@@ -8,24 +8,10 @@ import {
   CardTitle,
 } from "./ui/card";
 import { Button } from "./ui/button";
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "./ui/select";
+
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "./ui/accordion";
-import { ListTodo, MailOpen } from "lucide-react";
+import { ListTodo } from "lucide-react";
 import { FaGoogle } from "react-icons/fa";
 import { Separator } from "./ui/separator";
 
@@ -97,7 +83,7 @@ const Header = () => {
             </form>
           </CardContent>
           <CardFooter className="flex flex-col">
-            <Button className="w-full">Sign</Button>
+            <Button className="w-full">Sign In</Button>
           </CardFooter>
         </Card>
       </div>
