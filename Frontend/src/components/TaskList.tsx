@@ -60,15 +60,26 @@ const TaskList = () => {
         </div>
       </div>
 
-      <div className="grid gap-y-6 gap-x-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-36 p-4">
-        <TaskCard />
-        <TaskCard />
-        <TaskCard />
-        <TaskCard />
-        <TaskCard />
-        <TaskCard />
-        <TaskCard />
-        <TaskCard />
+      <div className="mt-36 p-4">
+        <div
+          className="grid gap-y-6 gap-x-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3"
+          style={{
+            maxHeight: "calc(100vh - 150px)", // Adjust height to fit your layout
+            overflowY: "auto",
+          }}
+        >
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+          <TaskCard />
+        </div>
       </div>
     </>
   );

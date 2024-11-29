@@ -3,11 +3,6 @@
 import React from "react";
 import { Activity, LayoutDashboard, File, ClipboardCheck, SquarePen } from "lucide-react";
 import NavBar from "./NavBar";
-import { Separator } from "./ui/separator";
-
-
-import { useForm } from "react-hook-form";
-import Overview from "./overview";
 import TaskList from "./TaskList";
 
 const MainPage = () => {
@@ -52,7 +47,7 @@ const MainPage = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="ml-64 mt-16 flex-1 p-6">
+      <main className="ml-64 mt-16 flex-1 p-6 mb">
         
 <TaskList></TaskList>        
       </main>

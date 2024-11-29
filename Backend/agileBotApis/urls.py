@@ -1,5 +1,5 @@
 """
-URL configuration for agileBotApis project.
+URL configuration for dgrocery project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/4.2/topics/http/urls/
@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import permissions
@@ -26,13 +27,7 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),  
 
     path('admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
-    path('dj-rest-auth/', include('dj_rest_auth.urls')),
-    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
-
-    path('api/',include('users.urls')),
-    # path('products/', include('products.urls')),
-    # path('orders/', include('orders.urls')),
+    path('api/accounts/',include('users.urls')),
 ]
 
 if settings.DEBUG:

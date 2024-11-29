@@ -5,6 +5,8 @@ __pycache__/
 db.sqlite3
 media/
 staticfiles/
+*.log
+.env
 
 # Next.js
 .next/
@@ -20,4 +22,5 @@ build/
 *.model
 *.bin
 *.h5
-*.ckpt
+*.ckpt 
+
