@@ -24,3 +24,9 @@ build/
 *.h5
 *.ckpt 
 
+
+#react 
+node_modules/
+build/
+.env.local
+.vite/
