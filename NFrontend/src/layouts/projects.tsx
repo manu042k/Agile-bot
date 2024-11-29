@@ -8,7 +8,7 @@ const ProjectLayout: React.FC = () => {
       <NavBarComponent />
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col gap-4 p-4 mt-16 overflow-y-auto">
+      <div className="flex flex-1 flex-col gap-4 p-4 mt-14 overflow-y-auto">
         <Outlet />
       </div>
     </div>

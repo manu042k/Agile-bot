@@ -28,6 +28,7 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('api/accounts/',include('users.urls')),
+    path('api/project-management/',include('projectApis.urls')),
 ]
 
 if settings.DEBUG:

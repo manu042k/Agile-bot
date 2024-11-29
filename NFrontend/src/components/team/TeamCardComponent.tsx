@@ -1,15 +1,13 @@
-import { Folder } from "lucide-react";
-import React from "react";
-
+import { Users } from "lucide-react";
 interface Props {
-  projectId: number;
-  projectTitle: string;
-  projectDescription: string;
+  teamId: number;
+  teamName: string;
+  teamDescription: string;
 }
-const ProjectCardComponent: React.FC<Props> = ({
-  projectId,
-  projectTitle,
-  projectDescription,
+const TeamCardComponents: React.FC<Props> = ({
+  teamId,
+  teamName,
+  teamDescription,
 }) => {
   return (
     <a
@@ -18,18 +16,17 @@ const ProjectCardComponent: React.FC<Props> = ({
     >
       <div className="flex flex-col items-center justify-center h-full p-4">
         <div className="flex mt-5 items-center justify-center w-12 h-12 rounded-full bg-gray-300 group-hover:bg-gray-400 transition-colors">
-          <Folder className="w-6 h-6 text-black group-hover:text-white transition-colors" />
+          <Users className="w-6 h-6 text-black group-hover:text-white transition-colors" />
         </div>
         <h3 className="mt-4 text-lg font-bold text-black group-hover:text-gray-900">
-          {projectTitle}
+          {teamName}
         </h3>
         <p className="mt-2 text-sm text-gray-600 group-hover:text-gray-800 text-center">
-          {projectDescription.slice(0, 100)}
-          {projectDescription.length > 100 ? "..." : ""}
+          {teamDescription.slice(0, 100)}
+          {teamDescription.length > 100 ? "..." : ""}
         </p>
       </div>
     </a>
   );
 };
-
-export default ProjectCardComponent;
+export default TeamCardComponents;

@@ -79,7 +79,7 @@ const LoginComponents = () => {
             </div>
             {error && <p className="mr-4 text-red-600">{error}</p>}
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full ">
               Login
             </Button>
             {/* <Button variant="outline" className="w-full">

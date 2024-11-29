@@ -1,3 +1,4 @@
+from .permissions import IsTeamMember
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Team, TeamMembership, User
 from .serializers import AddTeamMemberSerializer, TeamSerializer, UserSerializer, CustomTokenObtainPairSerializer
 from django.shortcuts import get_object_or_404
-
+from django.http import Http404
 
 class RegisterView(APIView):
     """Register a new user"""
@@ -39,11 +40,15 @@ class UserInfoView(APIView):
 
 class TeamListCreateView(generics.ListCreateAPIView):
     """ API View to list and create teams """
-    queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeamMember]
+
+    def get_queryset(self):
+        """Override to filter teams visible to the user."""
+        return Team.objects.filter(members=self.request.user)
 
     def perform_create(self, serializer):
+        """Create a new team and add the creator as an admin."""
         team = serializer.save()
         # Automatically add the creator as an admin
         TeamMembership.objects.create(user=self.request.user, team=team, role='admin')
@@ -75,4 +80,15 @@ class TeamDetailView(generics.RetrieveAPIView):
     """ API View to retrieve a single team """
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsTeamMember] 
+
+    def get_object(self,args, **kwargs):
+        user = self.request.user
+        # Get the team id from the URL kwargs
+        team_id = self.kwargs.get("pk")
+
+        # Retrieve the team where the user is a member
+        try:
+            return Team.objects.get(pk=team_id, members=user)
+        except Team.DoesNotExist:
+            raise Http404("Team not found or you do not have access.")

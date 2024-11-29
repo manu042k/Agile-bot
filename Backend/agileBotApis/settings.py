@@ -57,7 +57,7 @@ INSTALLED_APPS = [
    
     # custom apps
     'users',
-
+    'projectApis',
 
 ]
 
