@@ -1,0 +1,26 @@
+env
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+media/
+staticfiles/
+*.log
+.env
+
+# Next.js
+.next/
+node_modules/
+out/
+build/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# LLM
+*.model
+*.bin
+*.h5
+*.ckpt 
+
