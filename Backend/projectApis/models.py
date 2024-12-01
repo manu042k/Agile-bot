@@ -18,4 +18,15 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.name
+        return self.name 
+    
+
+
+class FileUpload(models.Model):
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, blank=False)
+    timeline = models.CharField(max_length=50, blank=True, null=True)
+    sprintsize = models.IntegerField(blank=True, null=True)
+    file = models.FileField(upload_to='project_files/', blank=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+

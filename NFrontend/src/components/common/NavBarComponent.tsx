@@ -1,11 +1,3 @@
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Label } from "@/components/ui/label";
 import { ListTodo } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
@@ -17,10 +9,10 @@ import { toast } from "react-hot-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import NavUserComponent from "./NavUserComponent";
 import BreadcrumbNavigation from "./BreadcrumbRoute";
-
+import { useNavigate } from "react-router-dom";
 const NavBarComponent = () => {
   const [user, setUser] = useState<User | null>(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -33,13 +25,18 @@ const NavBarComponent = () => {
 
     fetchUser();
   }, []);
+
   return (
     <header className="fixed flex h-16 shrink-0 items-center gap-2 border-b px-4 w-full ">
       <ListTodo
         className="w-[20px] h-[20px] text-black font-bold "
         aria-hidden="true"
       />
-      <Label className="text-lg sm:text-lg font-bold" htmlFor="name">
+      <Label
+        onClick={() => navigate("/projects")}
+        className="text-lg sm:text-lg font-bold"
+        htmlFor="name"
+      >
         AgileBot
       </Label>
 

@@ -42,3 +42,12 @@ export interface TeamDTO {
   name: string;
   description: string;
 }
+
+export interface ProjectItem {
+  project: string;
+  timeline: string;
+  sprintsize: number;
+  file: string | File;
+  created_at: string;
+  updated_at: string;
+}

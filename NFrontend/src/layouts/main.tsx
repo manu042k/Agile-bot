@@ -1,9 +1,12 @@
 import React from "react";
 import NavBarComponent from "@/components/common/NavBarComponent";
 import { Activity, LayoutDashboard, File, ClipboardCheck } from "lucide-react";
-import { Outlet, Link } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
 
 const MainLayout: React.FC = () => {
+  const location = useLocation();
+  const projectId = location.pathname.split("/")[2];
+
   return (
     <div className="flex h-screen">
       {/* Fixed Navbar */}
@@ -20,21 +23,21 @@ const MainLayout: React.FC = () => {
             <span>Project List</span>
           </Link>
           <Link
-            to="/overview"
+            to={`/projects/${projectId}/overview`}
             className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-200"
           >
             <Activity className="w-5 h-5" />
             <span>Overview</span>
           </Link>
           <Link
-            to="/board"
+            to={`/projects/${projectId}/board`}
             className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-200"
           >
             <LayoutDashboard className="w-5 h-5" />
             <span>Board</span>
           </Link>
           <Link
-            to="/tasks"
+            to={`/projects/${projectId}/tasks`}
             className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-200"
           >
             <ClipboardCheck className="w-5 h-5" />

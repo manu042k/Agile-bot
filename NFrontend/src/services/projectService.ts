@@ -23,7 +23,7 @@ const projectService = {
   async deleteProject(projectId: number): Promise<void> {
     await api.delete(`${URLS.PROJECTS}${projectId}/`);
   },
-  async getProject(projectId: number): Promise<Project> {
+  async getProject(projectId: string): Promise<Project> {
     const response = await api.get<Project>(`${URLS.PROJECTS}${projectId}/`);
     return response.data;
   },

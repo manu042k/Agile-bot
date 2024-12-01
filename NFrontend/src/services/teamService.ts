@@ -16,10 +16,10 @@ const teamService = {
     const response = await api.put<Team>(`${URLS.TEAMS}${team.id}/`, team);
     return response.data;
   },
-  async deleteTeam(teamId: number): Promise<void> {
+  async deleteTeam(teamId: string): Promise<void> {
     await api.delete(`${URLS.TEAMS}${teamId}/`);
   },
-  async getTeam(teamId: number): Promise<Team> {
+  async getTeam(teamId: string): Promise<Team> {
     const response = await api.get<Team>(`${URLS.TEAMS}${teamId}/`);
     return response.data;
   },
