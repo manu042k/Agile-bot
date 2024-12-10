@@ -51,3 +51,43 @@ export interface ProjectItem {
   created_at: string;
   updated_at: string;
 }
+
+export enum TaskStatus {
+  Created = "created",
+  Completed = "completed",
+  Active = "active",
+  Backlog = "backlog",
+}
+
+export enum TaskPriority {
+  Normal = "normal",
+  Low = "low",
+  High = "high",
+}
+
+export enum TaskSize {
+  Small = "s",
+  Medium = "m",
+  Large = "l",
+  ExtraLarge = "xl",
+}
+export enum CreatedBy {
+  AI = "ai",
+  USER = "user",
+}
+export interface Task {
+  taskid: string;
+  name: string;
+  description: string;
+  details: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  size: TaskSize;
+  assigned_to?: User | null;
+  comments?: string[] | null;
+  related_work: Task[];
+  Project: string;
+  created_by: CreatedBy;
+  created_at: string;
+  updated_at: string;
+}

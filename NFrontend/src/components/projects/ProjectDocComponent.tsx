@@ -1,10 +1,8 @@
 import fileUploadService from "@/services/fileUploadService";
 import { ProjectItem } from "@/types/project";
 import React, { useEffect, useState } from "react";
-import { set } from "react-hook-form";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader } from "../ui/card";
 import { Separator } from "../ui/separator";
-import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 
 interface Props {
@@ -65,16 +63,6 @@ const ProjectDocComponent: React.FC<Props> = ({ id }) => {
                   type="application/pdf"
                   className="border border-muted rounded-lg"
                 />
-              </div>
-              {/* Action Button */}
-              <div className="mt-4">
-                <Button
-                  variant="outline"
-                  onClick={() => alert("Further Actions")}
-                  className="w-full"
-                >
-                  Download PDF
-                </Button>
               </div>
             </CardContent>
           </Card>

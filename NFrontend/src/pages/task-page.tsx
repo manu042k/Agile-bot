@@ -1,5 +1,12 @@
 import TaskCardComponent from "@/components/projects/TaskCardComponent";
+import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,10 +16,33 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import taskService from "@/services/taskService";
+import { Task } from "@/types/project";
 import { Plus, X } from "lucide-react";
-import React from "react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useLocation } from "react-router-dom";
 
 const TaskPage = () => {
+  const location = useLocation();
+  const projectId = location.pathname.split("/")[2];
+  const [tasks, setTasks] = useState<Task[] | null>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await taskService.getTasks(projectId);
+        setTasks(response);
+        console.log(response);
+      } catch (err: any) {
+        console.log(err);
+        toast.error("Failed to fetch tasks. Please try again.");
+      }
+    };
+    fetchTasks();
+  }, [projectId]);
+
   return (
     <>
       <div className="fixed w-full bg-white shadow-sm p-4 z-10">
@@ -21,10 +51,23 @@ const TaskPage = () => {
 
         <div className="flex items-center gap-4">
           <div>
-            <Button type="submit" className="flex items-center gap-2">
-              <Plus />
-              New Task
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger>
+                <Button
+                  onClick={() => setIsDialogOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus />
+                  New Task
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <TaskCreateComponent
+                  onClose={() => setIsDialogOpen(false)}
+                  projectId={projectId}
+                ></TaskCreateComponent>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div className="w-[500px]">
@@ -66,17 +109,7 @@ const TaskPage = () => {
             overflowY: "auto",
           }}
         >
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
-          <TaskCardComponent />
+          {tasks && tasks.map((task) => <TaskCardComponent task={task} />)}
         </div>
       </div>
     </>

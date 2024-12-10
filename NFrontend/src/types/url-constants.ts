@@ -6,4 +6,5 @@ export enum URLS {
   TEAMS = "api/accounts/teams/",
   PROJECTS_UPLOAD = "api/project-management/upload/",
   PROJECTS_VIEW = "api/project-management/view/",
+  TASK = "api/project-management/tasks/",
 }

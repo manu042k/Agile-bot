@@ -1,6 +1,6 @@
 from users.serializers import TeamSerializer, UserSerializer
 from rest_framework import serializers
-from .models import FileUpload, Project
+from .models import FileUpload, Project,Task, Comment
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
@@ -13,9 +13,6 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         fields = ['id','name', 'description', 'visibility', 'team', 'created_by', 'created_at', 'updated_at']
 
 
-
-
-
 class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileUpload
@@ -25,3 +22,24 @@ class FileUploadSerializer(serializers.ModelSerializer):
             'sprintsize': {'required': False},
             'file': {'required': True},
         }
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Comment
+        fields = ['id', 'user', 'content', 'created_at']
+
+# Task Serializer
+class TaskSerializer(serializers.ModelSerializer):
+    assigned_to = UserSerializer(read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+    related_work = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all(), many=True, required=False)
+
+    class Meta:
+        model = Task
+        fields = [
+            'taskid', 'name', 'description', 'details', 'status', 'priority', 
+            'size', 'assigned_to', 'comments', 'related_work', 'Project','created_by'
+        ]
