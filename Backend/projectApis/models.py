@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models,transaction
 import uuid
 
 from users.models import User
@@ -62,6 +62,7 @@ CREATED_BY_CHOICES = [('user', 'User'), ('ai', 'AI')]
 
 class Task(models.Model):
     taskid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
     Project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -79,9 +80,20 @@ class Task(models.Model):
     # Comments (one-to-many relationship with another model for Comments)
     comments = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='task_comments', blank=True, null=True)
     created_by = models.CharField(max_length=10, choices=CREATED_BY_CHOICES, default='ai')
+    task_number = models.CharField(max_length=255, editable=False)
 
     def __str__(self):
-        return self.name
+        return self.name 
+    
+    def save(self, *args, **kwargs):
+        if not self.task_number:
+            # Ensure atomicity
+            with transaction.atomic():
+                # Get the count of tasks for the associated project
+                task_count = Task.objects.filter(Project=self.Project).count() + 1
+                # Generate task number as "Project__name:task_count"
+                self.task_number = f"{task_count}"
+        super().save(*args, **kwargs)
 
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

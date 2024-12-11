@@ -32,7 +32,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
   };
 
   return (
-    <div className="p-4 border rounded-lg bg-white shadow-md">
+    <>
       {/* Title */}
       <h2 className="text-xl font-bold mb-4">
         {isEditing ? "Edit Task" : "Task Details"}
@@ -42,7 +42,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
       {!isEditing ? (
         <div className="space-y-4">
           <p>
-            <strong>Task ID:</strong> {task.taskid}
+            <strong>Task ID:</strong> {task.task_number}
           </p>
           <p>
             <strong>Name:</strong> {task.name}
@@ -170,7 +170,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
           </div>
         </form>
       )}
-    </div>
+    </>
   );
 };
 

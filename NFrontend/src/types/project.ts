@@ -36,6 +36,15 @@ export interface ProjectDTO {
   name: string;
   description: string;
   visibility: ProjectVisibility;
+  team: string;
+}
+
+export interface UpadtedProjectDTO {
+  id: string;
+  name: string;
+  description: string;
+  visibility: ProjectVisibility;
+  team: string;
 }
 
 export interface TeamDTO {
@@ -75,6 +84,11 @@ export enum CreatedBy {
   AI = "ai",
   USER = "user",
 }
+export interface Comment {
+  user: User;
+  task: Task;
+  content: string;
+}
 export interface Task {
   taskid: string;
   name: string;
@@ -84,10 +98,11 @@ export interface Task {
   priority: TaskPriority;
   size: TaskSize;
   assigned_to?: User | null;
-  comments?: string[] | null;
+  comments?: Comment[];
   related_work: Task[];
   Project: string;
   created_by: CreatedBy;
   created_at: string;
   updated_at: string;
+  task_number: string;
 }

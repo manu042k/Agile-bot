@@ -12,26 +12,93 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Team } from "@/types/project";
+import { Team, TeamMemberRole } from "@/types/project";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { User } from "@/types/user";
+import userInfoService from "@/services/userInfoService";
+import toast from "react-hot-toast";
 
 const TeamMemberPage: React.FC = () => {
   const { teamId } = useParams<{ teamId: string }>();
   const [team, setTeam] = useState<Team | null>(null);
+  const [users, setUsers] = useState<User[] | null>(null);
+  const [selectedUser, setSelectedUser] = useState<string | undefined>(
+    undefined
+  );
+  const [selectedRole, setSelectedRole] = useState<TeamMemberRole | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const fetchTeam = async () => {
+    try {
+      if (!teamId) return;
+      const response = await teamService.getTeam(teamId);
+      setTeam(response);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await userInfoService.getUsers();
+      if (team) {
+        // Filter users not in the team
+        const filteredUsers = response.filter(
+          (user) =>
+            !team.members.some((member) => member.user.email === user.email)
+        );
+        setUsers(filteredUsers);
+      } else {
+        setUsers(response);
+      }
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
-    const fetchTeam = async () => {
-      try {
-        if (!teamId) return;
-        const response = await teamService.getTeam(teamId);
-        setTeam(response);
-        console.log(response);
-      } catch (err: any) {
-        console.log(err);
-      }
-    };
-
     fetchTeam();
-  }, [teamId]);
+    fetchUsers();
+  }, [teamId, team]);
+
+  const handleAddMember = async () => {
+    if (!selectedUser || !selectedRole || !teamId) return;
+
+    try {
+      await teamService.addMember(parseInt(teamId), {
+        user_email: selectedUser,
+        role: selectedRole,
+      });
+      toast.success("Member added successfully");
+      setSelectedUser(undefined);
+      setSelectedRole(null);
+      setIsDialogOpen(false);
+      await fetchTeam();
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to add member");
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!teamId) return;
+
+    try {
+      await teamService.removeMember(parseInt(teamId), userId);
+      await fetchTeam();
+      toast.success("Member removed successfully");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to remove member");
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-10 space-y-8">
@@ -43,9 +110,71 @@ const TeamMemberPage: React.FC = () => {
           </h1>
           <p className="text-lg text-gray-600">{team?.description}</p>
         </div>
-        <Button variant="default" size="lg">
-          Add Member
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="default" size="lg">
+              Add Member
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <h2 className="text-xl font-bold mb-4">Add Team Member</h2>
+            <div className="space-y-4">
+              <div className="flex flex-col">
+                <label htmlFor="user" className="font-medium mb-1">
+                  Select User
+                </label>
+                <Select
+                  value={selectedUser}
+                  onValueChange={(value) => setSelectedUser(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users?.map((user) => (
+                      <SelectItem key={user.email} value={user.email}>
+                        {user.first_name} {user.last_name} : {user.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col">
+                <label htmlFor="role" className="font-medium mb-1">
+                  Select Role
+                </label>
+                <Select
+                  value={selectedRole || ""}
+                  onValueChange={(value) =>
+                    setSelectedRole(value as TeamMemberRole)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(TeamMemberRole).map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button onClick={handleAddMember}>Add</Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Team Members Table */}
@@ -62,7 +191,7 @@ const TeamMemberPage: React.FC = () => {
         </TableHeader>
         <TableBody>
           {team?.members.map((member) => (
-            <TableRow>
+            <TableRow key={member.user.email}>
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Avatar>
@@ -87,13 +216,15 @@ const TeamMemberPage: React.FC = () => {
                 {new Date(member.joined_at).toLocaleDateString()}
               </TableCell>
               <TableCell>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  // onClick={() => onDeleteUser(member.user.id)}
-                >
-                  Remove
-                </Button>
+                {member.role !== TeamMemberRole.Admin && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDeleteUser(member.user.id)}
+                  >
+                    Remove
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

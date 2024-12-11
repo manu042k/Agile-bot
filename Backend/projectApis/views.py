@@ -1,4 +1,6 @@
 from django.shortcuts import render
+
+from users.models import Team
 from .permissions import IsProjectOwnerOrTeamMember
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -36,6 +38,27 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializer.save(created_by=self.request.user) 
 
 
+class AssigenTeamToProject(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        project_id = request.data.get('project_id')
+        team_id = request.data.get('team_id')
+        
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        try:
+            team = Team.objects.get(id=team_id)
+        except Team.DoesNotExist:
+            return Response({"error": "Team not found."}, status=status.HTTP_404_NOT_FOUND)
+        
+        project.team = team
+        project.save()
+        
+        return Response({"message": "Team assigned to project successfully."}, status=status.HTTP_200_OK)
   
 
 class FileUploadView(APIView):

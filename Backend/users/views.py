@@ -75,6 +75,22 @@ class AddTeamMemberView(APIView):
             return Response({"detail": "Member added successfully."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class RemoveTeamMemberView(APIView):
+    """ API View to remove a member from a team """
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, team_id, user_id):
+        team = get_object_or_404(Team, id=team_id)
+        user = get_object_or_404(User, id=user_id)
+
+                # Check if the user is a member of the team
+        membership = TeamMembership.objects.filter(user=user, team=team).first()
+        if not membership:
+            return Response({"detail": "User is not a member of the team."},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+        membership.delete()
+        return Response({"detail": "Member removed successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 class TeamDetailView(generics.RetrieveAPIView):
     """ API View to retrieve a single team """
@@ -83,3 +99,9 @@ class TeamDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated,IsTeamMember] 
 
     
+
+class UserListView(generics.ListAPIView):
+    """ API View to list all users """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]

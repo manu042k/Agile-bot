@@ -1,5 +1,5 @@
 import api from "@/interceptor/api";
-import { Project, ProjectDTO } from "@/types/project";
+import { Project, ProjectDTO, UpadtedProjectDTO } from "@/types/project";
 import { URLS } from "@/types/url-constants";
 
 const projectService = {
@@ -13,7 +13,7 @@ const projectService = {
     return response.data;
   },
 
-  async updateProject(project: Project): Promise<Project> {
+  async updateProject(project: UpadtedProjectDTO): Promise<Project> {
     const response = await api.put<Project>(
       `${URLS.PROJECTS}${project.id}/`,
       project
@@ -25,6 +25,14 @@ const projectService = {
   },
   async getProject(projectId: string): Promise<Project> {
     const response = await api.get<Project>(`${URLS.PROJECTS}${projectId}/`);
+    return response.data;
+  },
+
+  async assginTeam(data: any): Promise<any> {
+    const response = await api.post(
+      `${URLS.PROJECTS}${URLS.ASSIGN_TEAM}`,
+      data
+    );
     return response.data;
   },
 };

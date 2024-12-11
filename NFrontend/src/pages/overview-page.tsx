@@ -11,12 +11,23 @@ const OverviewPage: React.FC = () => {
   const projectId = location.pathname.split("/")[2];
 
   return (
-    <div className="space-y-6">
-      <ProjectDisplayComponent id={projectId}></ProjectDisplayComponent>
-      <Separator className="my-4" />
-      <ProjectOverviewComponent />
-      <ProjectDocComponent id={projectId} />
-    </div>
+    <>
+      {/* Sticky ProjectDisplayComponent */}
+      <div className="sticky top-12 w-full bg-white shadow-sm z-10 p-8">
+        <ProjectDisplayComponent id={projectId} />
+      </div>
+
+      {/* Separator */}
+      <Separator className="my-6" />
+
+      {/* Scrollable content below the sticky header */}
+      <div className="px-4 md:px-8 h-[calc(100vh-200px)] overflow-y-auto">
+        <ProjectOverviewComponent />
+        <Separator className="my-6" />
+
+        <ProjectDocComponent id={projectId} />
+      </div>
+    </>
   );
 };
 

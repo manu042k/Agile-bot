@@ -108,7 +108,6 @@ const ProjectOverviewComponent = () => {
 
         <Button type="submit">Submit</Button>
       </form>
-      <Separator />
     </>
   );
 };

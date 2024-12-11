@@ -11,6 +11,8 @@ import AvatarCircles from "@/components/ui/avatar-circles";
 import { Badge } from "../ui/badge";
 import { Task, TaskStatus } from "@/types/project";
 import { Button } from "../ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import TaskViewComponent from "./TaskViewComponent";
 
 interface Props {
   task: Task;
@@ -24,23 +26,35 @@ const TaskCardComponent: React.FC<Props> = ({ task }) => {
   return (
     <Card className="w-full sm:w-[220px] md:w-[260px] lg:w-[300px] xl:w-[350px] mx-auto shadow-md">
       <CardHeader>
-        <CardTitle className="truncate">Task:{task.name} </CardTitle>
+        <CardTitle className="truncate">
+          Task Number:{task.task_number}{" "}
+        </CardTitle>
+        <CardTitle>{task.name} </CardTitle>
         <CardDescription>{task.description}</CardDescription>
       </CardHeader>
 
       <CardContent>
         <div className="flex items-center space-x-2">
           <h3 className="text-sm font-medium">Assigned to:</h3>
-          <AvatarCircles
-            avatarNames={avatarNames}
-            numPeople={2}
-            className="my-custom-class"
-          />{" "}
+          <AvatarCircles avatarNames={avatarNames} numPeople={2} />{" "}
         </div>
       </CardContent>
 
       <CardFooter className="flex justify-between items-center">
-        <Button variant="link">View Task</Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="link">View Task</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-xl h-auto max-h-[90vh] overflow-auto p-4">
+            <TaskViewComponent
+              task={task}
+              onUpdate={() => {
+                /* handle update */
+              }}
+            ></TaskViewComponent>
+          </DialogContent>
+        </Dialog>
+
         {task.status == TaskStatus.Completed && (
           <Badge className="bg-green-400 hover:bg-green-600">
             {TaskStatus.Completed}
