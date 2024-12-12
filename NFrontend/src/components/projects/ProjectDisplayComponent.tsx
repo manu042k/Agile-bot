@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import projectService from "@/services/projectService";
 import teamService from "@/services/teamService";
-import { Project, ProjectDTO, Team, UpadtedProjectDTO } from "@/types/project";
+import { Project, Team } from "@/types/project";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import {
@@ -13,6 +13,7 @@ import {
   SelectContent,
   SelectItem,
 } from "../ui/select";
+import ProjectOverviewComponent from "./ProjectOverviewComponent";
 
 interface Props {
   id: string;
@@ -23,15 +24,17 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
   const [project, setProject] = useState<Project | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
+  const [isOverviewDialogOpen, setIsOverviewDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
       try {
         const response = await projectService.getProject(id);
         setProject(response);
-      } catch (err: any) {
-        toast.error("Something went wrong while fetching the project.");
+      } catch (err) {
+        toast.error("Failed to fetch the project. Please try again.");
       }
     };
 
@@ -39,14 +42,19 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
       try {
         const response = await teamService.getTeams();
         setTeams(response);
-      } catch (err: any) {
-        toast.error("Something went wrong while fetching the teams.");
+      } catch (err) {
+        toast.error("Failed to fetch teams. Please try again.");
       }
     };
 
     fetchProject();
     fetchTeams();
   }, [id]);
+
+  const handleFileChange = () => {
+    setIsOverviewDialogOpen(false);
+    navigate(0); // Refresh the page
+  };
 
   const handleAssignTeam = async () => {
     if (!selectedTeam || !project) {
@@ -55,19 +63,17 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
     }
 
     try {
-      console.log("project id", project.id);
-
-      const response = await projectService.assginTeam({
+      setIsLoading(true);
+      await projectService.assginTeam({
         project_id: project.id,
         team_id: selectedTeam,
       });
-      console.log(response);
       toast.success("Team assigned successfully!");
-      setIsDialogOpen(false);
-      navigate(0);
-    } catch (err: any) {
-      console.error(err);
+      setIsAssignDialogOpen(false);
+    } catch (err) {
       toast.error("Failed to assign the team. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -77,10 +83,25 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
       <div className="mt-4 flex items-center justify-between">
         <p>{project?.description}</p>
         <div className="flex gap-4">
-          {!project?.team && (
+          <Dialog
+            open={isOverviewDialogOpen}
+            onOpenChange={setIsOverviewDialogOpen}
+          >
+            <DialogTrigger asChild>
+              <Button>Upload Requirement Document</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <ProjectOverviewComponent onSuccess={() => handleFileChange()} />
+            </DialogContent>
+          </Dialog>
+
+          {!project?.team ? (
             <>
               <Button onClick={() => navigate("/teams")}>Create Team</Button>
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <Dialog
+                open={isAssignDialogOpen}
+                onOpenChange={setIsAssignDialogOpen}
+              >
                 <DialogTrigger asChild>
                   <Button>Assign Team</Button>
                 </DialogTrigger>
@@ -88,7 +109,9 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
                   <h3 className="text-lg font-medium mb-4">Assign a Team</h3>
                   <Select
                     value={selectedTeam?.toString() || ""}
-                    onValueChange={(value) => setSelectedTeam(parseInt(value))}
+                    onValueChange={(value) =>
+                      setSelectedTeam(parseInt(value, 10))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a team" />
@@ -102,13 +125,14 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
                     </SelectContent>
                   </Select>
                   <div className="flex justify-end mt-4">
-                    <Button onClick={handleAssignTeam}>Assign</Button>
+                    <Button onClick={handleAssignTeam} disabled={isLoading}>
+                      {isLoading ? "Assigning..." : "Assign"}
+                    </Button>
                   </div>
                 </DialogContent>
               </Dialog>
             </>
-          )}
-          {project?.team && (
+          ) : (
             <Button onClick={() => navigate(`/teams/${project.team.id}`)}>
               View Team
             </Button>

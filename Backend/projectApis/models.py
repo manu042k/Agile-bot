@@ -75,7 +75,7 @@ class Task(models.Model):
     related_work = models.ManyToManyField('self', blank=True, symmetrical=False)
 
     # User assignment (many-to-one relationship)
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    assigned_to = models.ManyToManyField(User, null=True, blank=True)
     
     # Comments (one-to-many relationship with another model for Comments)
     comments = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='task_comments', blank=True, null=True)
@@ -83,7 +83,7 @@ class Task(models.Model):
     task_number = models.CharField(max_length=255, editable=False)
 
     def __str__(self):
-        return self.name 
+        return self.task_number
     
     def save(self, *args, **kwargs):
         if not self.task_number:

@@ -22,7 +22,7 @@ const OverviewPage: React.FC = () => {
 
       {/* Scrollable content below the sticky header */}
       <div className="px-4 md:px-8 h-[calc(100vh-200px)] overflow-y-auto">
-        <ProjectOverviewComponent />
+        {/* <ProjectOverviewComponent /> */}
         <Separator className="my-6" />
 
         <ProjectDocComponent id={projectId} />

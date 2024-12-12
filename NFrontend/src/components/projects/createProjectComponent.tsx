@@ -14,6 +14,7 @@ import { ProjectVisibility } from "@/types/project";
 import { useState } from "react";
 import projectService from "@/services/projectService";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const CreateProjectComponent = () => {
   const [name, setName] = useState<string>("");
@@ -22,6 +23,7 @@ const CreateProjectComponent = () => {
     ProjectVisibility.Public
   );
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleCreateProject = async (
     event: React.FormEvent<HTMLFormElement>
@@ -29,14 +31,19 @@ const CreateProjectComponent = () => {
     event.preventDefault();
     setError(null);
     try {
-      const newProject = { name, description, visibility };
+      const newProject = {
+        name,
+        description,
+        visibility,
+        team: "default-team",
+      };
 
       await projectService.createProject(newProject);
-      toast.success("Project created successfully!");
       setName("");
       setDescription("");
       setVisibility(ProjectVisibility.Public);
-      window.location.reload();
+      navigate(0);
+      toast.success("Project created successfully!");
     } catch (error: any) {
       setError("Failed to create project. Please try again.");
     }
@@ -75,12 +82,12 @@ const CreateProjectComponent = () => {
             Description
           </Label>
           <Textarea
+            required
             id="project-desc"
             className="col-span-3"
             placeholder="Type your message here."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            required
           />
         </div>
         <div className="grid grid-cols-4 items-center gap-4">
