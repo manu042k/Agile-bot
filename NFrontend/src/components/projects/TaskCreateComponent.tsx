@@ -18,6 +18,7 @@ import {
 } from "@/types/project";
 import taskService from "@/services/taskService";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 interface props {
   projectId: string;
@@ -25,6 +26,7 @@ interface props {
 }
 
 const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
+  const navigate = useNavigate();
   const { register, handleSubmit } = useForm<Task>();
 
   const onSubmit = async (data: Task) => {
@@ -39,6 +41,7 @@ const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
       await taskService.createTask(processedData);
       toast.success("Task created successfully!");
       onClose(); // Trigger close on success
+      navigate(0);
     } catch (err: any) {
       console.error(err);
       toast.error("Failed to create task. Please try again");

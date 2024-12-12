@@ -4,27 +4,27 @@ import React from "react";
 
 import { cn } from "@/lib/utils";
 
-interface Avatar {
-  firstName: string;
-  lastName: string;
-}
-interface AvatarCirclesProps {
-  className?: string;
-  numPeople?: number;
-  avatarNames: Avatar[];
+interface ApiResponse {
+  assigned_to: string[];
 }
 
-const AvatarCircles = ({
-  numPeople,
-  className,
-  avatarNames,
-}: AvatarCirclesProps) => {
+interface AvatarCirclesProps {
+  className?: string;
+  avatarData: string[];
+}
+
+const AvatarCircles = ({ className, avatarData }: AvatarCirclesProps) => {
+  const numPeople = avatarData.length;
   return (
     <div className={cn("z-10 flex -space-x-4 rtl:space-x-reverse", className)}>
-      {avatarNames.map((person, index) => {
+      {avatarData.map((name, index) => {
         const initials =
-          `${person.firstName[0]}${person.lastName[0]}`.toUpperCase();
-        const fullName = `${person.firstName} ${person.lastName}`;
+          name
+            .split(" ")
+            .map((n) => n[0])
+            .join("")
+            .toUpperCase() || "?";
+        const fullName = `${name}`;
         return (
           <div
             key={index}
@@ -35,10 +35,12 @@ const AvatarCircles = ({
           </div>
         );
       })}
-      {numPeople && (
+      {numPeople > 0 ? (
         <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-black text-center text-xs font-medium text-white hover:bg-gray-600 dark:border-gray-800 dark:bg-white dark:text-black">
           +{numPeople}
         </div>
+      ) : (
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-white bg-muted text-center text-xs font-medium text-white hover:bg-gray-600 dark:border-gray-800 dark:bg-white dark:text-black"></div>
       )}
     </div>
   );

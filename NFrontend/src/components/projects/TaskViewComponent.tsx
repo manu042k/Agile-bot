@@ -1,6 +1,11 @@
-import React, { useState } from "react";
-
-import { Task, TaskPriority, TaskStatus, TaskSize } from "@/types/project";
+import React, { useEffect, useState } from "react";
+import {
+  Task,
+  TaskPriority,
+  TaskStatus,
+  TaskSize,
+  TeamMember,
+} from "@/types/project";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -12,6 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { Separator } from "../ui/separator";
+import { Pen } from "lucide-react";
+import AvatarCircles from "../ui/avatar-circles";
+import taskService from "@/services/taskService";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import projectService from "@/services/projectService";
 
 interface Props {
   task: Task;
@@ -21,83 +33,83 @@ interface Props {
 const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTask, setEditedTask] = useState<Task>(task);
+  const [isDirty, setIsDirty] = useState(false);
+  const [projectMembers, setProjectMembers] = useState<TeamMember[]>([]);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await projectService.getProject(task.Project);
+        setProjectMembers(response.team.members);
+        console.log(response.team.members);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch project members");
+      }
+    };
+    fetchMembers();
+  }, [task.Project]);
+
+  const navigate = useNavigate();
 
   const handleChange = (key: keyof Task, value: any) => {
     setEditedTask({ ...editedTask, [key]: value });
+    setIsDirty(true);
   };
 
-  const handleSave = () => {
-    onUpdate(editedTask);
+  const handleAssignedToChange = (value: string[]) => {
+    const selectedMembers = value
+      .map((id) => projectMembers.find((member) => member.id === id))
+      .filter((member): member is TeamMember => member !== undefined);
+    handleChange("assigned_to", selectedMembers); // Update with selected team members
+  };
+
+  const handleSave = async () => {
+    try {
+      console.log(editedTask);
+      await taskService.updateTask(task.taskid, editedTask);
+      toast.success("Task updated successfully");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to update task");
+    } finally {
+      onUpdate(editedTask);
+      setIsEditing(false);
+      setIsDirty(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditedTask(task);
     setIsEditing(false);
+    setIsDirty(false);
   };
 
   return (
-    <>
-      {/* Title */}
-      <h2 className="text-xl font-bold mb-4">
-        {isEditing ? "Edit Task" : "Task Details"}
-      </h2>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center ">
+        <h2 className="text-2xl font-bold">
+          {isEditing ? "Edit Task" : "Task Details"}
+        </h2>
+        {!isEditing && (
+          <Pen className="pl-2" onClick={() => setIsEditing(true)} />
+        )}
+      </div>
 
-      {/* Display Mode */}
-      {!isEditing ? (
+      <Separator className="my-4" />
+
+      {/* Task Form */}
+      <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left Column */}
         <div className="space-y-4">
-          <p>
-            <strong>Task ID:</strong> {task.task_number}
-          </p>
-          <p>
-            <strong>Name:</strong> {task.name}
-          </p>
-          <p>
-            <strong>Description:</strong> {task.description}
-          </p>
-          <p>
-            <strong>Details:</strong> {task.details}
-          </p>
-          <p>
-            <strong>Status:</strong> {task.status}
-          </p>
-          <p>
-            <strong>Priority:</strong> {task.priority}
-          </p>
-          <p>
-            <strong>Size:</strong> {task.size}
-          </p>
-          <p>
-            <strong>Assigned To:</strong>{" "}
-            {task.assigned_to?.first_name || "Unassigned"}
-          </p>
-          <p>
-            <strong>Task Number:</strong> {task.task_number}
-          </p>
-          <Button onClick={() => setIsEditing(true)}>Edit Task</Button>
-        </div>
-      ) : (
-        // Editable Form
-        <form className="space-y-4">
           <div className="flex flex-col">
             <Label htmlFor="name">Name</Label>
             <Input
               id="name"
               value={editedTask.name}
+              readOnly={!isEditing}
               onChange={(e) => handleChange("name", e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={editedTask.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="details">Details</Label>
-            <Textarea
-              id="details"
-              value={editedTask.details}
-              onChange={(e) => handleChange("details", e.target.value)}
             />
           </div>
 
@@ -105,6 +117,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
             <Label htmlFor="status">Status</Label>
             <Select
               value={editedTask.status}
+              disabled={!isEditing}
               onValueChange={(value) =>
                 handleChange("status", value as TaskStatus)
               }
@@ -124,6 +137,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
             <Label htmlFor="priority">Priority</Label>
             <Select
               value={editedTask.priority}
+              disabled={!isEditing}
               onValueChange={(value) =>
                 handleChange("priority", value as TaskPriority)
               }
@@ -143,6 +157,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
             <Label htmlFor="size">Size</Label>
             <Select
               value={editedTask.size}
+              disabled={!isEditing}
               onValueChange={(value) => handleChange("size", value as TaskSize)}
             >
               <SelectTrigger>
@@ -156,21 +171,57 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
             </Select>
           </div>
 
-          <div className="space-x-2">
-            <Button type="button" onClick={handleSave}>
-              Save
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => setIsEditing(false)}
-            >
-              Cancel
-            </Button>
+          <div className="flex flex-col">
+            <Label>Assigned to</Label>
+            {!isEditing && (
+              <AvatarCircles
+                avatarData={
+                  Array.isArray(editedTask.assigned_to)
+                    ? editedTask.assigned_to
+                    : []
+                }
+              />
+            )}
+            {isEditing && <></>}
           </div>
-        </form>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-4">
+          <div className="flex flex-col">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              className="h-32"
+              id="description"
+              value={editedTask.description}
+              readOnly={!isEditing}
+              onChange={(e) => handleChange("description", e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <Label htmlFor="details">Details</Label>
+            <Textarea
+              className="h-32"
+              id="details"
+              value={editedTask.details}
+              readOnly={!isEditing}
+              onChange={(e) => handleChange("details", e.target.value)}
+            />
+          </div>
+        </div>
+      </form>
+
+      {/* Save/Cancel Buttons */}
+      {isEditing && (
+        <div className="flex space-x-4">
+          <Button onClick={handleSave}>Save</Button>
+          <Button variant="secondary" onClick={handleCancel}>
+            Cancel
+          </Button>
+        </div>
       )}
-    </>
+    </div>
   );
 };
 

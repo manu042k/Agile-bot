@@ -18,6 +18,7 @@ export interface Project {
 }
 
 export interface TeamMember {
+  id: string;
   user: User;
   role: TeamMemberRole;
   joined_at: string;
@@ -97,8 +98,8 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   size: TaskSize;
-  assigned_to?: User | null;
-  comments?: Comment[];
+  assigned_to: User | null | string;
+  comments: Comment[];
   related_work: Task[];
   Project: string;
   created_by: CreatedBy;

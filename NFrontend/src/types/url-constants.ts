@@ -11,4 +11,6 @@ export enum URLS {
   PROJECTS_UPLOAD = "api/project-management/upload/",
   PROJECTS_VIEW = "api/project-management/view/",
   TASK = "api/project-management/tasks/",
+  TASKS_BY_PROJECT = "api/project-management/projects/",
+  TASKS_PATCH = "api/project-management/tasks-patch/",
 }

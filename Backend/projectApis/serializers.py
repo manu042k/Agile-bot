@@ -1,3 +1,4 @@
+from users.models import User
 from users.serializers import TeamSerializer, UserSerializer
 from rest_framework import serializers
 from .models import FileUpload, Project,Task, Comment
@@ -33,13 +34,27 @@ class CommentSerializer(serializers.ModelSerializer):
 
 # Task Serializer
 class TaskSerializer(serializers.ModelSerializer):
-    assigned_to = UserSerializer(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
-    related_work = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all(), many=True, required=False)
-
+    related_work = serializers.StringRelatedField(many=True,required=False)
+    assigned_to = serializers.StringRelatedField(many=True,required=False)
+    
     class Meta:
         model = Task
         fields = [
             'taskid', 'name', 'description', 'details', 'status', 'priority', 
             'size', 'assigned_to', 'comments', 'related_work', 'Project','created_by','task_number'
         ]
+        
+
+class UpdateTaskSerializer(serializers.ModelSerializer):
+    comments = CommentSerializer(many=True, read_only=True)
+    related_work = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all(), many=True, required=False)
+    assigned_to = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(),many=True, allow_null=True, required=False)
+    
+    class Meta:
+        model = Task
+        fields = [
+            'taskid', 'name', 'description', 'details', 'status', 'priority', 
+            'size', 'assigned_to', 'comments', 'related_work', 'Project','created_by','task_number'
+        ]
+        
