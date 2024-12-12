@@ -1,0 +1,5 @@
+langchain
+langchain_cohere
+langchain_community
+langchain_groq
+faiss-cpu
