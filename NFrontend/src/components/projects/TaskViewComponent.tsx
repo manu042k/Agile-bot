@@ -41,7 +41,6 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
       try {
         const response = await projectService.getProject(task.Project);
         setProjectMembers(response.team.members);
-        console.log(response.team.members);
       } catch (err) {
         console.error(err);
         toast.error("Failed to fetch project members");
@@ -57,16 +56,17 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
     setIsDirty(true);
   };
 
-  const handleAssignedToChange = (value: string[]) => {
-    const selectedMembers = value
-      .map((id) => projectMembers.find((member) => member.id === id))
-      .filter((member): member is TeamMember => member !== undefined);
-    handleChange("assigned_to", selectedMembers); // Update with selected team members
+  const handleAssignedToChange = (
+    selectedOptions: HTMLCollectionOf<HTMLOptionElement>
+  ) => {
+    const selectedIds = Array.from(selectedOptions).map(
+      (option) => option.value
+    );
+    handleChange("assigned_to", selectedIds);
   };
 
   const handleSave = async () => {
     try {
-      console.log(editedTask);
       await taskService.updateTask(task.taskid, editedTask);
       toast.success("Task updated successfully");
     } catch (err: any) {
@@ -76,6 +76,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
       onUpdate(editedTask);
       setIsEditing(false);
       setIsDirty(false);
+      navigate(0);
     }
   };
 
@@ -171,9 +172,10 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
             </Select>
           </div>
 
-          <div className="flex flex-col">
+          {/* Modified Assigned to Component */}
+          <div className="space-y-2">
             <Label>Assigned to</Label>
-            {!isEditing && (
+            {!isEditing ? (
               <AvatarCircles
                 avatarData={
                   Array.isArray(editedTask.assigned_to)
@@ -181,8 +183,27 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
                     : []
                 }
               />
+            ) : (
+              <select
+                name="Assigned to"
+                id="assigned_to"
+                multiple
+                onChange={(e) =>
+                  handleAssignedToChange(e.target.selectedOptions)
+                }
+                className="w-full p-2 border-2 border-blue-500 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {projectMembers.map((member) => (
+                  <option
+                    className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
+                    key={member.user.id}
+                    value={member.user.id}
+                  >
+                    {member.user.first_name} {member.user.last_name}
+                  </option>
+                ))}
+              </select>
             )}
-            {isEditing && <></>}
           </div>
         </div>
 
