@@ -14,10 +14,8 @@ import { ProjectVisibility } from "@/types/project";
 import { useState } from "react";
 import projectService from "@/services/projectService";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 const CreateProjectComponent = () => {
-  const navigate = useNavigate();
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [visibility, setVisibility] = useState<ProjectVisibility>(

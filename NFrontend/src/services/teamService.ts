@@ -13,22 +13,26 @@ const teamService = {
     return response.data;
   },
   async updateTeam(team: Team): Promise<Team> {
-    const response = await api.put<Team>(`${URLS.TEAMS}${team.id}/`, team);
+    const response = await api.patch<Team>(`${URLS.TEAMS}${team.id}/`, team);
     return response.data;
   },
-  async deleteTeam(teamId: number): Promise<void> {
+  async deleteTeam(teamId: string): Promise<void> {
     await api.delete(`${URLS.TEAMS}${teamId}/`);
   },
-  async getTeam(teamId: number): Promise<Team> {
+  async getTeam(teamId: string): Promise<Team> {
     const response = await api.get<Team>(`${URLS.TEAMS}${teamId}/`);
     return response.data;
   },
-
-  //todo
   async addMember(teamId: number, user: any): Promise<string> {
     const response = await api.post<string>(
-      `${URLS.TEAMS}${teamId}/add-member/`,
+      `${URLS.TEAMS}${teamId}${URLS.ADD_MEMBER}`,
       user
+    );
+    return response.data;
+  },
+  async removeMember(teamId: number, user: any): Promise<string> {
+    const response = await api.delete<string>(
+      `${URLS.TEAMS}${teamId}${URLS.REMOVE_MEMBER}` + user + "/"
     );
     return response.data;
   },

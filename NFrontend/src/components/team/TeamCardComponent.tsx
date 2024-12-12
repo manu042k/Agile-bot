@@ -1,4 +1,5 @@
 import { Users } from "lucide-react";
+import { Link } from "react-router-dom";
 interface Props {
   teamId: number;
   teamName: string;
@@ -10,8 +11,8 @@ const TeamCardComponents: React.FC<Props> = ({
   teamDescription,
 }) => {
   return (
-    <a
-      href="#"
+    <Link
+      to={`/teams/${teamId}`}
       className="block group aspect-video rounded-xl bg-slate-100 hover:bg-muted/70 transition-colors"
     >
       <div className="flex flex-col items-center justify-center h-full p-4">
@@ -26,7 +27,7 @@ const TeamCardComponents: React.FC<Props> = ({
           {teamDescription.length > 100 ? "..." : ""}
         </p>
       </div>
-    </a>
+    </Link>
   );
 };
 export default TeamCardComponents;

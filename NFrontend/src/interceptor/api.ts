@@ -1,9 +1,16 @@
 import authService from "@/services/authService";
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import Cookies from "js-cookie";
 
 const api = axios.create({
   baseURL: "http://localhost:8000/",
 });
+
+// Get the CSRF token from the cookie
+const csrfToken = Cookies.get("csrftoken");
+
+// Set up Axios to include the CSRF token in request headers
+api.defaults.headers.common["X-CSRFToken"] = csrfToken;
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
@@ -11,7 +18,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.set("Authorization", `Bearer ${token}`);
     }
-    
+
     return config;
   },
   (error) => Promise.reject(error)

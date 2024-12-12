@@ -7,4 +7,4 @@ class IsTeamMember(BasePermission):
     """
     def has_object_permission(self, request, view, obj):
         # Allow access if the user is a member of the team
-        return request.user in obj.team.members.all()
+        return request.user in obj.members.all()

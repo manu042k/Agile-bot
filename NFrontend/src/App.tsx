@@ -1,13 +1,16 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/login-page";
-import TestPage from "./pages/test-page";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import MainLayout from "./layouts/main";
 import ProjectsPage from "./pages/projects-page";
 import ProjectLayout from "./layouts/projects";
 import ProfilePage from "./pages/profile-page";
 import TeamPage from "./pages/team-page";
+import TeamMemberPage from "./pages/teamMember-page";
+import OverviewPage from "./pages/overview-page";
+import BoardPage from "./pages/board-page";
+import TaskPage from "./pages/task-page";
 
 const App: React.FC = () => {
   return (
@@ -16,8 +19,16 @@ const App: React.FC = () => {
         <Route path="/" element={<LoginPage />} />
         <Route path="/" element={<MainLayout />}>
           <Route
-            path="/dashboard"
-            element={<PrivateRoute component={TestPage} />}
+            path="/projects/:projectId/overview"
+            element={<PrivateRoute component={OverviewPage} />}
+          />
+          <Route
+            path="/projects/:projectId/board"
+            element={<PrivateRoute component={BoardPage} />}
+          />
+          <Route
+            path="/projects/:projectId/tasks"
+            element={<PrivateRoute component={TaskPage} />}
           />
         </Route>
         <Route path="/" element={<ProjectLayout />}>
@@ -32,6 +43,11 @@ const App: React.FC = () => {
           <Route
             path="/teams"
             element={<PrivateRoute component={TeamPage} />}
+          />
+
+          <Route
+            path="/teams/:teamId"
+            element={<PrivateRoute component={TeamMemberPage} />}
           />
         </Route>
       </Routes>

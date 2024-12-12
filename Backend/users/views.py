@@ -41,7 +41,7 @@ class UserInfoView(APIView):
 class TeamListCreateView(generics.ListCreateAPIView):
     """ API View to list and create teams """
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated, IsTeamMember]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         """Override to filter teams visible to the user."""
@@ -75,20 +75,33 @@ class AddTeamMemberView(APIView):
             return Response({"detail": "Member added successfully."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+class RemoveTeamMemberView(APIView):
+    """ API View to remove a member from a team """
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, team_id, user_id):
+        team = get_object_or_404(Team, id=team_id)
+        user = get_object_or_404(User, id=user_id)
+
+                # Check if the user is a member of the team
+        membership = TeamMembership.objects.filter(user=user, team=team).first()
+        if not membership:
+            return Response({"detail": "User is not a member of the team."},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+        membership.delete()
+        return Response({"detail": "Member removed successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 class TeamDetailView(generics.RetrieveAPIView):
     """ API View to retrieve a single team """
     queryset = Team.objects.all()
     serializer_class = TeamSerializer
-    permission_classes = [IsAuthenticated, IsTeamMember] 
+    permission_classes = [IsAuthenticated,IsTeamMember] 
 
-    def get_object(self,args, **kwargs):
-        user = self.request.user
-        # Get the team id from the URL kwargs
-        team_id = self.kwargs.get("pk")
+    
 
-        # Retrieve the team where the user is a member
-        try:
-            return Team.objects.get(pk=team_id, members=user)
-        except Team.DoesNotExist:
-            raise Http404("Team not found or you do not have access.")
+class UserListView(generics.ListAPIView):
+    """ API View to list all users """
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
