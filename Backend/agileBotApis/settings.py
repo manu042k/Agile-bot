@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     # custom apps
     'users',
     'projectApis',
+    
 
 ]
 
@@ -91,7 +92,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'agileBotApis.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -213,4 +213,13 @@ LOGGING = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # your frontend URL
-]
+] 
+
+
+
+CELERY_BROKER_URL = 'redis://default:ymUVxL1MATJEeeUc5NBSJVP0fZX1TAyi@redis-19867.c277.us-east-1-3.ec2.redns.redis-cloud.com:19867'
+CELERY_RESULT_BACKEND = 'redis://default:ymUVxL1MATJEeeUc5NBSJVP0fZX1TAyi@redis-19867.c277.us-east-1-3.ec2.redns.redis-cloud.com:19867'
+# Other Celery settings can remain as they are, such as:
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'

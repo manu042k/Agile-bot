@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from .tasks import add, generate_task
 from users.models import Team
 from .permissions import IsProjectOwnerOrTeamMember
 from rest_framework import viewsets
@@ -213,4 +214,12 @@ class CommentListCreateView(APIView):
 
 
 
-
+class TriggerTaskGeneration(APIView):
+    def post(self, request):
+        # task_id = request.data.get('task_id')
+        try:
+            generate_task.delay(1)
+        except Exception as e:
+            print(e)
+        finally:
+            return Response({"message": "Task generation triggered successfully."}, status=status.HTTP_200_OK)
