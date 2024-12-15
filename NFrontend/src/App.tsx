@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/login-page";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import MainLayout from "./layouts/main";

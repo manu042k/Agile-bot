@@ -30,8 +30,9 @@ const LoginComponents = () => {
       toast.success("Login successful");
 
       navigate("/projects");
-    } catch (error: any) {
-      setError(error.response?.data?.detail || "Login failed");
+    } catch (error) {
+      const err = error as { response?: { data?: { detail?: string } } };
+      setError(err.response?.data?.detail || "Login failed");
       setLoading(false);
     } finally {
       setLoading(false);
