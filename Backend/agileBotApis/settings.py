@@ -210,9 +210,8 @@ LOGGING = {
 }
 
 
-CELERY_BROKER_URL = "redis://default:ymUVxL1MATJEeeUc5NBSJVP0fZX1TAyi@redis-19867.c277.us-east-1-3.ec2.redns.redis-cloud.com:19867"
-CELERY_RESULT_BACKEND = "redis://default:ymUVxL1MATJEeeUc5NBSJVP0fZX1TAyi@redis-19867.c277.us-east-1-3.ec2.redns.redis-cloud.com:19867"
-# Other Celery settings can remain as they are, such as:
+CELERY_BROKER_URL = os.getenv("REDIS_URI")
+CELERY_RESULT_BACKEND = os.getenv("REDIS_URI")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
