@@ -1,4 +1,5 @@
 export enum URLS {
+  BASE_URL = "http://localhost:8000/",
   USER_INFO = "api/accounts/user/info/",
   USERS = "api/accounts/users/",
   ADD_MEMBER = "/add-member/",
@@ -13,4 +14,5 @@ export enum URLS {
   TASK = "api/project-management/tasks/",
   TASKS_BY_PROJECT = "api/project-management/projects/",
   TASKS_PATCH = "api/project-management/tasks-patch/",
+  TASK_TRIGGER = "api/project-management/trigger/",
 }

@@ -50,6 +50,7 @@ const RegisterComponent = () => {
         first_name,
         last_name,
         phone_number,
+        id: "",
       });
       console.log("Registration successful", response);
       setSuccessful("Registration successful");
@@ -63,11 +64,11 @@ const RegisterComponent = () => {
     } catch (error: any) {
       setError(
         error.response?.data?.email ||
-        error.response?.data?.first_name ||
-        error.response?.data?.last_name ||
-        error.response?.data?.password ||
-        error.response?.data?.phone_number ||
-        "Registration failed"
+          error.response?.data?.first_name ||
+          error.response?.data?.last_name ||
+          error.response?.data?.password ||
+          error.response?.data?.phone_number ||
+          "Registration failed"
       );
       setLoading(false);
     } finally {

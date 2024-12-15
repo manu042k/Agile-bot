@@ -54,6 +54,7 @@ export interface TeamDTO {
 }
 
 export interface ProjectItem {
+  id: string;
   project: string;
   timeline: string;
   sprintsize: number;

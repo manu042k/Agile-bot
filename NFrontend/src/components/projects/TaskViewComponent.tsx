@@ -1,11 +1,4 @@
-import React, { useEffect, useState } from "react";
-import {
-  Task,
-  TaskPriority,
-  TaskStatus,
-  TaskSize,
-  TeamMember,
-} from "@/types/project";
+import React, { useState, useEffect, useCallback, useReducer } from "react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -20,10 +13,30 @@ import {
 import { Separator } from "../ui/separator";
 import { Pen } from "lucide-react";
 import AvatarCircles from "../ui/avatar-circles";
-import taskService from "@/services/taskService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import taskService from "@/services/taskService";
 import projectService from "@/services/projectService";
+import {
+  Task,
+  TaskPriority,
+  TaskStatus,
+  TaskSize,
+  TeamMember,
+} from "@/types/project";
+
+// Action Types for Reducer
+const SET_FIELD = "SET_FIELD";
+
+// Reducer function for handling state updates
+const taskReducer = (state: Task, action: { type: string; payload: any }) => {
+  switch (action.type) {
+    case SET_FIELD:
+      return { ...state, [action.payload.key]: action.payload.value };
+    default:
+      return state;
+  }
+};
 
 interface Props {
   task: Task;
@@ -31,31 +44,30 @@ interface Props {
 }
 
 const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTask, setEditedTask] = useState<Task>(task);
-  const [isDirty, setIsDirty] = useState(false);
+  const [state, dispatch] = useReducer(taskReducer, { ...task });
   const [projectMembers, setProjectMembers] = useState<TeamMember[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const navigate = useNavigate();
 
+  // Fetch project members
   useEffect(() => {
     const fetchMembers = async () => {
       try {
         const response = await projectService.getProject(task.Project);
         setProjectMembers(response.team.members);
       } catch (err) {
-        console.error(err);
-        toast.error("Failed to fetch project members");
+        toast.error("Failed to fetch project members.");
       }
     };
     fetchMembers();
   }, [task.Project]);
 
-  const navigate = useNavigate();
+  // Handle input changes
+  const handleChange = useCallback((key: keyof Task, value: any) => {
+    dispatch({ type: SET_FIELD, payload: { key, value } });
+  }, []);
 
-  const handleChange = (key: keyof Task, value: any) => {
-    setEditedTask({ ...editedTask, [key]: value });
-    setIsDirty(true);
-  };
-
+  // Handle multi-select changes for assigned members
   const handleAssignedToChange = (
     selectedOptions: HTMLCollectionOf<HTMLOptionElement>
   ) => {
@@ -65,175 +77,106 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
     handleChange("assigned_to", selectedIds);
   };
 
+  // Save the task changes
   const handleSave = async () => {
     try {
-      await taskService.updateTask(task.taskid, editedTask);
+      await taskService.updateTask(task.taskid, state);
       toast.success("Task updated successfully");
-    } catch (err: any) {
-      console.error(err);
+      onUpdate(state);
+      setIsEditing(false);
+    } catch (err) {
       toast.error("Failed to update task");
     } finally {
-      onUpdate(editedTask);
-      setIsEditing(false);
-      setIsDirty(false);
       navigate(0);
     }
   };
 
+  // Cancel editing and revert changes
   const handleCancel = () => {
-    setEditedTask(task);
+    dispatch({
+      type: SET_FIELD,
+      payload: { key: "assigned_to", value: task.assigned_to },
+    });
     setIsEditing(false);
-    setIsDirty(false);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center ">
+      <div className="flex items-center">
         <h2 className="text-2xl font-bold">
           {isEditing ? "Edit Task" : "Task Details"}
         </h2>
         {!isEditing && (
-          <Pen className="pl-2" onClick={() => setIsEditing(true)} />
+          <Pen
+            className="pl-2 cursor-pointer"
+            onClick={() => setIsEditing(true)}
+          />
         )}
       </div>
 
       <Separator className="my-4" />
 
-      {/* Task Form */}
       <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Column */}
         <div className="space-y-4">
-          <div className="flex flex-col">
-            <Label htmlFor="name">Name</Label>
-            <Input
-              id="name"
-              value={editedTask.name}
-              readOnly={!isEditing}
-              onChange={(e) => handleChange("name", e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={editedTask.status}
-              disabled={!isEditing}
-              onValueChange={(value) =>
-                handleChange("status", value as TaskStatus)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="created">Created</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="priority">Priority</Label>
-            <Select
-              value={editedTask.priority}
-              disabled={!isEditing}
-              onValueChange={(value) =>
-                handleChange("priority", value as TaskPriority)
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="normal">Normal</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="size">Size</Label>
-            <Select
-              value={editedTask.size}
-              disabled={!isEditing}
-              onValueChange={(value) => handleChange("size", value as TaskSize)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="s">Small</SelectItem>
-                <SelectItem value="m">Medium</SelectItem>
-                <SelectItem value="l">Large</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Modified Assigned to Component */}
-          <div className="space-y-2">
-            <Label>Assigned to</Label>
-            {!isEditing ? (
-              <AvatarCircles
-                avatarData={
-                  Array.isArray(editedTask.assigned_to)
-                    ? editedTask.assigned_to
-                    : []
-                }
-              />
-            ) : (
-              <select
-                name="Assigned to"
-                id="assigned_to"
-                multiple
-                onChange={(e) =>
-                  handleAssignedToChange(e.target.selectedOptions)
-                }
-                className="w-full p-2 border-2 border-blue-500 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {projectMembers.map((member) => (
-                  <option
-                    className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-                    key={member.user.id}
-                    value={member.user.id}
-                  >
-                    {member.user.first_name} {member.user.last_name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
+          <InputField
+            label="Name"
+            value={state.name}
+            readOnly={!isEditing}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              handleChange("name", e.target.value)
+            }
+          />
+          <SelectField
+            label="Status"
+            value={state.status}
+            options={Object.values(TaskStatus)}
+            disabled={!isEditing}
+            onChange={(value: string) => handleChange("status", value)}
+          />
+          <SelectField
+            label="Priority"
+            value={state.priority}
+            options={Object.values(TaskPriority)}
+            disabled={!isEditing}
+            onChange={(value: string) => handleChange("priority", value)}
+          />
+          <SelectField
+            label="Size"
+            value={state.size}
+            options={Object.values(TaskSize)}
+            disabled={!isEditing}
+            onChange={(value: string) => handleChange("size", value)}
+          />
+          <AssignedToField
+            isEditing={isEditing}
+            assignedTo={state.assigned_to}
+            projectMembers={projectMembers}
+            onChange={handleAssignedToChange}
+          />
         </div>
 
         {/* Right Column */}
         <div className="space-y-4">
-          <div className="flex flex-col">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              className="h-32"
-              id="description"
-              value={editedTask.description}
-              readOnly={!isEditing}
-              onChange={(e) => handleChange("description", e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col">
-            <Label htmlFor="details">Details</Label>
-            <Textarea
-              className="h-32"
-              id="details"
-              value={editedTask.details}
-              readOnly={!isEditing}
-              onChange={(e) => handleChange("details", e.target.value)}
-            />
-          </div>
+          <TextareaField
+            label="Description"
+            value={state.description}
+            readOnly={!isEditing}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              handleChange("description", e.target.value)
+            }
+          />
+          <TextareaField
+            label="Details"
+            value={state.details}
+            readOnly={!isEditing}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              handleChange("details", e.target.value)
+            }
+          />
         </div>
       </form>
 
-      {/* Save/Cancel Buttons */}
       {isEditing && (
         <div className="flex space-x-4">
           <Button onClick={handleSave}>Save</Button>
@@ -245,5 +188,69 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
     </div>
   );
 };
+
+const InputField = ({ label, value, onChange, readOnly }: any) => (
+  <div className="flex flex-col">
+    <Label>{label}</Label>
+    <Input value={value} onChange={onChange} readOnly={readOnly} />
+  </div>
+);
+
+const SelectField = ({ label, value, options, onChange, disabled }: any) => (
+  <div className="flex flex-col">
+    <Label>{label}</Label>
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger>
+        <SelectValue placeholder={`Select ${label}`} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((option: string) => (
+          <SelectItem key={option} value={option}>
+            {option.charAt(0).toUpperCase() + option.slice(1).replace("_", " ")}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+);
+
+const TextareaField = ({ label, value, onChange, readOnly }: any) => (
+  <div className="flex flex-col">
+    <Label>{label}</Label>
+    <Textarea
+      className="h-36"
+      value={value}
+      onChange={onChange}
+      readOnly={readOnly}
+    />
+  </div>
+);
+
+const AssignedToField = ({
+  isEditing,
+  assignedTo,
+  projectMembers,
+  onChange,
+}: any) => (
+  <div className="space-y-2">
+    <Label>Assigned to</Label>
+    {!isEditing ? (
+      <AvatarCircles avatarData={assignedTo} />
+    ) : (
+      <select
+        multiple
+        value={assignedTo}
+        onChange={(e) => onChange(e.target.selectedOptions)}
+        className="w-full p-2 border-2 border-blue-500 rounded-md bg-white text-gray-700"
+      >
+        {projectMembers.map((member: TeamMember) => (
+          <option key={member.user.id} value={member.user.id}>
+            {member.user.first_name} {member.user.last_name}
+          </option>
+        ))}
+      </select>
+    )}
+  </div>
+);
 
 export default TaskViewComponent;

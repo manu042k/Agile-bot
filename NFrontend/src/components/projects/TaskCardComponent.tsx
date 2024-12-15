@@ -38,9 +38,7 @@ const TaskCardComponent: React.FC<Props> = ({ task }) => {
       <CardContent>
         <div className="flex items-center space-x-2">
           <h3 className="text-sm font-medium">Assigned to:</h3>
-          <AvatarCircles
-            avatarData={avatarData}
-          />{" "}
+          <AvatarCircles avatarData={avatarData} />{" "}
         </div>
       </CardContent>
 
