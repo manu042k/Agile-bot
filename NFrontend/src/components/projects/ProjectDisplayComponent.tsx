@@ -70,6 +70,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
       });
       toast.success("Team assigned successfully!");
       setIsAssignDialogOpen(false);
+      navigate(0);
     } catch (err) {
       toast.error("Failed to assign the team. Please try again.");
     } finally {
@@ -78,11 +79,21 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
   };
 
   return (
-    <>
-      <h2 className="text-2xl font-bold">Overview - {project?.name}</h2>
-      <div className="mt-4 flex items-center justify-between">
-        <p>{project?.description}</p>
-        <div className="flex gap-4">
+    <div className="space-y-6">
+      {/* Project Overview */}
+      <div className="bg-white p-6 shadow-md rounded-lg">
+        <h2 className="text-2xl font-bold mb-4">Overview - {project?.name}</h2>
+        <p className="text-gray-600">{project?.description}</p>
+        <p className="mt-4 text-gray-800 font-medium">
+          <span className="font-bold">Status:</span> {project?.visibility}
+        </p>
+      </div>
+
+      {/* Actions Section */}
+      <div className="bg-white p-6 shadow-md rounded-lg">
+        <h3 className="text-xl font-semibold mb-4">Actions</h3>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          {/* Upload Requirement Document */}
           <Dialog
             open={isOverviewDialogOpen}
             onOpenChange={setIsOverviewDialogOpen}
@@ -91,13 +102,17 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
               <Button>Upload Requirement Document</Button>
             </DialogTrigger>
             <DialogContent>
-              <ProjectOverviewComponent onSuccess={() => handleFileChange()} />
+              <ProjectOverviewComponent onSuccess={handleFileChange} />
             </DialogContent>
           </Dialog>
 
+          {/* Team Management */}
           {!project?.team ? (
-            <>
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Create Team */}
               <Button onClick={() => navigate("/teams")}>Create Team</Button>
+
+              {/* Assign Team */}
               <Dialog
                 open={isAssignDialogOpen}
                 onOpenChange={setIsAssignDialogOpen}
@@ -131,7 +146,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
                   </div>
                 </DialogContent>
               </Dialog>
-            </>
+            </div>
           ) : (
             <Button onClick={() => navigate(`/teams/${project.team.id}`)}>
               View Team
@@ -139,8 +154,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
           )}
         </div>
       </div>
-      <p className="mt-4">Status: {project?.visibility}</p>
-    </>
+    </div>
   );
 };
 

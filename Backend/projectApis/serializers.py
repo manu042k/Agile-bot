@@ -17,7 +17,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
 class FileUploadSerializer(serializers.ModelSerializer):
     class Meta:
         model = FileUpload
-        fields = ['project', 'timeline', 'sprintsize', 'file', 'created_at', 'updated_at']
+        fields = ['id','project', 'timeline', 'sprintsize', 'file', 'created_at', 'updated_at']
         extra_kwargs = {
             'timeline': {'required': False},
             'sprintsize': {'required': False},

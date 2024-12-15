@@ -19,16 +19,6 @@ const MainLayout: React.FC = () => {
       <aside className="fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 border-r bg-slate-50 p-4">
         <nav className="space-y-2">
           <Link
-            to="/projects"
-            className={clsx(
-              "flex items-center gap-2 p-2 rounded-md hover:bg-gray-200",
-              isActive("/projects") && "bg-gray-300 font-semibold"
-            )}
-          >
-            <File className="w-5 h-5" />
-            <span>Project List</span>
-          </Link>
-          <Link
             to={`/projects/${projectId}/overview`}
             className={clsx(
               "flex items-center gap-2 p-2 rounded-md hover:bg-gray-200",
@@ -60,6 +50,16 @@ const MainLayout: React.FC = () => {
           >
             <ClipboardCheck className="w-5 h-5" />
             <span>Task List</span>
+          </Link>
+          <Link
+            to="/projects"
+            className={clsx(
+              "flex items-center gap-2 p-2 rounded-md hover:bg-gray-200",
+              isActive("/projects") && "bg-gray-300 font-semibold"
+            )}
+          >
+            <File className="w-5 h-5" />
+            <span>Project List</span>
           </Link>
         </nav>
       </aside>

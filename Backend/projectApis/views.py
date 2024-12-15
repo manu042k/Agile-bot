@@ -140,19 +140,6 @@ class TaskDetailView(APIView):
         
         serializer = TaskSerializer(task)
         return Response(serializer.data)
-
-    # def patch(self, request, pk):
-    #     try:
-    #         task = Task.objects.get(pk=pk)
-    #     except Task.DoesNotExist:
-    #         return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        
-    #     serializer = TaskSerializer(task, data=request.data, partial=True)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def delete(self, request, pk):
         try:
             task = Task.objects.get(pk=pk)
@@ -216,10 +203,11 @@ class CommentListCreateView(APIView):
 
 class TriggerTaskGeneration(APIView):
     def post(self, request):
-        # task_id = request.data.get('task_id')
         try:
-            generate_task.delay(1)
+            file_id = request.data.get('file_id')
+            file = FileUpload.objects.get(id=file_id)
+            generate_task.delay(file_id)
         except Exception as e:
-            print(e)
-        finally:
-            return Response({"message": "Task generation triggered successfully."}, status=status.HTTP_200_OK)
+            return Response({"error": f"Error {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({"message": "Task generation triggered successfully."}, status=status.HTTP_200_OK)

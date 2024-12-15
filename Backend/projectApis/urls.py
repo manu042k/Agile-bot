@@ -18,6 +18,6 @@ urlpatterns = [
         path('tasks/<uuid:task_id>/comments/', CommentListCreateView.as_view(), name='task-comment-list-create'),
         path('projects/<int:project_id>/tasks/', TaskByProjectView.as_view(), name='get-tasks-by-project'),
         path('projects/assign-team/', AssigenTeamToProject.as_view(), name='assign-team-to-project'),
-        path('trigger',TriggerTaskGeneration.as_view(),name='trigger-task-generation')
+        path('trigger/',TriggerTaskGeneration.as_view(),name='trigger-task-generation')
 
 ] + router.urls

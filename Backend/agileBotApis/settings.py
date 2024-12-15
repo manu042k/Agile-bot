@@ -35,6 +35,11 @@ DEBUG = os.getenv('DEBUG')
 
 ALLOWED_HOSTS = []
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+     # your frontend URL
+] 
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 AUTH_USER_MODEL = 'users.User'
 # Application definition
@@ -211,9 +216,6 @@ LOGGING = {
     },
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # your frontend URL
-] 
 
 
 

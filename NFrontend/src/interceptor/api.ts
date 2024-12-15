@@ -1,9 +1,10 @@
 import authService from "@/services/authService";
+import { URLS } from "@/types/url-constants";
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
 
 const api = axios.create({
-  baseURL: "http://localhost:8000/",
+  baseURL: URLS.BASE_URL,
 });
 
 // Get the CSRF token from the cookie
