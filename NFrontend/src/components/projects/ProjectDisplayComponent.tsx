@@ -14,7 +14,17 @@ import {
   SelectItem,
 } from "../ui/select";
 import ProjectOverviewComponent from "./ProjectOverviewComponent";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 interface Props {
   id: string;
 }
@@ -73,6 +83,20 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
       navigate(0);
     } catch (err) {
       toast.error("Failed to assign the team. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleDeleteProject = async () => {
+    try {
+      if (!project) {
+        return;
+      }
+      await projectService.deleteProject(project.id.toString());
+      navigate("/projects");
+      toast.success("Project deleted successfully!");
+    } catch (err) {
+      toast.error("Failed to delete the project. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -152,6 +176,27 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
               View Team
             </Button>
           )}
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive"> Delete Project</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your project and remove your data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDeleteProject}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

@@ -13,8 +13,6 @@ root.render(
   <React.StrictMode>
     <Toaster position="top-right" />
 
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <App />
   </React.StrictMode>
 );

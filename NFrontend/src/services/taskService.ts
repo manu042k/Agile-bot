@@ -16,12 +16,16 @@ const taskService = {
   async updateTask(id: string, task: any): Promise<any> {
     const response = await api.patch<any>(URLS.TASKS_PATCH + id + "/", task);
     return response.data;
-  }, 
+  },
 
-  async triggerTask(data:any): Promise<any> {
-    const response = await api.post<any>(URLS.TASK_TRIGGER , data);
+  async triggerTask(data: any): Promise<any> {
+    const response = await api.post<any>(URLS.TASK_TRIGGER, data);
     return response.data;
-  }
+  },
+  async removeTask(id: string): Promise<any> {
+    const response = await api.delete(`${URLS.TASK}${id}/`);
+    return response.data;
+  },
 };
 
 export default taskService;

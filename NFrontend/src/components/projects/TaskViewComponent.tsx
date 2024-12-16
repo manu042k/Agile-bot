@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Separator } from "../ui/separator";
-import { Pen } from "lucide-react";
+import { Pen, Trash2 } from "lucide-react";
 import AvatarCircles from "../ui/avatar-circles";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,17 @@ import {
   TaskSize,
   TeamMember,
 } from "@/types/project";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 // Action Types for Reducer
 const SET_FIELD = "SET_FIELD";
@@ -71,8 +82,8 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
   const handleAssignedToChange = (
     selectedOptions: HTMLCollectionOf<HTMLOptionElement>
   ) => {
-    const selectedIds = Array.from(selectedOptions).map(
-      (option) => option.value
+    const selectedIds: number[] = Array.from(selectedOptions).map((option) =>
+      Number(option.value)
     );
     handleChange("assigned_to", selectedIds);
   };
@@ -81,13 +92,13 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
   const handleSave = async () => {
     try {
       await taskService.updateTask(task.taskid, state);
-      toast.success("Task updated successfully");
       onUpdate(state);
       setIsEditing(false);
+      navigate(0);
+      toast.success("Task updated successfully");
     } catch (err) {
       toast.error("Failed to update task");
-    } finally {
-      navigate(0);
+      console.log(err);
     }
   };
 
@@ -100,6 +111,15 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
     setIsEditing(false);
   };
 
+  const handleDelete = async () => {
+    try {
+      await taskService.removeTask(task.taskid);
+      navigate(0);
+      toast.success("Task deleted successfully");
+    } catch (err) {
+      toast.error("Failed to delete task");
+    }
+  };
   return (
     <div className="space-y-6">
       <div className="flex items-center">
@@ -107,10 +127,33 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
           {isEditing ? "Edit Task" : "Task Details"}
         </h2>
         {!isEditing && (
-          <Pen
-            className="pl-2 cursor-pointer"
-            onClick={() => setIsEditing(true)}
-          />
+          <>
+            <Pen
+              className="pl-2 cursor-pointer mr-2 ml-2"
+              onClick={() => setIsEditing(true)}
+            />
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Trash2 className="pl-2 cursor-pointer mr-2 text-red-500" />
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete
+                    your Task and remove your data from our servers.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete}>
+                    Continue
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         )}
       </div>
 

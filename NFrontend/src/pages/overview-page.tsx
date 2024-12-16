@@ -1,7 +1,6 @@
 import React from "react";
 import { Separator } from "@/components/ui/separator";
 import { useLocation } from "react-router-dom";
-import ProjectOverviewComponent from "@/components/projects/ProjectOverviewComponent";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import ProjectDisplayComponent from "@/components/projects/ProjectDisplayComponent";
 import ProjectDocComponent from "@/components/projects/ProjectDocComponent";
@@ -22,8 +21,6 @@ const OverviewPage: React.FC = () => {
 
       {/* Scrollable content below the sticky header */}
       <div className="px-4 md:px-8 h-[calc(100vh-200px)] overflow-y-auto">
-        {/* <ProjectOverviewComponent /> */}
-
         <ProjectDocComponent id={projectId} />
       </div>
     </>

@@ -1,10 +1,10 @@
-import { CirclePlus, Folder } from "lucide-react";
+import { CirclePlus } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import ProjectCardComponent from "@/components/projects/projectCardComponent";
 import { useEffect, useState } from "react";
 import { Project } from "@/types/project";
 import projectService from "@/services/projectService";
 import toast from "react-hot-toast";
+import ProjectCardComponent from "@/components/projects/projectCardComponent";
 import CreateProjectComponent from "@/components/projects/createProjectComponent";
 
 const ProjectsPage = () => {
