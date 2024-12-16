@@ -1,0 +1,48 @@
+name: React App Build
+
+on:
+  pull_request:
+    branches:
+      - main  # Trigger on pull requests targeting the 'main' branch
+    paths:
+      - 'NFrontend/**'  # Trigger when files in the NFrontend folder are changed
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Adjust Node version as needed
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          cd NFrontend
+          npm install --legacy-peer-deps
+
+      # Build the React app
+      - name: Build the React app
+        run: |
+          cd NFrontend
+          npm run build
+
+      # Verify the build output
+      - name: Verify build output
+        run: |
+          cd NFrontend
+          ls build  # Ensure the build directory is created
+
+      # Optionally, you can upload the build artifacts (e.g., for deployment)
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: react-build
+          path: NFrontend/build  # Path to the build directory
