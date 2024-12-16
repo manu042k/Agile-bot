@@ -1,8 +1,6 @@
 name: Django CI
 
 on:
-  push:
-    branches: [ "production" ]
   pull_request:
     branches: [ "production" ]
 
@@ -10,19 +8,15 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    strategy:
-      max-parallel: 4
-      matrix:
-        python-version: [3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v4
 
-    # Set up Python
-    - name: Set up Python ${{ matrix.python-version }}
+    # Set up Python (Using Python 3.8 as an example)
+    - name: Set up Python 3.8
       uses: actions/setup-python@v3
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.9.6 # Use a single Python version, e.g., 3.8
 
     # Install Dependencies in Backend directory
     - name: Install Dependencies
