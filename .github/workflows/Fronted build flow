@@ -3,7 +3,7 @@ name: React App Build
 on:
   pull_request:
     branches:
-      - main  # Trigger on pull requests targeting the 'main' branch
+      - production  # Trigger on pull requests targeting the 'main' branch
     paths:
       - 'NFrontend/**'  # Trigger when files in the NFrontend folder are changed
 
