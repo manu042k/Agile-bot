@@ -17,14 +17,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    # Set up Python
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+
+    # Install Dependencies in Backend directory
     - name: Install Dependencies
       run: |
+        cd Backend  # Change to the Backend directory
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
+    # Run Tests in Backend directory
     - name: Run Tests
       run: |
+        cd Backend  # Change to the Backend directory
         python manage.py test
