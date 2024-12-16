@@ -1,6 +1,8 @@
 name: Django CI
 
 on:
+  push:
+    branches: [ "production" ]
   pull_request:
     branches: [ "production" ]
 
@@ -12,11 +14,11 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Set up Python (Using Python 3.8 as an example)
-    - name: Set up Python 3.8
+    # Set up Python (Using Python 3.9)
+    - name: Set up Python 3.9
       uses: actions/setup-python@v3
       with:
-        python-version: 3.9.6 # Use a single Python version, e.g., 3.8
+        python-version: 3.9  # Use a supported version of Python
 
     # Install Dependencies in Backend directory
     - name: Install Dependencies
