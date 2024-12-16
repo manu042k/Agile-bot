@@ -78,51 +78,6 @@ const ProfilePage = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Analytics Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-8">
-        {/* Analytics Card 1 */}
-        <Card className="bg-white shadow-md rounded-lg p-6 flex flex-col justify-between">
-          <CardHeader className="pb-4 border-b-2">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-              <BarChart2 className="w-6 h-6" />
-              Activity Analytics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center text-gray-600">
-            <p className="text-3xl font-bold">150</p>
-            <p className="text-sm mt-2">Total Logins</p>
-          </CardContent>
-        </Card>
-
-        {/* Analytics Card 2 */}
-        <Card className="bg-white shadow-md rounded-lg p-6 flex flex-col justify-between">
-          <CardHeader className="pb-4 border-b-2">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-              <UserCheck className="w-6 h-6 " />
-              Completed Tasks
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center text-gray-600">
-            <p className="text-3xl font-bold">34</p>
-            <p className="text-sm mt-2">Tasks Completed</p>
-          </CardContent>
-        </Card>
-
-        {/* Analytics Card 3 */}
-        <Card className="bg-white shadow-md rounded-lg p-6 flex flex-col justify-between">
-          <CardHeader className="pb-4 border-b-2">
-            <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-              <Calendar className="w-6 h-6" />
-              Active This Week
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center text-gray-600">
-            <p className="text-3xl font-bold">7</p>
-            <p className="text-sm mt-2">Days Active</p>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
