@@ -13,7 +13,7 @@ const ProjectCardComponent: React.FC<Props> = ({
 }) => {
   return (
     <Link
-      to={`/projects/${projectId}/overview`}
+      to={`/projects/${projectId}`}
       className="block group aspect-video rounded-xl bg-slate-100 hover:bg-muted/70 transition-colors"
     >
       <div className="flex flex-col items-center justify-center h-full p-4">

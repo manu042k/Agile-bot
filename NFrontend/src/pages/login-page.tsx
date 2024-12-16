@@ -33,16 +33,22 @@ const LoginPage = () => {
           <RetroGrid />
 
           {/* Second Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="flex items-center justify-center">
+          <div className="grid grid-cols-auto sm:grid-cols-2 gap-4 z-10">
+            {/* Fixed AgileBot Section */}
+            <div className="flex items-center justify-center sticky top-0 self-start">
               <ListTodo
                 className="w-[200px] h-[200px] text-black"
                 aria-hidden="true"
               />
-              <Label className="text-lg sm:text-2xl font-black" htmlFor="name">
+              <Label
+                className="text-lg sm:text-2xl font-black ml-4"
+                htmlFor="name"
+              >
                 AgileBot
               </Label>
             </div>
+
+            {/* Login/Register Tabs */}
             <div className="flex items-center justify-center">
               <Tabs defaultValue="Login" className="w-[400px]">
                 <TabsList className="grid w-full grid-cols-2">
@@ -63,4 +69,5 @@ const LoginPage = () => {
     </>
   );
 };
+
 export default LoginPage;

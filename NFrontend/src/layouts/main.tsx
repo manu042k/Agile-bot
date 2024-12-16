@@ -19,11 +19,10 @@ const MainLayout: React.FC = () => {
       <aside className="fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 border-r bg-slate-50 p-4">
         <nav className="space-y-2">
           <Link
-            to={`/projects/${projectId}/overview`}
+            to={`/projects/${projectId}`}
             className={clsx(
               "flex items-center gap-2 p-2 rounded-md hover:bg-gray-200",
-              isActive(`/projects/${projectId}/overview`) &&
-                "bg-gray-300 font-semibold"
+              isActive(`/projects/${projectId}`) && "bg-gray-300 font-semibold"
             )}
           >
             <Activity className="w-5 h-5" />

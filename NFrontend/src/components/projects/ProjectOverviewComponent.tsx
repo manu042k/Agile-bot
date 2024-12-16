@@ -59,7 +59,7 @@ const ProjectOverviewComponent: React.FC<Props> = ({ onSuccess }) => {
     }
 
     try {
-      const response = await fileUploadService.uploadFile(formData, csrfToken);
+      await fileUploadService.uploadFile(formData, csrfToken);
       toast.success("File uploaded successfully!");
       setFile(null);
       setTimeline(null);

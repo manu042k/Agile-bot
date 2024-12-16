@@ -20,7 +20,7 @@ const projectService = {
     );
     return response.data;
   },
-  async deleteProject(projectId: number): Promise<void> {
+  async deleteProject(projectId: string): Promise<void> {
     await api.delete(`${URLS.PROJECTS}${projectId}/`);
   },
   async getProject(projectId: string): Promise<Project> {

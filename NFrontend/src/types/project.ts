@@ -99,7 +99,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   size: TaskSize;
-  assigned_to: User | null | string;
+  assigned_to: User[] | Number[];
   comments: Comment[];
   related_work: Task[];
   Project: string;
