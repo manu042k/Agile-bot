@@ -11,6 +11,7 @@ import TeamMemberPage from "./pages/teamMember-page";
 import OverviewPage from "./pages/overview-page";
 import BoardPage from "./pages/board-page";
 import TaskPage from "./pages/task-page";
+import NotFoundComponent from "./components/common/NotFoundComponent";
 
 const App: React.FC = () => {
   return (
@@ -61,6 +62,9 @@ const App: React.FC = () => {
             element={<PrivateRoute component={TeamMemberPage} />}
           />
         </Route>
+
+        {/* Catch-all route for Not Found (404) */}
+        <Route path="*" element={<NotFoundComponent />} />
       </Routes>
     </Router>
   );
