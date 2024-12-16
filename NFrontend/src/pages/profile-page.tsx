@@ -1,10 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import authService from "@/services/authService";
 import userInfoService from "@/services/userInfoService";
 import { User } from "@/types/user";
-import { BarChart2, Calendar, LogOut, UserCheck } from "lucide-react";
+import { BarChart2, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";

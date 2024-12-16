@@ -1,12 +1,6 @@
 "use client";
 
-import React from "react";
-
 import { cn } from "@/lib/utils";
-
-interface ApiResponse {
-  assigned_to: string[];
-}
 
 interface AvatarCirclesProps {
   className?: string;

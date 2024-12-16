@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Project } from "@/types/project";
 import projectService from "@/services/projectService";
 import toast from "react-hot-toast";
-import ProjectCardComponent from "@/components/projects/projectCardComponent";
-import CreateProjectComponent from "@/components/projects/createProjectComponent";
+import ProjectCardComponent from "@/components/projects/ProjectCardComponent";
+import CreateProjectComponent from "@/components/projects/CreateProjectComponent";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState<Project[] | null>(null);

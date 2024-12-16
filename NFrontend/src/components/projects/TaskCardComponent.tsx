@@ -13,6 +13,7 @@ import { Task, TaskStatus } from "@/types/project";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import TaskViewComponent from "./TaskViewComponent";
+import { User } from "@/types/user";
 
 interface Props {
   task: Task;
@@ -20,7 +21,9 @@ interface Props {
 const TaskCardComponent: React.FC<Props> = ({ task }) => {
   const avatarData: string[] = task.assigned_to
     ? Array.isArray(task.assigned_to)
-      ? task.assigned_to
+      ? typeof task.assigned_to[0] === "object"
+        ? (task.assigned_to as User[]).map((user) => user.first_name)
+        : (task.assigned_to as number[]).map(String)
       : []
     : [];
   return (
