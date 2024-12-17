@@ -30,7 +30,7 @@ jobs:
      # Run Tests
     - name: Run Tests
       env:
-        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY.SECRET_KEY }}
       run: |
         cd Backend
         python manage.py test
