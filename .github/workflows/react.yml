@@ -1,9 +1,12 @@
 name: React App Build
 
 on:
+  push:
+    branches: [ "production" ]
+    paths:
+      - 'NFrontend/**'
   pull_request:
-    branches:
-      - production  # Trigger on pull requests targeting the 'main' branch
+    branches: [ "production" ]  # Trigger on pull requests targeting the 'main' branch
     paths:
       - 'NFrontend/**'  # Trigger when files in the NFrontend folder are changed
 
