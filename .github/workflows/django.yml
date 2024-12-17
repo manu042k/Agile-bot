@@ -12,25 +12,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    # Step 1: Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-    # Set up Python (Using Python 3.9)
+    # Step 2: Set up Python (Using Python 3.9)
     - name: Set up Python 3.9
       uses: actions/setup-python@v3
       with:
         python-version: 3.9  # Use a supported version of Python
 
-    # Install Dependencies in Backend directory
+    # Step 3: Install Dependencies in Backend directory
     - name: Install Dependencies
       run: |
         cd Backend  # Change to the Backend directory
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-     # Run Tests
+    # Step 4: Inject environment variables and create .env file
+    - name: Set up environment variables
+      run: |
+        cd Backend
+        echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+        echo "DEBUG=${{ secrets.DEBUG }}" >> .env
+        echo "ACCESS_TOKEN_LIFETIME=${{ secrets.ACCESS_TOKEN_LIFETIME }}" >> .env
+        echo "REFRESH_TOKEN_LIFETIME=${{ secrets.REFRESH_TOKEN_LIFETIME }}" >> .env
+        echo "ROTATE_REFRESH_TOKENS=${{ secrets.ROTATE_REFRESH_TOKENS }}" >> .env
+        echo "BLACKLIST_AFTER_ROTATION=${{ secrets.BLACKLIST_AFTER_ROTATION }}" >> .env
+        echo "COHERE_API_KEY=${{ secrets.COHERE_API_KEY }}" >> .env
+        echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> .env
+        echo "REDIS_URI=${{ secrets.REDIS_URI }}" >> .env
+
+    # Step 5: Run Tests
     - name: Run Tests
       env:
-        SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY.SECRET_KEY }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DEBUG: ${{ secrets.DEBUG }}
+        ACCESS_TOKEN_LIFETIME: ${{ secrets.ACCESS_TOKEN_LIFETIME }}
+        REFRESH_TOKEN_LIFETIME: ${{ secrets.REFRESH_TOKEN_LIFETIME }}
+        ROTATE_REFRESH_TOKENS: ${{ secrets.ROTATE_REFRESH_TOKENS }}
+        BLACKLIST_AFTER_ROTATION: ${{ secrets.BLACKLIST_AFTER_ROTATION }}
+        COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        REDIS_URI: ${{ secrets.REDIS_URI }}
       run: |
         cd Backend
         python manage.py test
