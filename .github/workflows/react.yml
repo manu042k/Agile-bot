@@ -6,46 +6,48 @@ on:
     paths:
       - 'NFrontend/**'
   pull_request:
-    branches: [ "production" ]  # Trigger on pull requests targeting the 'main' branch
+    branches: [ "production" ]
     paths:
-      - 'NFrontend/**'  # Trigger when files in the NFrontend folder are changed
+      - 'NFrontend/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the repository
+      # Step 1: Checkout the repository
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4  # Updated to the latest version
 
-      # Set up Node.js
+      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Adjust Node version as needed
+          node-version: '18'  # Updated to a modern, stable version
 
-      # Install dependencies
+      # Step 3: Install dependencies
       - name: Install dependencies
+        working-directory: NFrontend
         run: |
-          cd NFrontend
-          npm install --legacy-peer-deps
+          npm ci --legacy-peer-deps  # Use npm ci for a clean install with consistent dependencies
 
-      # Build the React app
+      # Step 4: Build the React app
       - name: Build the React app
+        working-directory: NFrontend
         run: |
-          cd NFrontend
+          rm -rf node_modules/.vite  # Clean Vite cache
+          rm -rf dist  # Remove old build
           npm run build
 
-      # Verify the build output
+      # Step 5: Verify the build output
       - name: Verify build output
+        working-directory: NFrontend
         run: |
-          cd NFrontend
-          ls build  # Ensure the build directory is created
+          ls build  # Ensure the 'build' folder is generated
 
-      # Optionally, you can upload the build artifacts (e.g., for deployment)
+      # Step 6: Upload build artifacts
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
           name: react-build
-          path: NFrontend/build  # Path to the build directory
+          path: NFrontend/build  # Path to the build output
