@@ -1,5 +1,5 @@
 const BoardPage = () => {
-  return <div>work under progress</div>;
+  return <div></div>;
 };
 
 export default BoardPage;

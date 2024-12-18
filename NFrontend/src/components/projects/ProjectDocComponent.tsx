@@ -47,8 +47,7 @@ const ProjectDocComponent: React.FC<Props> = ({ id }) => {
       const response = await taskService.triggerTask({
         file_id: projectItem?.id,
       });
-      toast.success("Task generation initiated");
-      console.log(response);
+      // toast.success("Task generation initiated");
     } catch (error: any) {
       console.log(error);
       toast.error("An error occurred");

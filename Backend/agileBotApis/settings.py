@@ -44,6 +44,8 @@ AUTH_USER_MODEL = "users.User"
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -91,7 +93,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "agileBotApis.wsgi.application"
-
+ASGI_APPLICATION = "agileBotApis.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [
+                (
+                    "redis://default:ymUVxL1MATJEeeUc5NBSJVP0fZX1TAyi@redis-19867.c277.us-east-1-3.ec2.redns.redis-cloud.com:19867"
+                )
+            ],
+        },
+    },
+}
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 

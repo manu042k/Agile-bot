@@ -52,7 +52,6 @@ const RegisterComponent = () => {
         phone_number,
         id: "",
       });
-      console.log("Registration successful", response);
       setSuccessful("Registration successful");
 
       setEmail("");

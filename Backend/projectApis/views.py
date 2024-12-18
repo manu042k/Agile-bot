@@ -1,12 +1,16 @@
 from django.shortcuts import render
-
-from .tasks import add, generate_task
+from .tasks import generate_task
 from users.models import Team
 from .permissions import IsProjectOwnerOrTeamMember
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from .models import Project, Task, Comment
-from .serializers import CommentSerializer, ProjectDetailSerializer, TaskSerializer, UpdateTaskSerializer
+from .serializers import (
+    CommentSerializer,
+    ProjectDetailSerializer,
+    TaskSerializer,
+    UpdateTaskSerializer,
+)
 from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -29,38 +33,45 @@ class ProjectViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         return Project.objects.filter(
-        Q(created_by=user) | Q(team__members=user)
+            Q(created_by=user) | Q(team__members=user)
         ).distinct()
 
     def perform_create(self, serializer):
         """
         Set the `created_by` field to the current user during creation.
         """
-        serializer.save(created_by=self.request.user) 
+        serializer.save(created_by=self.request.user)
 
 
 class AssigenTeamToProject(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        project_id = request.data.get('project_id')
-        team_id = request.data.get('team_id')
-        
+        project_id = request.data.get("project_id")
+        team_id = request.data.get("team_id")
+
         try:
             project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
-            return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response(
+                {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
         try:
             team = Team.objects.get(id=team_id)
         except Team.DoesNotExist:
-            return Response({"error": "Team not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+            return Response(
+                {"error": "Team not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
         project.team = team
         project.save()
-        
-        return Response({"message": "Team assigned to project successfully."}, status=status.HTTP_200_OK)
-  
+
+        return Response(
+            {"message": "Team assigned to project successfully."},
+            status=status.HTTP_200_OK,
+        )
+
 
 class FileUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -76,23 +87,28 @@ class FileUploadView(APIView):
     def post(self, request, *args, **kwargs):
         # Deserialize the data
         serializer = self.serializer_class(data=request.data)
-        
+
         if serializer.is_valid():
             # Extract project id from the serializer data
             try:
-                project_id = serializer.validated_data['project'].id
+                project_id = serializer.validated_data["project"].id
                 # Remove any existing file upload for this project before saving the new one
                 FileUpload.objects.filter(project_id=project_id).delete()
             except KeyError:
-                return Response({"error": "Project ID not found in the request data."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "Project ID not found in the request data."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             except NotFound:
-                return Response({"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+                )
 
             # Save the new file upload
             serializer.save()
 
-            return Response( status=status.HTTP_201_CREATED)
-        
+            return Response(status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -106,11 +122,13 @@ class FileUploadShow(APIView):
             file_upload = FileUpload.objects.get(project_id=int(id))
 
         except FileUpload.DoesNotExist:
-            return Response({"error": "FileUpload for the specified project not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "FileUpload for the specified project not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
         serializer = FileUploadSerializer(file_upload)
-        return Response(serializer.data, status=status.HTTP_200_OK)        
-    
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TaskListCreateView(APIView):
@@ -137,9 +155,10 @@ class TaskDetailView(APIView):
             task = Task.objects.get(pk=pk)
         except Task.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+
         serializer = TaskSerializer(task)
         return Response(serializer.data)
+
     def delete(self, request, pk):
         try:
             task = Task.objects.get(pk=pk)
@@ -148,14 +167,16 @@ class TaskDetailView(APIView):
         except Task.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 
+
 class TaskPatchView(APIView):
     permission_classes = [IsAuthenticated]
+
     def patch(self, request, pk):
         try:
             task = Task.objects.get(pk=pk)
         except Task.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
-        
+
         serializer = UpdateTaskSerializer(task, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -163,9 +184,9 @@ class TaskPatchView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class TaskByProjectView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request, project_id):
         """
         Retrieve all tasks for a given project ID
@@ -173,16 +194,21 @@ class TaskByProjectView(APIView):
         try:
             # Fetch tasks that belong to the given project
             tasks = Task.objects.filter(Project_id=project_id)
-            
+
             # Serialize the data
             serializer = TaskSerializer(tasks, many=True)
-            
+
             # Return serialized data
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Task.DoesNotExist:
-            return Response({"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND) 
-        
+            return Response(
+                {"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+
 class CommentListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, task_id):
         comments = Comment.objects.filter(task_id=task_id)
         serializer = CommentSerializer(comments, many=True)
@@ -190,24 +216,31 @@ class CommentListCreateView(APIView):
 
     def post(self, request, task_id):
         data = request.data
-        data['task'] = task_id  # Ensure the task_id is included in the comment data
-        
+        data["task"] = task_id  # Ensure the task_id is included in the comment data
+
         serializer = CommentSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
-    
-
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TriggerTaskGeneration(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         try:
-            file_id = request.data.get('file_id')
+            user_id = request.user.id
+            file_id = request.data.get("file_id")
             file = FileUpload.objects.get(id=file_id)
-            generate_task.delay(file_id)
+            generate_task.delay(file_id, user_id)
+
+            return Response(
+                {"message": "Task generation started."}, status=status.HTTP_200_OK
+            )
         except Exception as e:
-            return Response({"error": f"Error {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        return Response({"message": "Task generation triggered successfully."}, status=status.HTTP_200_OK)
+            return Response(
+                {"error": f"Error {str(e)}"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response({"message": "not webscoket."}, status=status.HTTP_200_OK)
