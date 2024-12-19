@@ -17,7 +17,6 @@ const fileUploadService = {
     const response = await api.post<ProjectItem>(URLS.PROJECTS_VIEW, {
       project,
     });
-    console.log(response.data);
     return response.data;
   },
 };

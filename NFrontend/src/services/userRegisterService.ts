@@ -4,8 +4,10 @@ import axios from "axios";
 
 const userRegisterService = {
   async register(user: User): Promise<string> {
-    console.log("user", user);
-    const response = await axios.post<string>(URLS.REGISTER, user);
+    const response = await axios.post<string>(
+      URLS.BASE_URL + URLS.REGISTER,
+      user
+    );
     return response.data;
   },
 };

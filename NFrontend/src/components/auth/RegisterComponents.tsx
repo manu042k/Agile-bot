@@ -52,7 +52,6 @@ const RegisterComponent = () => {
         phone_number,
         id: "",
       });
-      console.log("Registration successful", response);
       setSuccessful("Registration successful");
 
       setEmail("");
@@ -62,6 +61,7 @@ const RegisterComponent = () => {
       setLastName("");
       setPhoneNumber("");
     } catch (error: any) {
+      console.error(error);
       setError(
         error.response?.data?.email ||
           error.response?.data?.first_name ||

@@ -45,8 +45,6 @@ const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
     } catch (err: any) {
       console.error(err);
       toast.error("Failed to create task. Please try again");
-    } finally {
-      console.log("Task Created:", processedData);
     }
   };
 
