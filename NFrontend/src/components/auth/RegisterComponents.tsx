@@ -61,6 +61,7 @@ const RegisterComponent = () => {
       setLastName("");
       setPhoneNumber("");
     } catch (error: any) {
+      console.error(error);
       setError(
         error.response?.data?.email ||
           error.response?.data?.first_name ||

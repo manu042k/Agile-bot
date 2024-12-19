@@ -6,9 +6,6 @@ import json
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-
 
 def send_message_to_frontend(message, user_id):
     channel_layer = get_channel_layer()
@@ -40,7 +37,6 @@ def generate_task(file_id, user_id):
 
         task_extractor = TaskExtractor(file.file)
         tasks = task_extractor.extract_tasks_from_requirements()
-        print(tasks)
 
         json_match = re.search(r"```json\n(.*?)```", tasks, re.DOTALL)
         send_message_to_frontend("Generated task", user_id)

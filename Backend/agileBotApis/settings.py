@@ -98,11 +98,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [
-                (
-                    "redis://default:ymUVxL1MATJEeeUc5NBSJVP0fZX1TAyi@redis-19867.c277.us-east-1-3.ec2.redns.redis-cloud.com:19867"
-                )
-            ],
+            "hosts": [(os.getenv("REDIS_URI"))],
         },
     },
 }
@@ -169,7 +165,6 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    # 'EXCEPTION_HANDLER': 'dgrocery.exceptions.dgrocery_exception_handler',
 }
 
 
