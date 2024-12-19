@@ -1,5 +1,6 @@
+
 const BoardPage = () => {
-  return <div></div>;
+  return <div> work Under progress :-) </div>;
 };
 
 export default BoardPage;
