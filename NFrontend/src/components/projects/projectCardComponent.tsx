@@ -1,6 +1,6 @@
 import { Folder } from "lucide-react";
 import React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 interface Props {
   projectId: number;
   projectTitle: string;
@@ -13,7 +13,7 @@ const ProjectCardComponent: React.FC<Props> = ({
 }) => {
   return (
     <Link
-      to={`/projects/${projectId}`}
+      href={`/projects/${projectId}`}
       className="block group aspect-video rounded-xl bg-slate-100 hover:bg-muted/70 transition-colors"
     >
       <div className="flex flex-col items-center justify-center h-full p-4">

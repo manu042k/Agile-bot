@@ -1,3 +1,4 @@
+"use client";
 import { Label } from "@/components/ui/label";
 import {
   DialogContent,
@@ -14,7 +15,7 @@ import { ProjectVisibility } from "@/types/project";
 import { useState } from "react";
 import projectService from "@/services/projectService";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 const CreateProjectComponent = () => {
   const [name, setName] = useState<string>("");
@@ -23,7 +24,7 @@ const CreateProjectComponent = () => {
     ProjectVisibility.Public
   );
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleCreateProject = async (
     event: React.FormEvent<HTMLFormElement>
@@ -42,7 +43,7 @@ const CreateProjectComponent = () => {
       setName("");
       setDescription("");
       setVisibility(ProjectVisibility.Public);
-      navigate(0);
+      router.refresh();
       toast.success("Project created successfully!");
     } catch (error: any) {
       setError("Failed to create project. Please try again.");

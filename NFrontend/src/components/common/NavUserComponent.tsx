@@ -1,24 +1,24 @@
 import { LogOut, User, Users } from "lucide-react";
 import { Button } from "../ui/button";
 import authService from "@/services/authService";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const NavUserComponent = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleLogout = () => {
     authService.logout();
     toast.success("Logout successful");
-    navigate("/");
+    router.push("/");
   };
 
   const handdleProfile = () => {
-    navigate("/profile");
+    router.push("/profile");
   };
 
   const handleTeams = () => {
-    navigate("/teams");
+    router.push("/teams");
   };
   return (
     <div className="flex flex-col space-y-2">

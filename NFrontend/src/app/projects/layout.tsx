@@ -1,25 +1,22 @@
+"use client";
 import React from "react";
-import NavBarComponent from "@/components/common/NavBarComponent";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { Activity, LayoutDashboard, File, ClipboardCheck } from "lucide-react";
-import { Outlet, Link, useLocation } from "react-router-dom";
-import clsx from "clsx"; // Optional utility for class management
+import clsx from "clsx";
 
-const MainLayout: React.FC = () => {
-  const location = useLocation();
-  const projectId = location.pathname.split("/")[2];
+const ProjectsLayout = ({ children }: { children: React.ReactNode }) => {
+  const pathname = usePathname();
+  const projectId = pathname.split("/")[2];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => pathname === path;
 
   return (
     <div className="flex h-screen">
-      {/* Fixed Navbar */}
-      <NavBarComponent />
-
-      {/* Sidebar */}
       <aside className="fixed top-16 left-0 z-40 h-[calc(100vh-4rem)] w-64 border-r bg-slate-50 p-4">
         <nav className="space-y-2">
           <Link
-            to={`/projects/${projectId}`}
+            href={`/projects/${projectId}`}
             className={clsx(
               "flex items-center gap-2 p-2 rounded-md hover:bg-gray-200",
               isActive(`/projects/${projectId}`) && "bg-gray-300 font-semibold"
@@ -29,7 +26,7 @@ const MainLayout: React.FC = () => {
             <span>Overview</span>
           </Link>
           <Link
-            to={`/projects/${projectId}/board`}
+            href={`/projects/${projectId}/board`}
             className={clsx(
               "flex items-center gap-2 p-2 rounded-md hover:bg-gray-200",
               isActive(`/projects/${projectId}/board`) &&
@@ -40,10 +37,10 @@ const MainLayout: React.FC = () => {
             <span>Board</span>
           </Link>
           <Link
-            to={`/projects/${projectId}/tasks`}
+            href={`/projects/${projectId}/task`}
             className={clsx(
               "flex items-center gap-2 p-2 rounded-md hover:bg-gray-200",
-              isActive(`/projects/${projectId}/tasks`) &&
+              isActive(`/projects/${projectId}/task`) &&
                 "bg-gray-300 font-semibold"
             )}
           >
@@ -51,7 +48,7 @@ const MainLayout: React.FC = () => {
             <span>Task List</span>
           </Link>
           <Link
-            to="/projects"
+            href="/projects"
             className={clsx(
               "flex items-center gap-2 p-2 rounded-md hover:bg-gray-200",
               isActive("/projects") && "bg-gray-300 font-semibold"
@@ -62,13 +59,9 @@ const MainLayout: React.FC = () => {
           </Link>
         </nav>
       </aside>
-
-      {/* Main Content */}
-      <main className="ml-64 mt-16 flex-1 p-6">
-        <Outlet />
-      </main>
+      <main className="ml-64 mt-16 flex-1 p-6">{children}</main>
     </div>
   );
 };
 
-export default MainLayout;
+export default ProjectsLayout;

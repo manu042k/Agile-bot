@@ -10,13 +10,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import authService from "@/services/authService";
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Progress } from "../ui/progress";
 import toast from "react-hot-toast";
 
 const LoginComponents = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ const LoginComponents = () => {
       await authService.login({ email, password });
       toast.success("Login successful");
 
-      navigate("/projects");
+      router.push("/projects");
     } catch (error) {
       const err = error as { response?: { data?: { detail?: string } } };
       setError(err.response?.data?.detail || "Login failed");
@@ -66,7 +66,10 @@ const LoginComponents = () => {
             <div className="grid gap-2">
               <div className="flex items-center">
                 <Label htmlFor="password">Password</Label>
-                <Link to="/" className="ml-auto inline-block text-sm underline">
+                <Link
+                  href="/"
+                  className="ml-auto inline-block text-sm underline"
+                >
                   Forgot your password?
                 </Link>
               </div>

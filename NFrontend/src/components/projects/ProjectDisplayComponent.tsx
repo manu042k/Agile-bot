@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import projectService from "@/services/projectService";
 import teamService from "@/services/teamService";
@@ -30,7 +32,7 @@ interface Props {
 }
 
 const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
@@ -63,7 +65,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
 
   const handleFileChange = () => {
     setIsOverviewDialogOpen(false);
-    navigate(0); // Refresh the page
+    router.refresh(); // Refresh the page
   };
 
   const handleAssignTeam = async () => {
@@ -80,7 +82,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
       });
       toast.success("Team assigned successfully!");
       setIsAssignDialogOpen(false);
-      navigate(0);
+      router.refresh();
     } catch (err) {
       toast.error("Failed to assign the team. Please try again.");
     } finally {
@@ -93,7 +95,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
         return;
       }
       await projectService.deleteProject(project.id.toString());
-      navigate("/projects");
+      router.push("/projects");
       toast.success("Project deleted successfully!");
     } catch (err) {
       toast.error("Failed to delete the project. Please try again.");
@@ -134,7 +136,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
           {!project?.team ? (
             <div className="flex flex-col sm:flex-row gap-4">
               {/* Create Team */}
-              <Button onClick={() => navigate("/teams")}>Create Team</Button>
+              <Button onClick={() => router.push("/teams")}>Create Team</Button>
 
               {/* Assign Team */}
               <Dialog
@@ -172,7 +174,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
               </Dialog>
             </div>
           ) : (
-            <Button onClick={() => navigate(`/teams/${project.team.id}`)}>
+            <Button onClick={() => router.push(`/teams/${project.team.id}`)}>
               View Team
             </Button>
           )}

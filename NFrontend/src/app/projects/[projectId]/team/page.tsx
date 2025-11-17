@@ -1,27 +1,28 @@
-import { CirclePlus } from "lucide-react";
+"use client";
+import CreateTeamComponent from "@/components/team/CreateTeamComponent";
+import TeamCardComponents from "@/components/team/TeamCardComponent";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import teamService from "@/services/teamService";
+import { Team } from "@/types/project";
+import { CirclePlus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Project } from "@/types/project";
-import projectService from "@/services/projectService";
 import toast from "react-hot-toast";
-import CreateProjectComponent from "@/components/projects/CreateProjectComponent";
-import ProjectCardComponent from "@/components/projects/ProjectCardComponent";
 
-const ProjectsPage = () => {
-  const [projects, setProjects] = useState<Project[] | null>(null);
+const TeamPage = () => {
+  const [teams, setTeams] = useState<Team[] | null>(null);
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const fetchTeams = async () => {
       try {
-        const response = await projectService.getProjects();
-        setProjects(response);
+        const response = await teamService.getTeams();
+        setTeams(response);
       } catch (err: any) {
         console.log(err);
-        toast.error("Failed to fetch projects. Please try again.");
+        toast.error("Failed to fetch teams. Please try again.");
       }
     };
 
-    fetchProjects();
+    fetchTeams();
   }, []);
 
   return (
@@ -38,20 +39,19 @@ const ProjectsPage = () => {
                       <CirclePlus className="w-6 h-6 text-black group-hover:text-white transition-colors" />
                     </div>
                     <h3 className="mt-4 text-lg font-bold text-black group-hover:text-gray-900">
-                      Add Project
+                      Create a New team
                     </h3>
                   </div>
                 </a>
               </DialogTrigger>
-              <CreateProjectComponent></CreateProjectComponent>
-              {/* Dialog Content */}
+              <CreateTeamComponent></CreateTeamComponent>
             </Dialog>
-
-            {projects?.map((project) => (
-              <ProjectCardComponent
-                projectId={project.id}
-                projectTitle={project.name}
-                projectDescription={project.description}
+            {teams?.map((team) => (
+              <TeamCardComponents
+                key={team.id}
+                teamId={team.id}
+                teamName={team.name}
+                teamDescription={team.description}
               />
             ))}
           </div>
@@ -61,4 +61,4 @@ const ProjectsPage = () => {
   );
 };
 
-export default ProjectsPage;
+export default TeamPage;

@@ -6,56 +6,141 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Comment',
+            name="Comment",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('content', models.TextField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("content", models.TextField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='FileUpload',
+            name="FileUpload",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('timeline', models.CharField(blank=True, max_length=50, null=True)),
-                ('sprintsize', models.IntegerField(blank=True, null=True)),
-                ('file', models.FileField(upload_to='project_files/')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("timeline", models.CharField(blank=True, max_length=50, null=True)),
+                ("sprintsize", models.IntegerField(blank=True, null=True)),
+                ("file", models.FileField(upload_to="project_files/")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Project',
+            name="Project",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('description', models.TextField()),
-                ('visibility', models.CharField(choices=[('public', 'Public'), ('private', 'Private')], default='public', max_length=50)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("description", models.TextField()),
+                (
+                    "visibility",
+                    models.CharField(
+                        choices=[("public", "Public"), ("private", "Private")],
+                        default="public",
+                        max_length=50,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Task',
+            name="Task",
             fields=[
-                ('taskid', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField()),
-                ('details', models.TextField()),
-                ('status', models.CharField(choices=[('created', 'Created'), ('completed', 'Completed'), ('active', 'Active'), ('backlog', 'Backlog')], default='created', max_length=10)),
-                ('priority', models.CharField(choices=[('normal', 'Normal'), ('low', 'Low'), ('high', 'High')], default='normal', max_length=10)),
-                ('size', models.CharField(choices=[('s', 'Small'), ('m', 'Medium'), ('l', 'Large'), ('xl', 'Extra Large')], default='m', max_length=2)),
-                ('created_by', models.CharField(choices=[('user', 'User'), ('ai', 'AI')], default='ai', max_length=10)),
-                ('task_number', models.CharField(editable=False, max_length=255)),
-                ('Project', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='projectApis.project')),
+                (
+                    "taskid",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField()),
+                ("details", models.TextField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("created", "Created"),
+                            ("completed", "Completed"),
+                            ("active", "Active"),
+                            ("backlog", "Backlog"),
+                        ],
+                        default="created",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "priority",
+                    models.CharField(
+                        choices=[
+                            ("normal", "Normal"),
+                            ("low", "Low"),
+                            ("high", "High"),
+                        ],
+                        default="normal",
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "size",
+                    models.CharField(
+                        choices=[
+                            ("s", "Small"),
+                            ("m", "Medium"),
+                            ("l", "Large"),
+                            ("xl", "Extra Large"),
+                        ],
+                        default="m",
+                        max_length=2,
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.CharField(
+                        choices=[("user", "User"), ("ai", "AI")],
+                        default="ai",
+                        max_length=10,
+                    ),
+                ),
+                ("task_number", models.CharField(editable=False, max_length=255)),
+                (
+                    "Project",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="projectApis.project",
+                    ),
+                ),
             ],
         ),
     ]

@@ -23,10 +23,10 @@ build/
 *.model
 *.bin
 *.h5
-*.ckpt 
+*.ckpt
 
 
-#react 
+#react
 node_modules/
 build/
 .env.local

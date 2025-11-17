@@ -1,4 +1,6 @@
-import { useLocation } from "react-router-dom";
+"use client";
+import { usePathname } from "next/navigation";
+import { Fragment } from "react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -14,10 +16,8 @@ const capitalizeFirstLetter = (str: string) => {
 };
 
 const BreadcrumbNavigation = () => {
-  const location = useLocation();
-  const pathSegments = location.pathname
-    .split("/")
-    .filter((segment) => segment);
+  const pathname = usePathname();
+  const pathSegments = pathname.split("/").filter((segment) => segment);
 
   return (
     <Breadcrumb>
@@ -26,8 +26,8 @@ const BreadcrumbNavigation = () => {
           const path = "/" + pathSegments.slice(0, index + 1).join("/");
           const capitalizedSegment = capitalizeFirstLetter(segment);
           return (
-            <>
-              <BreadcrumbItem key={path}>
+            <Fragment key={path}>
+              <BreadcrumbItem>
                 {index < pathSegments.length - 1 && (
                   <BreadcrumbLink href={path}>
                     {capitalizedSegment}
@@ -41,7 +41,7 @@ const BreadcrumbNavigation = () => {
               {index < pathSegments.length - 1 && (
                 <BreadcrumbSeparator className="hidden md:block" />
               )}
-            </>
+            </Fragment>
           );
         })}
       </BreadcrumbList>

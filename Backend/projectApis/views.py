@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from .tasks import generate_task
+
+# from .tasks import generate_task
 from users.models import Team
 from .permissions import IsProjectOwnerOrTeamMember
 from rest_framework import viewsets
@@ -233,7 +234,7 @@ class TriggerTaskGeneration(APIView):
             user_id = request.user.id
             file_id = request.data.get("file_id")
             file = FileUpload.objects.get(id=file_id)
-            generate_task.delay(file_id, user_id)
+            # generate_task.delay(file_id, user_id)
 
             return Response(
                 {"message": "Task generation started."}, status=status.HTTP_200_OK

@@ -5,20 +5,21 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('projectApis', '0002_initial'),
+        ("projectApis", "0002_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='task',
-            name='assigned_to',
+            model_name="task",
+            name="assigned_to",
         ),
         migrations.AddField(
-            model_name='task',
-            name='assigned_to',
-            field=models.ManyToManyField(blank=True, null=True, to=settings.AUTH_USER_MODEL),
+            model_name="task",
+            name="assigned_to",
+            field=models.ManyToManyField(
+                blank=True, null=True, to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

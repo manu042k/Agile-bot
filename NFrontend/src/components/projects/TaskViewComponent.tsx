@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect, useCallback, useReducer } from "react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
@@ -14,7 +16,7 @@ import { Separator } from "../ui/separator";
 import { Pen, Trash2 } from "lucide-react";
 import AvatarCircles from "../ui/avatar-circles";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import taskService from "@/services/taskService";
 import projectService from "@/services/projectService";
 import {
@@ -58,7 +60,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
   const [state, dispatch] = useReducer(taskReducer, { ...task });
   const [projectMembers, setProjectMembers] = useState<TeamMember[]>([]);
   const [isEditing, setIsEditing] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   // Fetch project members
   useEffect(() => {
@@ -94,7 +96,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
       await taskService.updateTask(task.taskid, state);
       onUpdate(state);
       setIsEditing(false);
-      navigate(0);
+      router.refresh();
       toast.success("Task updated successfully");
     } catch (err) {
       toast.error("Failed to update task");
@@ -114,7 +116,7 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
   const handleDelete = async () => {
     try {
       await taskService.removeTask(task.taskid);
-      navigate(0);
+      router.refresh();
       toast.success("Task deleted successfully");
     } catch (err) {
       toast.error("Failed to delete task");

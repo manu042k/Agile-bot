@@ -31,10 +31,13 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       authService.logout();
-      // Redirect to the login page after logout
-      toast.error("Session expired. Please login again.");
+      // Only redirect if not already on login page
       if (typeof window !== "undefined") {
-        window.location.href = "/"; // This will perform a full page redirect
+        const currentPath = window.location.pathname;
+        if (currentPath !== "/" && currentPath !== "/login") {
+          toast.error("Session expired. Please login again.");
+          window.location.href = "/"; // This will perform a full page redirect
+        }
       }
     }
     return Promise.reject(error);

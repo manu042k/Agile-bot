@@ -1,5 +1,5 @@
 import api from "@/interceptor/api";
-import { Team, TeamDTO } from "@/types/project";
+import { Team, TeamDTO, TeamMemberRole } from "@/types/project";
 import { URLS } from "@/types/url-constants";
 
 const teamService = {
@@ -33,6 +33,18 @@ const teamService = {
   async removeMember(teamId: number, user: any): Promise<string> {
     const response = await api.delete<string>(
       `${URLS.TEAMS}${teamId}${URLS.REMOVE_MEMBER}` + user + "/"
+    );
+    return response.data;
+  },
+
+  async updateTeamMemberRole(
+    teamId: number,
+    memberId: string,
+    role: TeamMemberRole
+  ): Promise<any> {
+    const response = await api.patch(
+      `${URLS.TEAMS}${teamId}/members/${memberId}/`,
+      { role }
     );
     return response.data;
   },

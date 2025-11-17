@@ -1,3 +1,4 @@
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -7,10 +8,10 @@ import { User } from "@/types/user";
 import { BarChart2, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 
 const ProfilePage = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   useEffect(() => {
     const fetchUser = async () => {
@@ -28,7 +29,7 @@ const ProfilePage = () => {
   const handleLogout = () => {
     authService.logout();
     toast.success("Logout successful");
-    navigate("/");
+    router.push("/");
   };
 
   return (
@@ -48,36 +49,41 @@ const ProfilePage = () => {
               <span className="text-2xl font-semibold">
                 {user?.first_name} {user?.last_name}
               </span>
-              <span className="text-sm text-gray-600">{user?.email}</span>
-              <span className="text-sm text-gray-600">
-                {user?.phone_number}
-              </span>
+              <span className="text-gray-500">{user?.email}</span>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="mt-6">
-          <div className="flex gap-4">
-            {" "}
-            <Button
-              variant="default"
-              className="w-full py-3 bg-blue-600 text-white hover:bg-blue-700 transition duration-200"
-              onClick={handleLogout}
-            >
-              <LogOut className="w-5 h-5 mr-2" />
-              Logout
-            </Button>
-            {/* Projects Button */}
-            <Button
-              variant="default"
-              className="w-full py-3 bg-green-600 text-white hover:bg-green-700 transition duration-200"
-              onClick={() => navigate("/projects")}
-            >
-              <BarChart2 className="w-5 h-5 mr-2" />
-              Projects
-            </Button>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Phone Number</h3>
+              <p className="text-gray-600">{user?.phone_number}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Active Status</h3>
+              <p
+                className={`font-semibold ${
+                  user?.is_active ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {user?.is_active ? "Active" : "Inactive"}
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Actions Section */}
+      <div className="w-full max-w-4xl mx-auto flex justify-end gap-4">
+        <Button variant="outline">
+          <BarChart2 className="mr-2 h-5 w-5" />
+          View Activity
+        </Button>
+        <Button variant="destructive" onClick={handleLogout}>
+          <LogOut className="mr-2 h-5 w-5" />
+          Logout
+        </Button>
+      </div>
     </div>
   );
 };

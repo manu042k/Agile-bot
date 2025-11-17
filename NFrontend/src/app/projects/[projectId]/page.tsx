@@ -1,14 +1,13 @@
+"use client";
 import React from "react";
 import { Separator } from "@/components/ui/separator";
-import { useLocation } from "react-router-dom";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import ProjectDisplayComponent from "@/components/projects/ProjectDisplayComponent";
 import ProjectDocComponent from "@/components/projects/ProjectDocComponent";
-import WebSockets from "@/components/common/webSockets";
+import WebSockets from "@/components/common/WebSockets";
 
-const OverviewPage: React.FC = () => {
-  const location = useLocation();
-  const projectId = location.pathname.split("/")[2];
+const OverviewPage = ({ params }: { params: { projectId: string } }) => {
+  const projectId = params.projectId;
 
   return (
     <>
