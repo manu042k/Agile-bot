@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -55,5 +65,81 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  /* Monochromatic Project Management Tool Styles */
+  .pm-card {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200;
+  }
+  
+  .pm-card-hover {
+    @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200;
+  }
+  
+  .pm-gradient {
+    @apply bg-gradient-to-br from-gray-50 via-white to-gray-50;
+  }
+  
+  .pm-glass {
+    @apply bg-white/95 backdrop-blur-sm border border-gray-200;
+  }
+  
+  .pm-text-subtle {
+    @apply text-gray-500 text-sm;
+  }
+  
+  .pm-badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200;
+  }
+  
+  .pm-badge-active {
+    @apply bg-gray-900 text-white border-gray-900;
+  }
+  
+  .pm-input {
+    @apply rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400 transition-all;
+  }
+  
+  .pm-button-primary {
+    @apply inline-flex items-center justify-center rounded-lg bg-gray-900 text-white px-4 py-2 text-sm font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/20 transition-all;
+  }
+  
+  .pm-button-secondary {
+    @apply inline-flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10 transition-all;
+  }
+  
+  .pm-status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+  
+  .pm-status-backlog {
+    @apply bg-gray-300;
+  }
+  
+  .pm-status-todo {
+    @apply bg-gray-400;
+  }
+  
+  .pm-status-progress {
+    @apply bg-gray-600;
+  }
+  
+  .pm-status-done {
+    @apply bg-gray-900;
+  }
+  
+  .pm-priority-low {
+    @apply bg-gray-100 text-gray-600 border-gray-200;
+  }
+  
+  .pm-priority-medium {
+    @apply bg-gray-200 text-gray-700 border-gray-300;
+  }
+  
+  .pm-priority-high {
+    @apply bg-gray-800 text-white border-gray-900;
   }
 }

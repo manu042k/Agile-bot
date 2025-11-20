@@ -11,7 +11,7 @@ import {
   SelectLabel,
   SelectItem,
 } from "@/components/ui/select";
-import { useLocation } from "react-router-dom";
+import { useParams } from "next/navigation";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import fileUploadService from "@/services/fileUploadService";
@@ -21,8 +21,8 @@ interface Props {
 }
 
 const ProjectOverviewComponent: React.FC<Props> = ({ onSuccess }) => {
-  const location = useLocation();
-  const projectId = location.pathname.split("/")[2];
+  const params = useParams();
+  const projectId = params.projectId as string;
   const [file, setFile] = useState<File | null>(null);
   const [timeline, setTimeline] = useState<number | null>(null);
   const [sprintSize, setSprintSize] = useState<string>("1");

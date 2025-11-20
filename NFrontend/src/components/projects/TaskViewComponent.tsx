@@ -124,44 +124,59 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
   };
   return (
     <div className="space-y-6">
-      <div className="flex items-center">
-        <h2 className="text-2xl font-bold">
-          {isEditing ? "Edit Task" : "Task Details"}
-        </h2>
-        {!isEditing && (
-          <>
-            <Pen
-              className="pl-2 cursor-pointer mr-2 ml-2"
-              onClick={() => setIsEditing(true)}
-            />
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Trash2 className="pl-2 cursor-pointer mr-2 text-red-500" />
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    your Task and remove your data from our servers.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete}>
-                    Continue
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </>
-        )}
+      {/* Professional Task Header */}
+      <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              {isEditing ? "Edit Task" : "Task Details"}
+            </h2>
+            <p className="text-gray-600 text-base">
+              {isEditing ? "Update task information" : "View and manage task details"}
+            </p>
+          </div>
+          {!isEditing ? (
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => setIsEditing(true)}
+                className="gap-2 border-2 border-gray-300 hover:border-gray-900 font-semibold"
+              >
+                <Pen className="w-4 h-4" />
+                Edit
+              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="lg" className="gap-2 border-2 border-red-600 font-semibold">
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Task?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      the task and remove all associated data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete}>
+                      Delete
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          ) : null}
+        </div>
       </div>
 
-      <Separator className="my-4" />
-
-      <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Professional Task Form */}
+      <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+        <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Left Column */}
         <div className="space-y-4">
           <InputField
@@ -220,16 +235,20 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
             }
           />
         </div>
-      </form>
+        </form>
 
-      {isEditing && (
-        <div className="flex space-x-4">
-          <Button onClick={handleSave}>Save</Button>
-          <Button variant="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
-        </div>
-      )}
+        {/* Professional Action Buttons */}
+        {isEditing && (
+          <div className="flex items-center gap-4 pt-6 border-t-2 border-gray-200">
+            <Button onClick={handleSave} className="min-w-32 bg-black hover:bg-gray-900 text-white font-semibold h-11 shadow-md">
+              Save Changes
+            </Button>
+            <Button variant="outline" onClick={handleCancel} className="min-w-32 border-2 border-gray-300 hover:border-gray-900 font-semibold h-11">
+              Cancel
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

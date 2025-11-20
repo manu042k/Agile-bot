@@ -1,64 +1,200 @@
 "use client";
-import CreateTeamComponent from "@/components/team/CreateTeamComponent";
-import TeamCardComponents from "@/components/team/TeamCardComponent";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import teamService from "@/services/teamService";
-import { Team } from "@/types/project";
-import { CirclePlus } from "lucide-react";
-import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { useParams } from "next/navigation";
+import { UserPlus, MoreVertical, Mail, User, Shield, Crown, Settings } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ProjectHeader from "@/components/projects/ProjectHeader";
 
-const TeamPage = () => {
-  const [teams, setTeams] = useState<Team[] | null>(null);
+// Mock team data
+const getMockTeam = (projectId: string) => ({
+  members: [
+    { id: 1, name: "John Doe", email: "john@example.com", role: "owner", avatar: null, tasks: 8, completed: 5 },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", role: "admin", avatar: null, tasks: 6, completed: 4 },
+    { id: 3, name: "Mike Johnson", email: "mike@example.com", role: "member", avatar: null, tasks: 5, completed: 2 },
+    { id: 4, name: "Sarah Wilson", email: "sarah@example.com", role: "member", avatar: null, tasks: 4, completed: 3 },
+    { id: 5, name: "Alex Brown", email: "alex@example.com", role: "member", avatar: null, tasks: 3, completed: 2 },
+  ],
+  pendingInvites: [
+    { id: 1, email: "newmember@example.com", role: "member", invitedBy: "John Doe", invitedAt: "2024-02-10" },
+  ],
+});
 
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        const response = await teamService.getTeams();
-        setTeams(response);
-      } catch (err: any) {
-        console.log(err);
-        toast.error("Failed to fetch teams. Please try again.");
-      }
-    };
+const getRoleIcon = (role: string) => {
+  switch (role) {
+    case "owner":
+      return Crown;
+    case "admin":
+      return Shield;
+    default:
+      return User;
+  }
+};
 
-    fetchTeams();
-  }, []);
+const getRoleColor = (role: string) => {
+  switch (role) {
+    case "owner":
+      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+    case "admin":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
+};
+
+const ProjectTeamPage = () => {
+  const params = useParams();
+  const projectId = params.projectId as string;
+  const team = getMockTeam(projectId);
 
   return (
-    <>
-      <div className="flex h-screen">
-        <div className="flex flex-1 flex-col gap-4 p-4 overflow-y-visible">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3 mt-2">
-            <Dialog>
-              {/* Trigger */}
-              <DialogTrigger asChild>
-                <a className="block group aspect-video rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors">
-                  <div className="flex flex-col items-center justify-center h-full">
-                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-300 group-hover:bg-gray-400 transition-colors">
-                      <CirclePlus className="w-6 h-6 text-black group-hover:text-white transition-colors" />
+    <div className="min-h-screen bg-gray-50">
+      <ProjectHeader />
+      <div className="px-6 py-8">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-900 mb-2">Team</h1>
+              <p className="text-gray-600">Manage team members and their roles</p>
+            </div>
+            <button className="pm-button-primary">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Invite Member
+            </button>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="pm-card p-5">
+            <p className="text-2xl font-semibold text-gray-900">{team.members.length}</p>
+            <p className="text-xs text-gray-500 mt-1">Team Members</p>
+          </div>
+          <div className="pm-card p-5">
+            <p className="text-2xl font-semibold text-gray-900">
+              {team.members.reduce((sum, m) => sum + m.tasks, 0)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
+          </div>
+          <div className="pm-card p-5">
+            <p className="text-2xl font-semibold text-gray-900">
+              {team.members.reduce((sum, m) => sum + m.completed, 0)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Completed Tasks</p>
+          </div>
+        </div>
+
+        {/* Team Members */}
+        <div className="pm-card p-6 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Active Members</h2>
+            <span className="text-sm text-gray-500">{team.members.length} members</span>
+          </div>
+          <div className="space-y-3">
+            {team.members.map((member) => {
+              const RoleIcon = getRoleIcon(member.role);
+              return (
+                <div key={member.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={member.avatar || undefined} alt={member.name} />
+                    <AvatarFallback className="bg-gray-900 text-white font-medium">
+                      {member.name.split(" ").map(n => n[0]).join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="font-semibold text-gray-900">{member.name}</h3>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium border flex items-center gap-1 ${getRoleColor(member.role)}`}>
+                        <RoleIcon className="h-3 w-3" />
+                        {member.role}
+                      </span>
                     </div>
-                    <h3 className="mt-4 text-lg font-bold text-black group-hover:text-gray-900">
-                      Create a New team
-                    </h3>
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      <Mail className="h-3 w-3" />
+                      {member.email}
+                    </p>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <span>{member.tasks} tasks assigned</span>
+                      <span>{member.completed} completed</span>
+                    </div>
                   </div>
-                </a>
-              </DialogTrigger>
-              <CreateTeamComponent></CreateTeamComponent>
-            </Dialog>
-            {teams?.map((team) => (
-              <TeamCardComponents
-                key={team.id}
-                teamId={team.id}
-                teamName={team.name}
-                teamDescription={team.description}
-              />
-            ))}
+                  <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <MoreVertical className="h-4 w-4 text-gray-500" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Pending Invites */}
+        {team.pendingInvites.length > 0 && (
+          <div className="pm-card p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Pending Invitations</h2>
+            <div className="space-y-3">
+              {team.pendingInvites.map((invite) => (
+                <div key={invite.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                      <Mail className="h-5 w-5 text-gray-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">{invite.email}</p>
+                      <p className="text-xs text-gray-500">
+                        Invited by {invite.invitedBy} on {invite.invitedAt}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-1 rounded text-xs bg-gray-200 text-gray-700 border border-gray-300">
+                      {invite.role}
+                    </span>
+                    <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors">
+                      <MoreVertical className="h-4 w-4 text-gray-500" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Workload View */}
+        <div className="pm-card p-6 mt-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Workload Distribution</h2>
+          <div className="space-y-4">
+            {team.members.map((member) => {
+              const completionRate = member.tasks > 0 ? (member.completed / member.tasks) * 100 : 0;
+              return (
+                <div key={member.id} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-gray-900 text-white text-xs">
+                          {member.name.split(" ").map(n => n[0]).join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{member.name}</p>
+                        <p className="text-xs text-gray-500">{member.tasks} tasks</p>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-700">{Math.round(completionRate)}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gray-900 rounded-full transition-all"
+                      style={{ width: `${completionRate}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default TeamPage;
+export default ProjectTeamPage;
+

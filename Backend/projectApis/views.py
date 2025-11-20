@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-# from .tasks import generate_task
+# from .tasks import generate_task  # Commented out - tasks are disabled
 from users.models import Team
 from .permissions import IsProjectOwnerOrTeamMember
 from rest_framework import viewsets

@@ -30,6 +30,11 @@ const ProjectDocComponent: React.FC<Props> = ({ id }) => {
   const [isProjectItemAvailable, setIsProjectItemAvailable] = useState(false);
 
   useEffect(() => {
+    // Don't fetch if id is undefined or invalid
+    if (!id || id === 'undefined') {
+      return;
+    }
+    
     const fetchProjectItem = async () => {
       try {
         const projectItem = await fileUploadService.viewFile(id);
@@ -58,68 +63,88 @@ const ProjectDocComponent: React.FC<Props> = ({ id }) => {
     <div className="space-y-6">
       {isProjectItemAvailable && (
         <>
-          {/* Project Item Header */}
-          <Card>
-            <CardHeader></CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">Project Details</h3>
-                <AlertDialog>
-                  <AlertDialogTrigger>
-                    <Button variant="link">
-                      {" "}
-                      <Sparkles /> Generate Task
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>
-                        Are you absolutely sure?
-                      </AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This action cannot be undone and will permanently delete
-                        the AI-generated task and regenerate it.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleGenerateTask}>
-                        Continue
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+          {/* Professional Project Details Header */}
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-8 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                  Project Requirements
+                </h2>
+                <p className="text-gray-600 text-lg">
+                  View and manage project documentation
+                </p>
               </div>
-              <div className="mt-2 ">
-                <Badge variant="secondary" className="mr-2">
-                  Sprint Size: {projectItem?.sprintsize} weeks
-                </Badge>
-                <Badge variant="secondary" className="mr-2">
-                  Timeline: {projectItem?.timeline} weeks
-                </Badge>
-                <Badge variant="secondary" className="mr-2">
-                  Created At:{" "}
-                  {new Date(projectItem?.created_at ?? "").toLocaleDateString()}
-                </Badge>
-                <Badge variant="secondary" className="mr-2">
-                  Updated At:{" "}
-                  {new Date(projectItem?.updated_at ?? "").toLocaleDateString()}
-                </Badge>
-              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="gap-2 bg-black hover:bg-gray-900 text-white font-semibold px-6 py-3 shadow-md hover:shadow-lg transition-all">
+                    <Sparkles className="w-5 h-5" />
+                    Generate Tasks
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Generate AI Tasks?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will use AI to analyze the requirements document and automatically 
+                      generate tasks. Any existing AI-generated tasks will be replaced.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleGenerateTask}>
+                      Generate
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
 
-              <Separator className="my-4" />
-              {/* PDF Embed */}
-              <div className="my-4">
-                <embed
-                  src={`${URLS.BASE_URL}${projectItem?.file}`}
-                  width="100%"
-                  height="600px"
-                  type="application/pdf"
-                  className="border border-muted rounded-lg"
-                />
+            {/* Professional Project Metadata */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+              <div className="bg-gray-50 rounded-lg p-5 border-2 border-gray-200">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Sprint Size</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {projectItem?.sprintsize} weeks
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="bg-gray-50 rounded-lg p-5 border-2 border-gray-200">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Timeline</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {projectItem?.timeline} weeks
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-5 border-2 border-gray-200">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Created</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {new Date(projectItem?.created_at ?? "").toLocaleDateString()}
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-5 border-2 border-gray-200">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Updated</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {new Date(projectItem?.updated_at ?? "").toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Professional Document Viewer */}
+          <div className="bg-white border-2 border-gray-200 rounded-lg p-8 shadow-sm">
+            <h3 className="text-2xl font-bold mb-6 text-gray-900">
+              Requirements Document
+            </h3>
+            <div className="rounded-lg overflow-hidden border-2 border-gray-300">
+              <embed
+                src={`${URLS.BASE_URL}${projectItem?.file}`}
+                width="100%"
+                height="700px"
+                type="application/pdf"
+                className="bg-gray-50"
+              />
+            </div>
+          </div>
         </>
       )}
     </div>

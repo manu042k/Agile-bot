@@ -27,58 +27,83 @@ const TaskCardComponent: React.FC<Props> = ({ task }) => {
       : []
     : [];
   return (
-    <Card className="w-full sm:w-[220px] md:w-[260px] lg:w-[300px] xl:w-[350px] mx-auto shadow-md">
-      <CardHeader>
-        <CardTitle className="truncate">
-          Task Number:{task.task_number}{" "}
-        </CardTitle>
-        <CardTitle>{task.name} </CardTitle>
-        <CardDescription>
-          {task.description.split(" ").slice(0, 5).join(" ")} ...
-        </CardDescription>
+    <Card className="bg-white border-2 border-gray-200 rounded-lg w-full group hover:border-gray-900 hover:shadow-xl transition-all duration-300">
+      <CardHeader className="space-y-4 pb-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-2 flex-1">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                Task #{task.task_number}
+              </span>
+              {task.status === TaskStatus.Completed && (
+                <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border-2 border-green-200 font-semibold px-3 py-1">
+                  Completed
+                </Badge>
+              )}
+              {task.status === TaskStatus.Active && (
+                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-2 border-blue-200 font-semibold px-3 py-1">
+                  Active
+                </Badge>
+              )}
+              {task.status === TaskStatus.Created && (
+                <Badge className="bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-2 border-yellow-200 font-semibold px-3 py-1">
+                  Created
+                </Badge>
+              )}
+              {task.status === TaskStatus.Backlog && (
+                <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-2 border-gray-300 font-semibold px-3 py-1">
+                  Backlog
+                </Badge>
+              )}
+            </div>
+            <CardTitle className="text-xl font-bold text-gray-900 line-clamp-2 group-hover:text-black transition-colors">
+              {task.name}
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+              {task.description}
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="flex items-center space-x-2">
-          <h3 className="text-sm font-medium">Assigned to:</h3>
-          <AvatarCircles avatarData={avatarData} />{" "}
+      <CardContent className="space-y-4 pb-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Assigned:</span>
+            {avatarData.length > 0 ? (
+              <AvatarCircles avatarData={avatarData} />
+            ) : (
+              <span className="text-sm text-gray-500 font-medium italic">Unassigned</span>
+            )}
+          </div>
         </div>
+        
+        {task.priority && (
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Priority:</span>
+            <Badge variant="outline" className="text-xs font-semibold border-2 px-3 py-1">
+              {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
+            </Badge>
+          </div>
+        )}
       </CardContent>
 
-      <CardFooter className="flex justify-between items-center">
+      <CardFooter className="border-t-2 border-gray-100 pt-5">
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="link">View Task</Button>
+            <Button variant="ghost" className="w-full hover:bg-gray-100 font-semibold text-gray-900 h-11">
+              View Details
+            </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-xl h-auto max-h-[150vh] overflow-auto p-4">
+          <DialogContent className="sm:max-w-4xl h-auto max-h-[90vh] overflow-auto">
             <TaskViewComponent
               task={task}
               onUpdate={() => {
                 /* handle update */
               }}
-            ></TaskViewComponent>
+            />
           </DialogContent>
         </Dialog>
-
-        {task.status == TaskStatus.Completed && (
-          <Badge className="bg-green-400 hover:bg-green-600">
-            {TaskStatus.Completed}
-          </Badge>
-        )}
-        {task.status == TaskStatus.Active && (
-          <Badge className="bg-blue-400 hover:bg-blue-600">{task.status}</Badge>
-        )}
-        {task.status == TaskStatus.Created && (
-          <Badge className="bg-yellow-400 hover:bg-yellow-600">
-            {task.status}
-          </Badge>
-        )}
-        {task.status == TaskStatus.Backlog && (
-          <Badge className="bg-red-400 hover:bg-red-600">{task.status}</Badge>
-        )}
-        <Badge variant="secondary" className="mr-2">
-          {task.created_by}
-        </Badge>
       </CardFooter>
     </Card>
   );

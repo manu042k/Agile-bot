@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import NavBarComponent from "../components/common/NavBarComponent";
+import MainLayout from "../components/layouts/MainLayout";
 
 export const metadata: Metadata = {
   title: "Agile Bot",
@@ -15,8 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <NavBarComponent />
-        <main>{children}</main>
+        <MainLayout>{children}</MainLayout>
       </body>
     </html>
   );
