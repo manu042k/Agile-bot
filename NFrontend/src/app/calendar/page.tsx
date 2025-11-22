@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, User, Flag, CalendarDays, Calendar, CalendarClock, ListTodo } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 
@@ -13,6 +14,8 @@ const getMockTasks = () => [
 ];
 
 const CalendarPage = () => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "month";
   const [currentDate, setCurrentDate] = useState(new Date(2024, 1, 1)); // February 2024
   const tasks = getMockTasks();
 
@@ -165,9 +168,9 @@ const CalendarPage = () => {
                           <div
                             key={task.id}
                             className={`text-xs p-1 rounded truncate ${
-                              task.priority === "high" ? "bg-red-100 text-red-700" :
-                              task.priority === "medium" ? "bg-yellow-100 text-yellow-700" :
-                              "bg-blue-100 text-blue-700"
+                              task.priority === "high" ? "pm-priority-high" :
+                              task.priority === "medium" ? "pm-priority-medium" :
+                              "pm-priority-low"
                             }`}
                             title={task.title}
                           >
@@ -215,9 +218,9 @@ const CalendarPage = () => {
                     <div className="flex items-start justify-between mb-2">
                       <h4 className="font-medium text-gray-900 text-sm">{task.title}</h4>
                       <span className={`px-2 py-0.5 rounded text-xs ${
-                        task.priority === "high" ? "bg-red-100 text-red-700" :
-                        task.priority === "medium" ? "bg-yellow-100 text-yellow-700" :
-                        "bg-blue-100 text-blue-700"
+                        task.priority === "high" ? "pm-priority-high" :
+                        task.priority === "medium" ? "pm-priority-medium" :
+                        "pm-priority-low"
                       }`}>
                         <Flag className="h-3 w-3 inline mr-1" />
                         {task.priority}

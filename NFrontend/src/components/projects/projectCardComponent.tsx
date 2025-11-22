@@ -1,5 +1,6 @@
 import { Folder, ArrowRight, Users, CheckCircle2 } from "lucide-react";
 import React from "react";
+import { getProjectStatusBadgeClass } from "@/lib/colorUtils";
 
 interface Props {
   projectId: number;
@@ -21,18 +22,6 @@ const ProjectCardComponent: React.FC<Props> = ({
   projectDescription,
   project,
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-gray-200 text-gray-700 border-gray-300";
-      case "completed":
-        return "bg-gray-800 text-white border-gray-900";
-      case "planning":
-        return "bg-gray-100 text-gray-600 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
-    }
-  };
 
   return (
     <div className="pm-card pm-card-hover p-6 h-full flex flex-col group cursor-pointer">
@@ -46,7 +35,7 @@ const ProjectCardComponent: React.FC<Props> = ({
             {projectTitle}
           </h3>
           {project && (
-            <span className={`pm-badge border ${getStatusColor(project.status)} inline-block`}>
+            <span className={`pm-badge border ${getProjectStatusBadgeClass(project.status)} inline-block`}>
               {project.status}
             </span>
           )}

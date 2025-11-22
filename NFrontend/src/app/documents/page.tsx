@@ -1,8 +1,11 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Upload, FileText, Search, Filter, Download, MoreVertical, Calendar, User, Clock, FolderOpen } from "lucide-react";
 import Link from "next/link";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import PageHeader from "@/components/common/PageHeader";
+import UploadDocumentComponent from "@/components/projects/UploadDocumentComponent";
 
 // Mock documents
 const mockDocuments = [
@@ -15,13 +18,29 @@ const mockDocuments = [
 ];
 
 const DocumentsPage = () => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "all";
   const [searchQuery, setSearchQuery] = useState("");
   const [filterProject, setFilterProject] = useState("all");
 
   const filteredDocuments = mockDocuments.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesProject = filterProject === "all" || doc.project === filterProject;
-    return matchesSearch && matchesProject;
+    
+    // Apply tab filters
+    let matchesTab = true;
+    if (tab === "recent") {
+      // Show documents uploaded in last 7 days
+      const uploadDate = new Date(doc.uploadedAt);
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      matchesTab = uploadDate > weekAgo;
+    } else if (tab === "by-project") {
+      // Group by project - show all but will be grouped
+      matchesTab = true;
+    }
+    
+    return matchesSearch && matchesProject && matchesTab;
   });
 
   const getFileIcon = (type: string) => {
@@ -35,7 +54,7 @@ const DocumentsPage = () => {
         description="Manage project documents and files across all your projects"
         icon={FileText}
         tabs={[
-          { icon: FileText, label: "All Documents", href: "/documents" },
+          { icon: FileText, label: "Documents", href: "/documents" },
           { icon: Clock, label: "Recent", href: "/documents?tab=recent" },
           { icon: FolderOpen, label: "By Project", href: "/documents?tab=by-project" },
         ]}
@@ -71,10 +90,15 @@ const DocumentsPage = () => {
                 More Filters
               </button>
             </div>
-            <button className="pm-button-primary">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload Document
-            </button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="pm-button-primary">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Document
+                </button>
+              </DialogTrigger>
+              <UploadDocumentComponent />
+            </Dialog>
           </div>
         </div>
 
@@ -142,10 +166,11 @@ const DocumentsPage = () => {
               </div>
             </div>
 
-            {/* Documents List */}
-            <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">All Documents</h2>
-              {filteredDocuments.length > 0 ? (
+            {/* All Documents Tab */}
+            {tab === "all" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Documents</h2>
+                {filteredDocuments.length > 0 ? (
                 <div className="space-y-3">
                   {filteredDocuments.map((doc) => (
                     <div key={doc.id} className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
@@ -202,7 +227,94 @@ const DocumentsPage = () => {
                   )}
                 </div>
               )}
-            </div>
+              </div>
+            )}
+
+            {/* Recent Tab */}
+            {tab === "recent" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Recent Documents
+                </h2>
+                {filteredDocuments.length > 0 ? (
+                  <div className="space-y-3">
+                    {filteredDocuments.map((doc) => (
+                      <div
+                        key={doc.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all"
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            {getFileIcon(doc.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">
+                              {doc.name}
+                            </h3>
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span>{doc.project}</span>
+                              <span>•</span>
+                              <span>{doc.size}</span>
+                              <span>•</span>
+                              <span>{doc.uploadedAt}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                            <Download className="h-4 w-4 text-gray-600" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    No recent documents found
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* By Project Tab */}
+            {tab === "by-project" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Documents by Project
+                </h2>
+                <div className="space-y-6">
+                  {Array.from(new Set(mockDocuments.map(d => d.project))).map((project) => {
+                    const projectDocs = mockDocuments.filter(d => d.project === project);
+                    return (
+                      <div key={project} className="border border-gray-200 rounded-lg p-4">
+                        <h3 className="font-semibold text-gray-900 mb-3">{project}</h3>
+                        <div className="space-y-2">
+                          {projectDocs.map((doc) => (
+                            <div
+                              key={doc.id}
+                              className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="flex items-center gap-3 flex-1">
+                                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                  {getFileIcon(doc.type)}
+                                </div>
+                                <div className="flex-1">
+                                  <p className="font-medium text-gray-900 text-sm">{doc.name}</p>
+                                  <p className="text-xs text-gray-500">{doc.size} • {doc.uploadedAt}</p>
+                                </div>
+                              </div>
+                              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                                <Download className="h-4 w-4 text-gray-600" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}

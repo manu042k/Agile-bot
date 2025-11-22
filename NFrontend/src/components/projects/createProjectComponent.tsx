@@ -51,76 +51,67 @@ const CreateProjectComponent = () => {
   };
 
   return (
-    <DialogContent className="sm:max-w-[425px] md:max-w-[700px] lg:max-w-[800px]">
+    <DialogContent className="sm:max-w-[500px]">
       <DialogHeader>
-        <DialogTitle>Add New Project</DialogTitle>
-        <DialogDescription>
+        <DialogTitle className="text-2xl font-bold text-gray-900">Create Project</DialogTitle>
+        <DialogDescription className="text-gray-600">
           Fill in the details to create a new project.
         </DialogDescription>
       </DialogHeader>
-      <div className="grid gap-4 py-4">
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label
-            htmlFor="project-name"
-            className="text-right block truncate font-semibold"
-          >
+      <form onSubmit={handleCreateProject} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="project-name" className="text-sm font-medium text-gray-700">
             Project Name
           </Label>
           <Input
             id="project-name"
             placeholder="Enter project name"
-            className="col-span-3"
+            className="pm-input"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
           />
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label
-            htmlFor="project-desc"
-            className="text-right block truncate font-semibold"
-          >
+        <div className="space-y-2">
+          <Label htmlFor="project-desc" className="text-sm font-medium text-gray-700">
             Description
           </Label>
           <Textarea
             required
             id="project-desc"
-            className="col-span-3"
-            placeholder="Type your message here."
+            className="pm-input min-h-[100px]"
+            placeholder="Enter project description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
-        <div className="grid grid-cols-4 items-center gap-4">
-          <Label
-            htmlFor="project-visibility"
-            className="text-right block truncate font-semibold"
-          >
+        <div className="space-y-2">
+          <Label htmlFor="project-visibility" className="text-sm font-medium text-gray-700">
             Visibility
           </Label>
           <RadioGroup
             id="project-visibility"
-            className="col-span-3"
             value={visibility}
             onValueChange={(value) => setVisibility(value as ProjectVisibility)}
+            className="flex gap-4"
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value={ProjectVisibility.Public} id="public" />
-              <Label htmlFor="public">{ProjectVisibility.Public}</Label>
+              <Label htmlFor="public" className="font-normal cursor-pointer">{ProjectVisibility.Public}</Label>
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value={ProjectVisibility.Private} id="private" />
-              <Label htmlFor="private">{ProjectVisibility.Private}</Label>
+              <Label htmlFor="private" className="font-normal cursor-pointer">{ProjectVisibility.Private}</Label>
             </div>
           </RadioGroup>
         </div>
-      </div>
-      {error && <p className="text-red-500">{error}</p>}
-      <DialogFooter>
-        <form onSubmit={handleCreateProject}>
-          <Button type="submit">Create</Button>
-        </form>
-      </DialogFooter>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button type="submit" className="pm-button-primary w-full sm:w-auto">
+            Create Project
+          </Button>
+        </DialogFooter>
+      </form>
     </DialogContent>
   );
 };

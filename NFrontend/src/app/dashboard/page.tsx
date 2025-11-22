@@ -1,4 +1,5 @@
 "use client";
+import { useSearchParams } from "next/navigation";
 import { 
   FolderKanban, 
   CheckSquare, 
@@ -46,6 +47,9 @@ const mockUpcomingDeadlines = [
 ];
 
 const DashboardPage = () => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "overview";
+
   return (
     <div className="min-h-screen bg-gray-50">
       <PageHeader
@@ -60,6 +64,9 @@ const DashboardPage = () => {
       />
 
       <div className="px-6 py-8">
+        {/* Overview Tab */}
+        {tab === "overview" && (
+          <>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -319,6 +326,78 @@ const DashboardPage = () => {
             )}
           </div>
         </div>
+          </>
+        )}
+
+        {/* My Tasks Tab */}
+        {tab === "my-tasks" && (
+          <div className="space-y-6">
+            <div className="pm-card p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">My Tasks</h2>
+              <div className="space-y-3">
+                {mockMyTasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-1">{task.title}</h3>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span>{task.project}</span>
+                        <span>•</span>
+                        <span>Due: {task.dueDate}</span>
+                        <span>•</span>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          task.priority === "high" ? "pm-priority-high" :
+                          task.priority === "medium" ? "pm-priority-medium" :
+                          "pm-priority-low"
+                        }`}>
+                          {task.priority}
+                        </span>
+                      </div>
+                    </div>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                      task.status === "done" ? "pm-status-badge-done" :
+                      task.status === "in_progress" ? "pm-status-badge-progress" :
+                      "pm-status-badge-todo"
+                    }`}>
+                      {task.status.replace("_", " ")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Projects Tab */}
+        {tab === "projects" && (
+          <div className="space-y-6">
+            <div className="pm-card p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Projects</h2>
+              <div className="space-y-3">
+                {mockRecentProjects.map((project) => (
+                  <Link key={project.id} href={`/projects/${project.id}`}>
+                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-1">{project.name}</h3>
+                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                          <span>{project.completed}/{project.tasks} tasks completed</span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gray-900 rounded-full transition-all"
+                            style={{ width: `${project.progress}%` }}
+                          />
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-bold text-gray-900">{project.progress}%</p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

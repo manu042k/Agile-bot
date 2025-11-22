@@ -111,35 +111,92 @@
     @apply inline-flex items-center justify-center rounded-lg bg-white border border-gray-200 text-gray-700 px-4 py-2 text-sm font-medium hover:bg-gray-50 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-900/10 transition-all;
   }
   
+  /* Status Colors - Consistent across all components */
   .pm-status-dot {
     @apply w-2 h-2 rounded-full;
   }
   
   .pm-status-backlog {
-    @apply bg-gray-300;
-  }
-  
-  .pm-status-todo {
     @apply bg-gray-400;
   }
   
+  .pm-status-todo {
+    @apply bg-blue-500;
+  }
+  
   .pm-status-progress {
-    @apply bg-gray-600;
+    @apply bg-amber-500;
   }
   
   .pm-status-done {
-    @apply bg-gray-900;
+    @apply bg-green-500;
   }
   
+  /* Status Badge Colors */
+  .pm-status-badge-backlog {
+    @apply bg-gray-100 text-gray-700 border-gray-200;
+  }
+  
+  .pm-status-badge-todo {
+    @apply bg-blue-100 text-blue-700 border-blue-200;
+  }
+  
+  .pm-status-badge-progress {
+    @apply bg-amber-100 text-amber-700 border-amber-200;
+  }
+  
+  .pm-status-badge-done {
+    @apply bg-green-100 text-green-700 border-green-200;
+  }
+  
+  /* Priority Colors - Consistent across all components */
   .pm-priority-low {
-    @apply bg-gray-100 text-gray-600 border-gray-200;
+    @apply bg-gray-100 text-gray-700 border-gray-200;
   }
   
   .pm-priority-medium {
-    @apply bg-gray-200 text-gray-700 border-gray-300;
+    @apply bg-amber-100 text-amber-700 border-amber-200;
   }
   
   .pm-priority-high {
-    @apply bg-gray-800 text-white border-gray-900;
+    @apply bg-red-100 text-red-700 border-red-200;
+  }
+  
+  /* Role Colors - Consistent across all components */
+  .pm-role-owner {
+    @apply bg-amber-100 text-amber-800 border-amber-200;
+  }
+  
+  .pm-role-admin {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+  
+  .pm-role-member {
+    @apply bg-gray-100 text-gray-800 border-gray-200;
+  }
+  
+  /* Project Status Colors - Consistent across all components */
+  .pm-project-status-active {
+    @apply bg-amber-100 text-amber-700 border-amber-200;
+  }
+  
+  .pm-project-status-completed {
+    @apply bg-green-100 text-green-700 border-green-200;
+  }
+  
+  .pm-project-status-planning {
+    @apply bg-blue-100 text-blue-700 border-blue-200;
+  }
+  
+  .pm-project-status-dot-active {
+    @apply bg-amber-500;
+  }
+  
+  .pm-project-status-dot-completed {
+    @apply bg-green-500;
+  }
+  
+  .pm-project-status-dot-planning {
+    @apply bg-blue-500;
   }
 }

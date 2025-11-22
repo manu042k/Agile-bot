@@ -36,22 +36,22 @@ const TaskCardComponent: React.FC<Props> = ({ task }) => {
                 Task #{task.task_number}
               </span>
               {task.status === TaskStatus.Completed && (
-                <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border-2 border-green-200 font-semibold px-3 py-1">
+                <Badge className="pm-status-badge-done border-2 font-semibold px-3 py-1">
                   Completed
                 </Badge>
               )}
               {task.status === TaskStatus.Active && (
-                <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-2 border-blue-200 font-semibold px-3 py-1">
+                <Badge className="pm-status-badge-progress border-2 font-semibold px-3 py-1">
                   Active
                 </Badge>
               )}
               {task.status === TaskStatus.Created && (
-                <Badge className="bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border-2 border-yellow-200 font-semibold px-3 py-1">
+                <Badge className="pm-status-badge-todo border-2 font-semibold px-3 py-1">
                   Created
                 </Badge>
               )}
               {task.status === TaskStatus.Backlog && (
-                <Badge className="bg-gray-100 text-gray-700 hover:bg-gray-200 border-2 border-gray-300 font-semibold px-3 py-1">
+                <Badge className="pm-status-badge-backlog border-2 font-semibold px-3 py-1">
                   Backlog
                 </Badge>
               )}

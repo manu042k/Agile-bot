@@ -1,4 +1,5 @@
 "use client";
+import { useSearchParams } from "next/navigation";
 import {
   TrendingUp,
   TrendingDown,
@@ -36,6 +37,9 @@ const mockChartData = [
 ];
 
 const AnalyticsPage = () => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "overview";
+
   return (
     <div className="min-h-screen bg-gray-50">
       <PageHeader
@@ -57,362 +61,478 @@ const AnalyticsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-4">
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <TrendingUp className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                      Export Report
-                    </h3>
-                    <p className="text-xs text-gray-500">Download data</p>
-                  </div>
-                </div>
-              </button>
+            {/* Overview Tab */}
+            {tab === "overview" && (
+              <>
+                {/* Quick Actions */}
+                <div className="grid grid-cols-2 gap-4">
+                  <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                        <TrendingUp className="h-5 w-5 text-gray-700" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
+                          Export Report
+                        </h3>
+                        <p className="text-xs text-gray-500">Download data</p>
+                      </div>
+                    </div>
+                  </button>
 
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Calendar className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                      Date Range
-                    </h3>
-                    <p className="text-xs text-gray-500">Select period</p>
-                  </div>
-                </div>
-              </button>
-            </div>
-
-            {/* Analytics Overview */}
-            <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Analytics Overview
-              </h2>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-gray-600">Productivity Score</span>
-                    <span className="font-medium text-gray-900">
-                      {mockMetrics.productivityScore}%
-                    </span>
-                  </div>
-                  <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gray-900 rounded-full transition-all"
-                      style={{ width: `${mockMetrics.productivityScore}%` }}
-                    />
-                  </div>
+                  <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
+                        <Calendar className="h-5 w-5 text-gray-700" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
+                          Date Range
+                        </h3>
+                        <p className="text-xs text-gray-500">Select period</p>
+                      </div>
+                    </div>
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {mockMetrics.completedTasks}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">Completed</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {mockMetrics.inProgressTasks}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">In Progress</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {mockMetrics.teamMembers}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">Team Members</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+                {/* Analytics Overview */}
+                <div className="pm-card p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    Analytics Overview
+                  </h2>
+                  <div className="space-y-4">
+                    <div>
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span className="text-gray-600">
+                          Productivity Score
+                        </span>
+                        <span className="font-medium text-gray-900">
+                          {mockMetrics.productivityScore}%
+                        </span>
+                      </div>
+                      <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gray-900 rounded-full transition-all"
+                          style={{ width: `${mockMetrics.productivityScore}%` }}
+                        />
+                      </div>
+                    </div>
 
-            {/* Key Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="pm-card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-gray-100">
-                    <CheckCircle2 className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <TrendingUp className="h-4 w-4 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {mockMetrics.completedTasks}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">Tasks Completed</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    +12% from last month
-                  </p>
-                </div>
-              </div>
-
-              <div className="pm-card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-gray-100">
-                    <Clock className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <TrendingDown className="h-4 w-4 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {mockMetrics.averageCompletionTime}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Avg. Completion Time
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    -0.3 days from last month
-                  </p>
-                </div>
-              </div>
-
-              <div className="pm-card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-gray-100">
-                    <Users className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <TrendingUp className="h-4 w-4 text-gray-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {mockMetrics.teamMembers}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">Team Members</p>
-                  <p className="text-xs text-gray-500 mt-1">+2 this month</p>
-                </div>
-              </div>
-
-              <div className="pm-card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-2 rounded-lg bg-gray-100">
-                    <TrendingUp className="h-5 w-5 text-gray-700" />
+                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+                      <div>
+                        <p className="text-2xl font-semibold text-gray-900">
+                          {mockMetrics.completedTasks}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">Completed</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-semibold text-gray-900">
+                          {mockMetrics.inProgressTasks}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          In Progress
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-semibold text-gray-900">
+                          {mockMetrics.teamMembers}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Team Members
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {mockMetrics.productivityScore}%
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Productivity Score
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    +5% from last month
-                  </p>
-                </div>
-              </div>
-            </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 gap-6">
-              {/* Task Completion Chart */}
-              <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Task Completion Trend
-                </h2>
-                <div className="space-y-4">
-                  {mockChartData.map((data, idx) => (
-                    <div key={idx} className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">{data.month}</span>
-                        <div className="flex items-center gap-4">
-                          <span className="text-gray-500">
-                            Created: {data.created}
+                {/* Key Metrics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="pm-card p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 rounded-lg bg-gray-100">
+                        <CheckCircle2 className="h-5 w-5 text-gray-700" />
+                      </div>
+                      <TrendingUp className="h-4 w-4 text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {mockMetrics.completedTasks}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Tasks Completed
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        +12% from last month
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pm-card p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 rounded-lg bg-gray-100">
+                        <Clock className="h-5 w-5 text-gray-700" />
+                      </div>
+                      <TrendingDown className="h-4 w-4 text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {mockMetrics.averageCompletionTime}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Avg. Completion Time
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        -0.3 days from last month
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pm-card p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 rounded-lg bg-gray-100">
+                        <Users className="h-5 w-5 text-gray-700" />
+                      </div>
+                      <TrendingUp className="h-4 w-4 text-gray-500" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {mockMetrics.teamMembers}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">Team Members</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        +2 this month
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pm-card p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="p-2 rounded-lg bg-gray-100">
+                        <TrendingUp className="h-5 w-5 text-gray-700" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {mockMetrics.productivityScore}%
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Productivity Score
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        +5% from last month
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Charts Section */}
+                <div className="grid grid-cols-1 gap-6">
+                  {/* Task Completion Chart */}
+                  <div className="pm-card p-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                      Task Completion Trend
+                    </h2>
+                    <div className="space-y-4">
+                      {mockChartData.map((data, idx) => (
+                        <div key={idx} className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">{data.month}</span>
+                            <div className="flex items-center gap-4">
+                              <span className="text-gray-500">
+                                Created: {data.created}
+                              </span>
+                              <span className="text-gray-900 font-medium">
+                                Completed: {data.completed}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-8 bg-gray-100 rounded overflow-hidden flex">
+                              <div
+                                className="bg-gray-300"
+                                style={{
+                                  width: `${(data.created / 100) * 100}%`,
+                                }}
+                              />
+                              <div
+                                className="bg-gray-900"
+                                style={{
+                                  width: `${(data.completed / 100) * 100}%`,
+                                }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-500 w-12 text-right">
+                              {Math.round(
+                                (data.completed / data.created) * 100
+                              )}
+                              %
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Project Status Distribution */}
+                  <div className="pm-card p-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                      Project Status
+                    </h2>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600">
+                            Active Projects
                           </span>
-                          <span className="text-gray-900 font-medium">
-                            Completed: {data.completed}
+                          <span className="text-sm font-medium text-gray-900">
+                            {mockMetrics.activeProjects}
                           </span>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-8 bg-gray-100 rounded overflow-hidden flex">
+                        <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className="bg-gray-300"
-                            style={{ width: `${(data.created / 100) * 100}%` }}
-                          />
-                          <div
-                            className="bg-gray-900"
+                            className="h-full bg-gray-600 rounded-full"
                             style={{
-                              width: `${(data.completed / 100) * 100}%`,
+                              width: `${
+                                (mockMetrics.activeProjects /
+                                  mockMetrics.totalProjects) *
+                                100
+                              }%`,
                             }}
                           />
                         </div>
-                        <span className="text-xs text-gray-500 w-12 text-right">
-                          {Math.round((data.completed / data.created) * 100)}%
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600">
+                            Completed Projects
+                          </span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {mockMetrics.completedProjects}
+                          </span>
+                        </div>
+                        <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gray-900 rounded-full"
+                            style={{
+                              width: `${
+                                (mockMetrics.completedProjects /
+                                  mockMetrics.totalProjects) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm text-gray-600">
+                            Planning
+                          </span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {mockMetrics.totalProjects -
+                              mockMetrics.activeProjects -
+                              mockMetrics.completedProjects}
+                          </span>
+                        </div>
+                        <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gray-300 rounded-full"
+                            style={{
+                              width: `${
+                                ((mockMetrics.totalProjects -
+                                  mockMetrics.activeProjects -
+                                  mockMetrics.completedProjects) /
+                                  mockMetrics.totalProjects) *
+                                100
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Task Status Breakdown */}
+                  <div className="pm-card p-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                      Task Status Breakdown
+                    </h2>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="pm-status-dot pm-status-done" />
+                          <span className="text-sm font-medium text-gray-900">
+                            Completed
+                          </span>
+                        </div>
+                        <span className="text-lg font-semibold text-gray-900">
+                          {mockMetrics.completedTasks}
                         </span>
                       </div>
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="pm-status-dot pm-status-progress" />
+                          <span className="text-sm font-medium text-gray-900">
+                            In Progress
+                          </span>
+                        </div>
+                        <span className="text-lg font-semibold text-gray-900">
+                          {mockMetrics.inProgressTasks}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="pm-status-dot pm-status-todo" />
+                          <span className="text-sm font-medium text-gray-900">
+                            To Do
+                          </span>
+                        </div>
+                        <span className="text-lg font-semibold text-gray-900">
+                          {mockMetrics.totalTasks -
+                            mockMetrics.completedTasks -
+                            mockMetrics.inProgressTasks}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border-2 border-gray-300 rounded-lg bg-gray-50">
+                        <div className="flex items-center gap-3">
+                          <div className="pm-status-dot pm-status-backlog" />
+                          <span className="text-sm font-medium text-gray-900">
+                            Overdue
+                          </span>
+                        </div>
+                        <span className="text-lg font-semibold text-gray-900">
+                          {mockMetrics.overdueTasks}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Team Performance */}
+                  <div className="pm-card p-6">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                      Team Performance
+                    </h2>
+                    <div className="space-y-4">
+                      {[1, 2, 3, 4, 5].map((i) => {
+                        const performance = 60 + Math.random() * 40;
+                        return (
+                          <div key={i} className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-medium text-gray-900">
+                                Team Member {i}
+                              </span>
+                              <span className="text-gray-600">
+                                {Math.round(performance)}%
+                              </span>
+                            </div>
+                            <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gray-900 rounded-full transition-all"
+                                style={{ width: `${performance}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Performance Tab */}
+            {tab === "performance" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Performance Metrics
+                </h2>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="pm-card p-5">
+                      <p className="text-sm text-gray-600 mb-2">Velocity</p>
+                      <p className="text-3xl font-bold text-gray-900">42</p>
+                      <p className="text-xs text-gray-500 mt-1">Tasks/week</p>
+                    </div>
+                    <div className="pm-card p-5">
+                      <p className="text-sm text-gray-600 mb-2">Burn Rate</p>
+                      <p className="text-3xl font-bold text-gray-900">68%</p>
+                      <p className="text-xs text-gray-500 mt-1">On track</p>
+                    </div>
+                  </div>
+                  <div className="pm-card p-6">
+                    <h3 className="font-semibold text-gray-900 mb-4">
+                      Sprint Performance
+                    </h3>
+                    <div className="space-y-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
+                        >
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              Sprint {i}
+                            </p>
+                            <p className="text-xs text-gray-500">Week {i}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-gray-900">
+                              {75 + i * 5}%
+                            </p>
+                            <p className="text-xs text-gray-500">Completed</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Reports Tab */}
+            {tab === "reports" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Generated Reports
+                </h2>
+                <div className="space-y-3">
+                  {[
+                    {
+                      name: "Q1 2024 Summary",
+                      date: "2024-03-31",
+                      type: "Summary",
+                    },
+                    {
+                      name: "Team Performance Report",
+                      date: "2024-03-28",
+                      type: "Performance",
+                    },
+                    {
+                      name: "Task Analytics",
+                      date: "2024-03-25",
+                      type: "Analytics",
+                    },
+                  ].map((report, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {report.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {report.type} • {report.date}
+                        </p>
+                      </div>
+                      <button className="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+                        Download
+                      </button>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Project Status Distribution */}
-              <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Project Status
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">
-                        Active Projects
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {mockMetrics.activeProjects}
-                      </span>
-                    </div>
-                    <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gray-600 rounded-full"
-                        style={{
-                          width: `${
-                            (mockMetrics.activeProjects /
-                              mockMetrics.totalProjects) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">
-                        Completed Projects
-                      </span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {mockMetrics.completedProjects}
-                      </span>
-                    </div>
-                    <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gray-900 rounded-full"
-                        style={{
-                          width: `${
-                            (mockMetrics.completedProjects /
-                              mockMetrics.totalProjects) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-600">Planning</span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {mockMetrics.totalProjects -
-                          mockMetrics.activeProjects -
-                          mockMetrics.completedProjects}
-                      </span>
-                    </div>
-                    <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gray-300 rounded-full"
-                        style={{
-                          width: `${
-                            ((mockMetrics.totalProjects -
-                              mockMetrics.activeProjects -
-                              mockMetrics.completedProjects) /
-                              mockMetrics.totalProjects) *
-                            100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Task Status Breakdown */}
-              <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Task Status Breakdown
-                </h2>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="pm-status-dot pm-status-done" />
-                      <span className="text-sm font-medium text-gray-900">
-                        Completed
-                      </span>
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {mockMetrics.completedTasks}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="pm-status-dot pm-status-progress" />
-                      <span className="text-sm font-medium text-gray-900">
-                        In Progress
-                      </span>
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {mockMetrics.inProgressTasks}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="pm-status-dot pm-status-todo" />
-                      <span className="text-sm font-medium text-gray-900">
-                        To Do
-                      </span>
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {mockMetrics.totalTasks -
-                        mockMetrics.completedTasks -
-                        mockMetrics.inProgressTasks}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between p-4 border-2 border-gray-300 rounded-lg bg-gray-50">
-                    <div className="flex items-center gap-3">
-                      <div className="pm-status-dot pm-status-backlog" />
-                      <span className="text-sm font-medium text-gray-900">
-                        Overdue
-                      </span>
-                    </div>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {mockMetrics.overdueTasks}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Team Performance */}
-              <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Team Performance
-                </h2>
-                <div className="space-y-4">
-                  {[1, 2, 3, 4, 5].map((i) => {
-                    const performance = 60 + Math.random() * 40;
-                    return (
-                      <div key={i} className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium text-gray-900">
-                            Team Member {i}
-                          </span>
-                          <span className="text-gray-600">
-                            {Math.round(performance)}%
-                          </span>
-                        </div>
-                        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gray-900 rounded-full transition-all"
-                            style={{ width: `${performance}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Sidebar */}

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   CirclePlus,
   FolderOpen,
@@ -16,11 +17,18 @@ import {
   FolderKanban,
   CheckCircle,
   Clock3,
+  LayoutGrid,
+  Trash2,
+  Archive,
 } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import CreateProjectComponent from "@/components/projects/CreateProjectComponent";
 import Link from "next/link";
 import PageHeader from "@/components/common/PageHeader";
+import {
+  getProjectStatusBadgeClass,
+  getProjectStatusDotClass,
+} from "@/lib/colorUtils";
 
 // Mock data
 const mockProjects = [
@@ -105,16 +113,24 @@ const mockProjects = [
 ];
 
 const ProjectsPage = () => {
+  const searchParams = useSearchParams();
+  const tabStatus = searchParams.get("tab");
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [viewMode, setViewMode] = useState<"grid" | "list" | "board">("grid");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [selectedProjects, setSelectedProjects] = useState<number[]>([]);
+
+  // Use tab status if available, otherwise use filterStatus
+  const effectiveStatus = tabStatus || filterStatus;
 
   const filteredProjects = mockProjects.filter((project) => {
     const matchesSearch =
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter =
-      filterStatus === "all" || project.status === filterStatus;
+      effectiveStatus === "all" ||
+      !effectiveStatus ||
+      project.status === effectiveStatus;
     return matchesSearch && matchesFilter;
   });
 
@@ -133,39 +149,6 @@ const ProjectsPage = () => {
   const overallProgress =
     totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case "active":
-        return {
-          bg: "bg-gray-200",
-          text: "text-gray-700",
-          border: "border-gray-300",
-          dot: "bg-gray-600",
-        };
-      case "completed":
-        return {
-          bg: "bg-gray-800",
-          text: "text-white",
-          border: "border-gray-900",
-          dot: "bg-gray-900",
-        };
-      case "planning":
-        return {
-          bg: "bg-gray-100",
-          text: "text-gray-600",
-          border: "border-gray-200",
-          dot: "bg-gray-500",
-        };
-      default:
-        return {
-          bg: "bg-gray-100",
-          text: "text-gray-700",
-          border: "border-gray-200",
-          dot: "bg-gray-500",
-        };
-    }
-  };
-
   const getColorGradient = (color: string) => {
     // Use consistent gray gradient for all projects
     return "from-gray-600 to-gray-700";
@@ -178,7 +161,7 @@ const ProjectsPage = () => {
         description="Manage and track your project portfolio"
         icon={FolderKanban}
         tabs={[
-          { icon: FolderKanban, label: "All Projects", href: "/projects" },
+          { icon: FolderKanban, label: "Projects", href: "/projects" },
           { icon: TrendingUp, label: "Active", href: "/projects?tab=active" },
           {
             icon: CheckCircle,
@@ -206,7 +189,7 @@ const ProjectsPage = () => {
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 <select
-                  value={filterStatus}
+                  value={effectiveStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="pm-input min-w-[140px] flex-shrink-0"
                 >
@@ -237,6 +220,17 @@ const ProjectsPage = () => {
                     title="List view"
                   >
                     <List className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("board")}
+                    className={`p-2 rounded transition-colors ${
+                      viewMode === "board"
+                        ? "bg-gray-100 text-gray-900"
+                        : "text-gray-500 hover:text-gray-900"
+                    }`}
+                    title="Board view"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -337,19 +331,139 @@ const ProjectsPage = () => {
 
             {/* Projects List */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                All Projects
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Projects
+                </h2>
+                {selectedProjects.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">
+                      {selectedProjects.length} selected
+                    </span>
+                    <button
+                      onClick={() => {
+                        // Bulk archive
+                        setSelectedProjects([]);
+                      }}
+                      className="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      <Archive className="h-4 w-4" />
+                      Archive
+                    </button>
+                    <button
+                      onClick={() => {
+                        // Bulk delete
+                        setSelectedProjects([]);
+                      }}
+                      className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => setSelectedProjects([])}
+                      className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
               {filteredProjects.length > 0 ? (
-                viewMode === "grid" ? (
+                viewMode === "board" ? (
+                  <div className="grid grid-cols-4 gap-4">
+                    {["planning", "active", "completed"].map((status) => {
+                      const statusProjects = filteredProjects.filter(
+                        (p) => p.status === status
+                      );
+                      return (
+                        <div key={status} className="space-y-3">
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <h3 className="font-semibold text-gray-900 capitalize">
+                              {status}
+                            </h3>
+                            <span className="text-sm text-gray-500">
+                              {statusProjects.length}
+                            </span>
+                          </div>
+                          <div className="space-y-2">
+                            {statusProjects.map((project) => (
+                              <Link
+                                key={project.id}
+                                href={`/projects/${project.id}`}
+                              >
+                                <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all">
+                                  <h4 className="font-medium text-gray-900 mb-2">
+                                    {project.name}
+                                  </h4>
+                                  <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
+                                    <div
+                                      className="h-full bg-gray-900 rounded-full"
+                                      style={{ width: `${project.progress}%` }}
+                                    />
+                                  </div>
+                                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <span>
+                                      {project.completedTasks}/{project.tasks}{" "}
+                                      tasks
+                                    </span>
+                                    <span>•</span>
+                                    <span>{project.team} members</span>
+                                  </div>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : viewMode === "grid" ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filteredProjects.map((project) => {
-                      const statusConfig = getStatusConfig(project.status);
+                      const isSelected = selectedProjects.includes(project.id);
                       return (
-                        <Link key={project.id} href={`/projects/${project.id}`}>
-                          <div className="group relative bg-white rounded-xl p-5 h-full flex flex-col shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 hover:border-gray-200 overflow-hidden">
+                        <div
+                          key={project.id}
+                          className={`group relative bg-white rounded-xl p-5 h-full flex flex-col shadow-sm hover:shadow-lg transition-all duration-300 border ${
+                            isSelected
+                              ? "border-gray-900 ring-2 ring-gray-900"
+                              : "border-gray-100 hover:border-gray-200"
+                          } overflow-hidden`}
+                        >
+                          {selectedProjects.length > 0 && (
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                if (e.target.checked) {
+                                  setSelectedProjects([
+                                    ...selectedProjects,
+                                    project.id,
+                                  ]);
+                                } else {
+                                  setSelectedProjects(
+                                    selectedProjects.filter(
+                                      (id) => id !== project.id
+                                    )
+                                  );
+                                }
+                              }}
+                              className="absolute top-4 left-4 w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900 z-10"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          )}
+                          <Link
+                            href={`/projects/${project.id}`}
+                            className="flex-1 flex flex-col"
+                          >
                             {/* Accent Bar */}
-                            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900" />
+                            <div
+                              className={`absolute top-0 left-0 right-0 h-1.5 ${getProjectStatusDotClass(
+                                project.status
+                              )}`}
+                            />
 
                             {/* Header */}
                             <div className="mb-4">
@@ -358,10 +472,14 @@ const ProjectsPage = () => {
                                   <FolderOpen className="h-5 w-5 text-white" />
                                 </div>
                                 <span
-                                  className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} flex items-center gap-1.5`}
+                                  className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getProjectStatusBadgeClass(
+                                    project.status
+                                  )} flex items-center gap-1.5`}
                                 >
                                   <span
-                                    className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`}
+                                    className={`w-1.5 h-1.5 rounded-full ${getProjectStatusDotClass(
+                                      project.status
+                                    )}`}
                                   />
                                   {project.status}
                                 </span>
@@ -413,19 +531,52 @@ const ProjectsPage = () => {
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </Link>
+                          </Link>
+                        </div>
                       );
                     })}
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {filteredProjects.map((project) => {
-                      const statusConfig = getStatusConfig(project.status);
+                      const isSelected = selectedProjects.includes(project.id);
                       return (
-                        <Link key={project.id} href={`/projects/${project.id}`}>
-                          <div className="group bg-white rounded-xl p-4 hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-gray-200">
-                            <div className="flex items-center gap-4">
+                        <div
+                          key={project.id}
+                          className={`group bg-white rounded-xl p-4 hover:shadow-md transition-all duration-300 border ${
+                            isSelected
+                              ? "border-gray-900 ring-2 ring-gray-900"
+                              : "border-gray-100 hover:border-gray-200"
+                          }`}
+                        >
+                          <div className="flex items-center gap-4">
+                            {selectedProjects.length > 0 && (
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  if (e.target.checked) {
+                                    setSelectedProjects([
+                                      ...selectedProjects,
+                                      project.id,
+                                    ]);
+                                  } else {
+                                    setSelectedProjects(
+                                      selectedProjects.filter(
+                                        (id) => id !== project.id
+                                      )
+                                    );
+                                  }
+                                }}
+                                className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900 flex-shrink-0"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            )}
+                            <Link
+                              href={`/projects/${project.id}`}
+                              className="flex items-center gap-4 flex-1"
+                            >
                               <div className="p-2.5 rounded-xl bg-gray-900 shadow-sm flex-shrink-0">
                                 <FolderOpen className="h-5 w-5 text-white" />
                               </div>
@@ -435,10 +586,14 @@ const ProjectsPage = () => {
                                     {project.name}
                                   </h3>
                                   <span
-                                    className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${statusConfig.bg} ${statusConfig.text} ${statusConfig.border} flex items-center gap-1.5`}
+                                    className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${getProjectStatusBadgeClass(
+                                      project.status
+                                    )} flex items-center gap-1.5`}
                                   >
                                     <span
-                                      className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot}`}
+                                      className={`w-1.5 h-1.5 rounded-full ${getProjectStatusDotClass(
+                                        project.status
+                                      )}`}
                                     />
                                     {project.status}
                                   </span>
@@ -467,9 +622,9 @@ const ProjectsPage = () => {
                                   />
                                 </div>
                               </div>
-                            </div>
+                            </Link>
                           </div>
-                        </Link>
+                        </div>
                       );
                     })}
                   </div>

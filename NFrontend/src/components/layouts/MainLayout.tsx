@@ -13,11 +13,13 @@ import {
   Search,
   Command
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import NavUserComponent from "../common/NavUserComponent";
 import EnhancedBreadcrumb from "../common/EnhancedBreadcrumb";
+import GlobalSearch from "../common/GlobalSearch";
+import NotificationCenter from "../common/NotificationCenter";
 import { useUser } from "@/hooks/useUser";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
@@ -25,12 +27,41 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const { user } = useUser();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Don't show sidebar on auth pages
   const authPages = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
   if (authPages.includes(pathname)) {
     return <>{children}</>;
   }
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K for search
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      // Cmd/Ctrl + P for create project
+      if ((e.metaKey || e.ctrlKey) && e.key === "p") {
+        e.preventDefault();
+        router.push("/projects");
+      }
+      // Cmd/Ctrl + C for create task (when not in input)
+      if ((e.metaKey || e.ctrlKey) && e.key === "c" && e.target instanceof HTMLInputElement === false && e.target instanceof HTMLTextAreaElement === false) {
+        e.preventDefault();
+        router.push("/tasks");
+      }
+      // Escape to close search
+      if (e.key === "Escape" && searchOpen) {
+        setSearchOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [searchOpen, router]);
 
   const mainNavItems = [
     {
@@ -158,27 +189,23 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           
           {/* Search */}
           <div className="hidden lg:flex flex-1 max-w-md">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400"
-              />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-gray-400">
+            <button
+              onClick={() => setSearchOpen(true)}
+              className="relative w-full flex items-center gap-3 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 hover:border-gray-300 transition-colors"
+            >
+              <Search className="h-4 w-4 text-gray-400" />
+              <span className="flex-1 text-left">Search...</span>
+              <div className="flex items-center gap-1 text-xs text-gray-400">
                 <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200">⌘</kbd>
                 <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200">K</kbd>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Right Side Actions */}
           <div className="flex items-center gap-3 flex-shrink-0">
             {/* Notifications */}
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <Bell className="h-5 w-5 text-gray-600" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-gray-900 rounded-full" />
-            </button>
+            <NotificationCenter />
 
             {/* User Menu */}
             <Popover>
@@ -204,6 +231,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           {children}
         </main>
       </div>
+
+      {/* Global Search Modal */}
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 };

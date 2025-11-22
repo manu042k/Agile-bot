@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Plus, Search, Filter, MoreVertical, User, Calendar, Flag } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
+import { getStatusColumnColor, getPriorityClass } from "@/lib/colorUtils";
 
 // Mock tasks data
 const mockTasks = {
@@ -92,24 +93,11 @@ const TaskPage = ({ params }: { params: { projectId: string } }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [tasks, setTasks] = useState(mockTasks);
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "pm-priority-high";
-      case "medium":
-        return "pm-priority-medium";
-      case "low":
-        return "pm-priority-low";
-      default:
-        return "pm-badge";
-    }
-  };
-
   const columns = [
-    { id: "backlog", title: "Backlog", count: tasks.backlog.length, color: "bg-gray-200" },
-    { id: "todo", title: "To Do", count: tasks.todo.length, color: "bg-gray-300" },
-    { id: "in_progress", title: "In Progress", count: tasks.in_progress.length, color: "bg-gray-400" },
-    { id: "done", title: "Done", count: tasks.done.length, color: "bg-gray-600" },
+    { id: "backlog", title: "Backlog", count: tasks.backlog.length, color: getStatusColumnColor("backlog") },
+    { id: "todo", title: "To Do", count: tasks.todo.length, color: getStatusColumnColor("todo") },
+    { id: "in_progress", title: "In Progress", count: tasks.in_progress.length, color: getStatusColumnColor("in_progress") },
+    { id: "done", title: "Done", count: tasks.done.length, color: getStatusColumnColor("done") },
   ];
 
   return (

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Filter, Search, User, CheckCircle2, MessageSquare, FileText, Users, Calendar, Activity, UserCircle, FolderOpen } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 
@@ -14,31 +15,45 @@ const mockActivities = [
 ];
 
 const ActivityPage = () => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "all";
   const [filterType, setFilterType] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Mock current user
+  const currentUser = "John Doe";
 
   const filteredActivities = mockActivities.filter(activity => {
     const matchesSearch = activity.user.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          activity.target.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          activity.project.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterType === "all" || activity.type === filterType;
-    return matchesSearch && matchesFilter;
+    
+    // Apply tab filters
+    let matchesTab = true;
+    if (tab === "my-activity") {
+      matchesTab = activity.user === currentUser;
+    } else if (tab === "projects") {
+      matchesTab = activity.type.includes("project") || activity.type.includes("task");
+    }
+    
+    return matchesSearch && matchesFilter && matchesTab;
   });
 
   const getActivityColor = (type: string) => {
     switch (type) {
       case "task_completed":
-        return "bg-green-100 text-green-700";
+        return "pm-status-badge-done";
       case "comment":
         return "bg-blue-100 text-blue-700";
       case "task_created":
-        return "bg-purple-100 text-purple-700";
+        return "pm-status-badge-todo";
       case "member_added":
-        return "bg-yellow-100 text-yellow-700";
+        return "pm-priority-medium";
       case "task_assigned":
-        return "bg-gray-100 text-gray-700";
+        return "pm-status-badge-progress";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "pm-status-badge-backlog";
     }
   };
 
@@ -49,7 +64,7 @@ const ActivityPage = () => {
         description="Track all activities across your projects and teams"
         icon={Activity}
         tabs={[
-          { icon: Activity, label: "All Activity", href: "/activity" },
+          { icon: Activity, label: "Activity", href: "/activity" },
           { icon: UserCircle, label: "My Activity", href: "/activity?tab=my-activity" },
           { icon: FolderOpen, label: "Projects", href: "/activity?tab=projects" },
         ]}

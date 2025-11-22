@@ -2,7 +2,9 @@
 import { useParams } from "next/navigation";
 import { Upload, FileText, Download, Trash2, Eye, MoreVertical, Search, Filter, Calendar, User } from "lucide-react";
 import { useState } from "react";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import ProjectHeader from "@/components/projects/ProjectHeader";
+import UploadDocumentComponent from "@/components/projects/UploadDocumentComponent";
 
 // Mock documents data
 const getMockDocuments = (projectId: string) => [
@@ -57,10 +59,15 @@ const ProjectDocumentsPage = () => {
               <h1 className="text-3xl font-semibold text-gray-900 mb-2">Documents</h1>
               <p className="text-gray-600">Manage project documents and files</p>
             </div>
-            <button className="pm-button-primary">
-              <Upload className="h-4 w-4 mr-2" />
-              Upload Document
-            </button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="pm-button-primary">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Document
+                </button>
+              </DialogTrigger>
+              <UploadDocumentComponent projectId={projectId} />
+            </Dialog>
           </div>
         </div>
 

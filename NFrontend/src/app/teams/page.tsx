@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CirclePlus, Users, Search, UserCheck, UsersRound } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -51,12 +52,29 @@ const mockTeams = [
 ];
 
 const TeamsPage = () => {
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab") || "all";
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredTeams = mockTeams.filter(team =>
-    team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    team.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Mock current user for filtering
+  const currentUser = "John Doe";
+
+  const filteredTeams = mockTeams.filter(team => {
+    const matchesSearch = team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         team.description.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // Apply tab filters
+    let matchesTab = true;
+    if (tab === "my-teams") {
+      // Mock: filter teams where user is a member
+      matchesTab = team.id <= 3; // Mock filter
+    } else if (tab === "members") {
+      // Show all teams for members tab
+      matchesTab = true;
+    }
+    
+    return matchesSearch && matchesTab;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -65,7 +83,7 @@ const TeamsPage = () => {
         description="Manage your organization's teams and collaborate effectively"
         icon={Users}
         tabs={[
-          { icon: Users, label: "All Teams", href: "/teams" },
+          { icon: Users, label: "Teams", href: "/teams" },
           { icon: UserCheck, label: "My Teams", href: "/teams?tab=my-teams" },
           { icon: UsersRound, label: "Members", href: "/teams?tab=members" },
         ]}
@@ -168,7 +186,7 @@ const TeamsPage = () => {
 
             {/* Teams List */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">All Teams</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Teams</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredTeams.map((team) => (
                   <Link key={team.id} href={`/teams/${team.id}`}>

@@ -68,7 +68,7 @@ const ProfilePage = () => {
                           {mockUser.first_name} {mockUser.last_name}
                         </h2>
                         <p className="text-gray-500 mb-2">{mockUser.email}</p>
-                        <span className="pm-badge bg-green-100 text-green-700 border-green-200">
+                        <span className={`pm-badge ${mockUser.is_active ? "pm-status-badge-done" : "pm-status-badge-backlog"}`}>
                           {mockUser.is_active ? "Active" : "Inactive"}
                         </span>
                       </div>

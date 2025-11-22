@@ -1,18 +1,18 @@
 "use client";
 import {
+  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useForm } from "react-hook-form";
+import { Textarea } from "@/components/ui/textarea";
+import { useState } from "react";
 import {
   CreatedBy,
-  Task,
   TaskPriority,
   TaskSize,
   TaskStatus,
@@ -28,100 +28,136 @@ interface props {
 
 const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
   const router = useRouter();
-  const { register, handleSubmit } = useForm<Task>();
+  const [name, setName] = useState<string>("");
+  const [description, setDescription] = useState<string>("");
+  const [details, setDetails] = useState<string>("");
+  const [priority, setPriority] = useState<TaskPriority>(TaskPriority.Medium);
+  const [size, setSize] = useState<TaskSize>(TaskSize.Medium);
+  const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = async (data: Task) => {
-    const processedData = {
-      ...data,
-      created_by: CreatedBy.USER,
-      status: TaskStatus.Created,
-      Project: projectId,
-    };
-
+  const handleCreateTask = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
     try {
+      const processedData = {
+        name,
+        description,
+        details,
+        priority,
+        size,
+        created_by: CreatedBy.USER,
+        status: TaskStatus.Created,
+        Project: projectId,
+      };
+
       await taskService.createTask(processedData);
       toast.success("Task created successfully!");
-      onClose(); // Trigger close on success
+      setName("");
+      setDescription("");
+      setDetails("");
+      setPriority(TaskPriority.Medium);
+      setSize(TaskSize.Medium);
+      onClose();
       router.refresh();
     } catch (err: any) {
-      console.error(err);
+      setError("Failed to create task. Please try again.");
       toast.error("Failed to create task. Please try again");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <DialogContent className="sm:max-w-[500px]">
       <DialogHeader>
-        <DialogTitle>Create a New Task</DialogTitle>
-        <DialogDescription>
-          Fill out the details to create a new task.
+        <DialogTitle className="text-2xl font-bold text-gray-900">Create Task</DialogTitle>
+        <DialogDescription className="text-gray-600">
+          Fill in the details to create a new task.
         </DialogDescription>
       </DialogHeader>
-      <div className="space-y-4 p-4">
-        {/* Task Name */}
-        <div>
-          <Label htmlFor="name">Task Name</Label>
+      <form onSubmit={handleCreateTask} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="task-name" className="text-sm font-medium text-gray-700">
+            Task Name
+          </Label>
           <Input
-            id="name"
+            id="task-name"
             placeholder="Enter task name"
-            {...register("name", { required: true })}
+            className="pm-input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
           />
         </div>
-        {/* Description */}
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Input
-            id="description"
-            placeholder="Enter description"
-            {...register("description", { required: true })}
+        <div className="space-y-2">
+          <Label htmlFor="task-desc" className="text-sm font-medium text-gray-700">
+            Description
+          </Label>
+          <Textarea
+            id="task-desc"
+            className="pm-input min-h-[80px]"
+            placeholder="Enter task description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
           />
         </div>
-        {/* Details */}
-        <div>
-          <Label htmlFor="details">Details</Label>
-          <Input
-            id="details"
-            placeholder="Enter details"
-            {...register("details")}
+        <div className="space-y-2">
+          <Label htmlFor="task-details" className="text-sm font-medium text-gray-700">
+            Details <span className="text-gray-400 font-normal">(optional)</span>
+          </Label>
+          <Textarea
+            id="task-details"
+            className="pm-input min-h-[80px]"
+            placeholder="Enter additional details"
+            value={details}
+            onChange={(e) => setDetails(e.target.value)}
           />
         </div>
-        {/* Priority */}
-        <div>
-          <Label htmlFor="priority">Priority</Label>
-          <select
-            id="priority"
-            {...register("priority", { required: true })}
-            className="w-full rounded-md border border-gray-300 p-2"
-          >
-            {Object.values(TaskPriority).map((priority) => (
-              <option key={priority} value={priority}>
-                {priority}
-              </option>
-            ))}
-          </select>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="task-priority" className="text-sm font-medium text-gray-700">
+              Priority
+            </Label>
+            <select
+              id="task-priority"
+              className="pm-input"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as TaskPriority)}
+              required
+            >
+              {Object.values(TaskPriority).map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="task-size" className="text-sm font-medium text-gray-700">
+              Size
+            </Label>
+            <select
+              id="task-size"
+              className="pm-input"
+              value={size}
+              onChange={(e) => setSize(e.target.value as TaskSize)}
+              required
+            >
+              {Object.values(TaskSize).map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
-        {/* Size */}
-        <div>
-          <Label htmlFor="size">Size</Label>
-          <select
-            id="size"
-            {...register("size", { required: true })}
-            className="w-full rounded-md border border-gray-300 p-2"
-          >
-            {Object.values(TaskSize).map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <DialogFooter>
-        <Button type="submit">Confirm</Button>
-        <DialogClose hidden onClick={onClose} /> {/* Optional close button */}
-      </DialogFooter>
-    </form>
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button type="submit" className="pm-button-primary w-full sm:w-auto">
+            Create Task
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
   );
 };
 

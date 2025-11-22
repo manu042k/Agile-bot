@@ -3,7 +3,9 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { Plus, Search, Filter, Calendar, User, Flag, MoreVertical, List, LayoutGrid, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import ProjectHeader from "@/components/projects/ProjectHeader";
+import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
 
 // Mock tasks data for this project
 const getMockTasks = (projectId: string) => [
@@ -68,10 +70,15 @@ const ProjectTasksPage = () => {
                   <LayoutGrid className="h-4 w-4" />
                 </button>
               </div>
-              <button className="pm-button-primary">
-                <Plus className="h-4 w-4 mr-2" />
-                New Task
-              </button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="pm-button-primary">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Task
+                  </button>
+                </DialogTrigger>
+                <TaskCreateComponent projectId={projectId} onClose={() => {}} />
+              </Dialog>
             </div>
           </div>
 

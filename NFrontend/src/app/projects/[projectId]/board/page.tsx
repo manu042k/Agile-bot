@@ -7,6 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import { Plus, User, Flag, Calendar, MoreVertical, GripVertical } from "lucide-react";
 import Link from "next/link";
+import { getStatusColumnColor, getPriorityClass } from "@/lib/colorUtils";
 
 // Mock tasks data for this project
 const getMockTasks = (projectId: string) => [
@@ -39,10 +40,10 @@ interface Column {
 }
 
 const columns: Column[] = [
-  { id: "backlog", title: "Backlog", status: "backlog", color: "bg-gray-100" },
-  { id: "todo", title: "To Do", status: "todo", color: "bg-blue-100" },
-  { id: "in_progress", title: "In Progress", status: "in_progress", color: "bg-yellow-100" },
-  { id: "done", title: "Done", status: "done", color: "bg-green-100" },
+  { id: "backlog", title: "Backlog", status: "backlog", color: getStatusColumnColor("backlog") },
+  { id: "todo", title: "To Do", status: "todo", color: getStatusColumnColor("todo") },
+  { id: "in_progress", title: "In Progress", status: "in_progress", color: getStatusColumnColor("in_progress") },
+  { id: "done", title: "Done", status: "done", color: getStatusColumnColor("done") },
 ];
 
 function TaskCard({ task }: { task: Task }) {
@@ -60,18 +61,6 @@ function TaskCard({ task }: { task: Task }) {
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-700 border-red-200";
-      case "medium":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200";
-      case "low":
-        return "bg-gray-100 text-gray-700 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
-    }
-  };
 
   return (
     <div
@@ -124,7 +113,7 @@ function TaskCard({ task }: { task: Task }) {
             <span>{new Date(task.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
           </div>
         </div>
-        <span className={`px-2 py-0.5 rounded text-xs font-medium border ${getPriorityColor(task.priority)}`}>
+        <span className={`px-2 py-0.5 rounded text-xs font-medium border ${getPriorityClass(task.priority)}`}>
           <Flag className="h-3 w-3 inline mr-1" />
           {task.priority}
         </span>

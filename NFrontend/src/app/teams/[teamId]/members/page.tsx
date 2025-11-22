@@ -2,7 +2,9 @@
 import { useParams, usePathname } from "next/navigation";
 import { Users, UserPlus, Mail, Crown, Shield, User, MoreVertical, Settings, FolderKanban } from "lucide-react";
 import Link from "next/link";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import InviteMemberComponent from "@/components/team/InviteMemberComponent";
 
 // Mock team data
 const getMockTeam = (teamId: string) => ({
@@ -35,11 +37,11 @@ const getRoleIcon = (role: string) => {
 const getRoleColor = (role: string) => {
   switch (role) {
     case "owner":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      return "pm-role-owner";
     case "admin":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "pm-role-admin";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "pm-role-member";
   }
 };
 
@@ -108,10 +110,15 @@ const TeamMembersPage = () => {
               <h2 className="text-2xl font-semibold text-gray-900 mb-2">Team Members</h2>
               <p className="text-gray-600">Manage team members and their roles</p>
             </div>
-            <button className="pm-button-primary">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Invite Member
-            </button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="pm-button-primary">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Invite Member
+                </button>
+              </DialogTrigger>
+              <InviteMemberComponent teamId={teamId} />
+            </Dialog>
           </div>
         </div>
 

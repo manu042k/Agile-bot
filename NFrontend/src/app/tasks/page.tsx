@@ -2,7 +2,10 @@
 import { useState } from "react";
 import { Plus, Search, Filter, Calendar, User, Flag, MoreVertical, List, LayoutGrid, CheckSquare, ListTodo, UserCheck, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { useParams, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
+import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
 
 // Mock tasks data
 const mockTasks = [
@@ -15,16 +18,35 @@ const mockTasks = [
 ];
 
 const TasksPage = () => {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const tab = searchParams.get("tab");
   const [viewMode, setViewMode] = useState<"list" | "board">("list");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  // For global tasks, use first project or allow selection
+  const defaultProjectId = "1";
+
+  // Mock current user for filtering
+  const currentUser = "John Doe";
 
   const filteredTasks = mockTasks.filter(task => {
     const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          task.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          task.assignee.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === "all" || task.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    
+    // Apply tab filters
+    let matchesTab = true;
+    if (tab === "my-tasks") {
+      matchesTab = task.assignee === currentUser;
+    } else if (tab === "assigned") {
+      matchesTab = task.assignee !== null && task.assignee !== "";
+    } else if (tab === "completed") {
+      matchesTab = task.status === "done";
+    }
+    
+    return matchesSearch && matchesFilter && matchesTab;
   });
 
   const getStatusColor = (status: string) => {
@@ -43,7 +65,7 @@ const TasksPage = () => {
         description="Manage and track all your tasks across projects"
         icon={CheckSquare}
         tabs={[
-          { icon: CheckSquare, label: "All Tasks", href: "/tasks" },
+          { icon: CheckSquare, label: "Tasks", href: "/tasks" },
           { icon: ListTodo, label: "My Tasks", href: "/tasks?tab=my-tasks" },
           { icon: UserCheck, label: "Assigned", href: "/tasks?tab=assigned" },
           { icon: CheckCircle2, label: "Completed", href: "/tasks?tab=completed" },
@@ -173,7 +195,7 @@ const TasksPage = () => {
 
             {/* Tasks List */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">All Tasks</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Tasks</h2>
               {viewMode === "list" ? (
                 filteredTasks.length > 0 ? (
                   <div className="space-y-3">

@@ -26,6 +26,14 @@ const getMockTask = (projectId: string, taskId: string) => ({
     { id: 2, title: "Design authentication UI", status: "done" },
     { id: 3, title: "Write API documentation", status: "todo" },
   ],
+  subtasks: [
+    { id: 1, title: "Set up JWT token generation", completed: true },
+    { id: 2, title: "Create authentication middleware", completed: true },
+    { id: 3, title: "Implement refresh token rotation", completed: false },
+    { id: 4, title: "Add password hashing with bcrypt", completed: false },
+    { id: 5, title: "Create login endpoint", completed: false },
+    { id: 6, title: "Create registration endpoint", completed: false },
+  ],
   comments: [
     { id: 1, user: "John Doe", content: "Started working on JWT implementation", timestamp: "2 hours ago" },
     { id: 2, user: "Jane Smith", content: "Make sure to include refresh token rotation", timestamp: "1 hour ago" },
@@ -155,6 +163,37 @@ const TaskDetailPage = () => {
                   <button className="pm-button-primary text-sm px-4">
                     Comment
                   </button>
+                </div>
+              </div>
+
+              {/* Subtasks */}
+              <div className="pm-card p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">Subtasks</h2>
+                  <button className="text-sm text-gray-600 hover:text-gray-900">+ Add subtask</button>
+                </div>
+                <div className="space-y-2">
+                  {task.subtasks.map((subtask) => (
+                    <div
+                      key={subtask.id}
+                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={subtask.completed}
+                        className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+                      />
+                      <span
+                        className={`flex-1 text-sm ${
+                          subtask.completed
+                            ? "text-gray-500 line-through"
+                            : "text-gray-900"
+                        }`}
+                      >
+                        {subtask.title}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
