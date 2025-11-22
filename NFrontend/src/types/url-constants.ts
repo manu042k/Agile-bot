@@ -4,6 +4,12 @@ export enum URLS {
   USERS = "api/accounts/users/",
   ADD_MEMBER = "/add-member/",
   REMOVE_MEMBER = "/remove-member/",
+  // Google OAuth endpoints
+  GOOGLE_LOGIN = "api/accounts/auth/google/login/",
+  GOOGLE_CALLBACK = "api/accounts/auth/google/callback/",
+  LOGOUT = "api/accounts/auth/logout/",
+  USER_ME = "api/accounts/auth/me/",
+  // Legacy endpoints (kept for backward compatibility)
   LOGIN = "api/accounts/login/",
   REGISTER = "api/accounts/register/",
   PROJECTS = "api/project-management/projects/",

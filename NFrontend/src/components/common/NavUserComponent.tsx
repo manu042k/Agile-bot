@@ -1,16 +1,23 @@
 import { LogOut, User, Users } from "lucide-react";
 import { Button } from "../ui/button";
-import authService from "@/services/authService";
+import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const NavUserComponent = () => {
   const router = useRouter();
 
-  const handleLogout = () => {
-    authService.logout();
-    toast.success("Logout successful");
-    router.push("/");
+  const handleLogout = async () => {
+    try {
+      await signOut({ 
+        callbackUrl: '/login',
+        redirect: true 
+      });
+      toast.success("Logout successful");
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error("Failed to logout. Please try again.");
+    }
   };
 
   const handdleProfile = () => {

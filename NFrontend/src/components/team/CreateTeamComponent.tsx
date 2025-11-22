@@ -75,7 +75,7 @@ const CreateTeamComponent = () => {
             Create Team
           </Button>
         </DialogFooter>
-      </form>
+        </form>
     </DialogContent>
   );
 };

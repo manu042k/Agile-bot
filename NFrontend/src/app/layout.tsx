@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import MainLayout from "../components/layouts/MainLayout";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Agile Bot",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <MainLayout>{children}</MainLayout>
+        <Providers>
+          <MainLayout>{children}</MainLayout>
+        </Providers>
       </body>
     </html>
   );

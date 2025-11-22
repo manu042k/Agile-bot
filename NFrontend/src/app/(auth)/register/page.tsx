@@ -83,51 +83,54 @@ export default function RegisterPage() {
   const passwordStrength = getPasswordStrength(password);
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-black p-12 flex-col justify-between relative overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-20 right-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-12 flex-col justify-between relative overflow-hidden">
+        {/* Animated Decorative elements */}
+        <div className="absolute top-20 right-20 w-72 h-72 bg-orange-500/10 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 left-20 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-float delay-300" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-3xl animate-pulse" />
         
-        <div className="relative z-10">
-          <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
-            <h1 className="text-4xl font-bold text-white mb-2">Join Agile Bot</h1>
+        <div className="relative z-10 animate-fade-in">
+          <Link href="/" className="inline-block hover:opacity-80 transition-opacity group">
+            <h1 className="text-4xl font-bold text-white mb-2 group-hover:text-orange-400 transition-colors">
+              Join Agile Bot
+            </h1>
             <p className="text-gray-400 text-lg">Start your journey to better project management</p>
           </Link>
         </div>
 
         <div className="relative z-10 space-y-6">
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center">
-              <Check className="w-6 h-6 text-white" />
+          <div className="flex items-start space-x-4 animate-fade-in delay-100 group">
+            <div className="flex-shrink-0 w-12 h-12 bg-orange-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-orange-500/30 group-hover:bg-orange-500/30 transition-all duration-300">
+              <Check className="w-6 h-6 text-orange-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white mb-1">Free to start</h3>
+              <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-orange-400 transition-colors">Free to start</h3>
               <p className="text-gray-400 text-sm">
                 Get started with our free plan and upgrade as you grow.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center">
-              <Check className="w-6 h-6 text-white" />
+          <div className="flex items-start space-x-4 animate-fade-in delay-200 group">
+            <div className="flex-shrink-0 w-12 h-12 bg-orange-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-orange-500/30 group-hover:bg-orange-500/30 transition-all duration-300">
+              <Check className="w-6 h-6 text-orange-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white mb-1">No credit card required</h3>
+              <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-orange-400 transition-colors">No credit card required</h3>
               <p className="text-gray-400 text-sm">
                 Start using Agile Bot immediately without any payment information.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start space-x-4">
-            <div className="flex-shrink-0 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center">
-              <Check className="w-6 h-6 text-white" />
+          <div className="flex items-start space-x-4 animate-fade-in delay-300 group">
+            <div className="flex-shrink-0 w-12 h-12 bg-orange-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-orange-500/30 group-hover:bg-orange-500/30 transition-all duration-300">
+              <Check className="w-6 h-6 text-orange-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white mb-1">24/7 Support</h3>
+              <h3 className="text-lg font-semibold text-white mb-1 group-hover:text-orange-400 transition-colors">24/7 Support</h3>
               <p className="text-gray-400 text-sm">
                 Our team is here to help you succeed every step of the way.
               </p>
@@ -135,7 +138,7 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 animate-fade-in delay-400">
           <p className="text-gray-400 text-sm">
             Trusted by over 10,000+ teams worldwide
           </p>
@@ -143,13 +146,17 @@ export default function RegisterPage() {
       </div>
 
       {/* Right Side - Register Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
-        <Card className="w-full max-w-md p-8">
+      <div className="flex-1 flex items-center justify-center p-8 relative">
+        {/* Background decorative elements */}
+        <div className="absolute top-10 right-10 w-64 h-64 bg-orange-500/5 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-10 left-10 w-80 h-80 bg-gray-900/5 rounded-full blur-3xl animate-float delay-200" />
+        
+        <Card className="pm-glass-card w-full max-w-md p-8 relative z-10 animate-fade-in">
           {/* Back to Home Link */}
           <div className="mb-6">
             <Link
               href="/"
-              className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-orange-600 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to home
@@ -157,8 +164,8 @@ export default function RegisterPage() {
           </div>
 
           <div className="text-center mb-8">
-            <Link href="/" className="inline-block mb-4 hover:opacity-80 transition-opacity">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-lg mb-4">
+            <Link href="/" className="inline-block mb-4 hover:opacity-80 transition-opacity group">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-lg mb-4 shadow-lg group-hover:shadow-orange-500/20 transition-all duration-300">
                 <span className="text-2xl font-bold text-white">AB</span>
               </div>
             </Link>
@@ -282,11 +289,11 @@ export default function RegisterPage() {
             {/* Terms and Conditions */}
             <p className="text-xs text-gray-600">
               By creating an account, you agree to our{' '}
-              <Link href="/terms" className="text-gray-900 hover:text-black font-medium">
+              <Link href="/terms" className="text-gray-900 hover:text-orange-600 font-medium transition-colors">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" className="text-gray-900 hover:text-black font-medium">
+              <Link href="/privacy" className="text-gray-900 hover:text-orange-600 font-medium transition-colors">
                 Privacy Policy
               </Link>
             </p>
@@ -294,7 +301,7 @@ export default function RegisterPage() {
             {/* Submit Button */}
             <Button
               type="submit"
-              className="w-full h-11 bg-black hover:bg-gray-800 text-white font-medium transition-all"
+              className="w-full h-11 bg-black hover:bg-gray-800 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02]"
               disabled={isLoading}
             >
               {isLoading ? (
@@ -320,7 +327,7 @@ export default function RegisterPage() {
           <Button
             type="button"
             variant="outline"
-            className="w-full h-11 border-2 transition-all"
+            className="w-full h-11 border-2 border-gray-200 hover:border-orange-500 hover:text-orange-600 transition-all duration-300 hover:scale-[1.02]"
             onClick={handleGoogleSignup}
             disabled={isGoogleLoading}
           >
@@ -337,7 +344,7 @@ export default function RegisterPage() {
             Already have an account?{' '}
             <Link
               href="/login"
-              className="font-semibold text-gray-900 hover:text-black transition-colors"
+              className="font-semibold text-gray-900 hover:text-orange-600 transition-colors"
             >
               Sign in
             </Link>

@@ -1,30 +1,50 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export function middleware(request: NextRequest) {
-  const token = request.cookies.get('jwt_token')?.value;
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes that don't require authentication
-  const publicRoutes = [
-    '/',
-    '/login',
-    '/register',
-    '/forgot-password',
-    '/reset-password',
-  ];
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const publicRoutes = ["/", "/login", "/register", "/forgot-password"];
+  const isPublicRoute =
+    publicRoutes.includes(pathname) || pathname.startsWith("/reset-password");
 
-  // If user is not authenticated and trying to access protected route
-  if (!token && !isPublicRoute) {
-    const loginUrl = new URL('/login', request.url);
-    return NextResponse.redirect(loginUrl);
+  // Skip middleware for API routes (including NextAuth)
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
   }
 
-  // If user is authenticated and trying to access auth pages, redirect to projects
-  if (token && ['/login', '/register', '/forgot-password'].includes(pathname)) {
-    const projectsUrl = new URL('/projects', request.url);
-    return NextResponse.redirect(projectsUrl);
+  // Skip middleware for Next.js internal routes
+  if (pathname.startsWith("/_next/") || pathname.startsWith("/favicon.ico")) {
+    return NextResponse.next();
+  }
+
+  // Check authentication for protected routes
+  if (!isPublicRoute) {
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+
+    // If no token, redirect to login
+    if (!token) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  // If authenticated and trying to access auth pages, redirect to projects
+  if (isPublicRoute && pathname !== "/") {
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+
+    if (token) {
+      return NextResponse.redirect(new URL("/projects", request.url));
+    }
   }
 
   return NextResponse.next();
@@ -34,11 +54,11 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except:
+     * - api (API routes including NextAuth)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

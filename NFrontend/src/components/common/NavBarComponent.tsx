@@ -6,24 +6,25 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import NavUserComponent from "./NavUserComponent";
 import EnhancedBreadcrumb from "./EnhancedBreadcrumb";
 import { useRouter, usePathname } from "next/navigation";
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "next-auth/react";
 import { LoadingSpinner } from "./Loading";
-import authService from "@/services/authService";
 
 const NavBarComponent = () => {
-  const { user, loading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
 
   // Don't render navbar on auth pages (landing, login, register, forgot-password)
   const authPages = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
-  if (authPages.includes(pathname)) {
+  if (authPages.includes(pathname) || pathname.startsWith("/reset-password")) {
     return null;
   }
 
+  // Use NextAuth session for auth status and user data
+  const { data: session, status: sessionStatus } = useSession();
+
   const handleLogoClick = () => {
     // If authenticated, go to projects, otherwise go to landing page
-    if (authService.isAuthenticated()) {
+    if (sessionStatus === 'authenticated') {
       router.push("/projects");
     } else {
       router.push("/");
@@ -53,28 +54,27 @@ const NavBarComponent = () => {
         </div>
 
         {/* User Menu */}
-        {loading ? (
+        {sessionStatus === 'loading' ? (
           <div className="flex items-center gap-3 px-3 py-2">
             <LoadingSpinner size="sm" />
           </div>
-        ) : (
+        ) : sessionStatus === 'authenticated' && session?.user ? (
           <Popover>
             <PopoverTrigger asChild>
               <button className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent/50 transition-all duration-200 group">
                 <Avatar className="h-9 w-9 ring-2 ring-primary/10 group-hover:ring-primary/20 transition-all">
-                  <AvatarImage src={user?.profile_pic} alt={user?.first_name} />
+                  <AvatarImage src={session.user.image || undefined} alt={session.user.name || 'User'} />
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {user?.first_name?.[0]}
-                    {user?.last_name?.[0]}
+                    {session.user.name?.[0] || session.user.email?.[0] || 'U'}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="hidden md:block text-left">
                   <div className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {user?.first_name} {user?.last_name}
+                    {session.user.name || 'User'}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {user?.email}
+                    {session.user.email}
                   </div>
                 </div>
               </button>
@@ -83,7 +83,7 @@ const NavBarComponent = () => {
               <NavUserComponent />
             </PopoverContent>
           </Popover>
-        )}
+        ) : null}
       </div>
     </header>
   );

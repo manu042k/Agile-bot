@@ -12,10 +12,14 @@ class CustomUserManager(BaseUserManager):
 
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError(_("The Email field must be set"))
+            raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
-        user.set_password(password)
+        if password:
+            user.set_password(password)
+        else:
+            # For Google SSO users, set unusable password
+            user.set_unusable_password()
         user.save(using=self._db)
         return user
 
@@ -24,36 +28,39 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault("is_superuser", True)
 
         if extra_fields.get("is_staff") is not True:
-            raise ValueError(_("Superuser must have is_staff=True."))
+            raise ValueError("Superuser must have is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
-            raise ValueError(_("Superuser must have is_superuser=True."))
+            raise ValueError("Superuser must have is_superuser=True.")
 
+        if not password:
+            raise ValueError("Superuser must have a password.")
         return self.create_user(email, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    """Custom user model"""
-
-    email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30, blank=False)
-    last_name = models.CharField(max_length=30)
-    profile_pic = models.ImageField(upload_to="profile_pics/", null=True, blank=True)
-    phone_number = models.CharField(max_length=15, blank=False)
+    """Custom user model - Minimal storage, fetches user info from Google SSO"""
+    
+    # Essential fields for system functionality
+    email = models.EmailField(unique=True, help_text="User email from Google")
+    google_id = models.CharField(max_length=255, unique=True, null=True, blank=True, help_text="Google user ID for SSO authentication")
+    
+    # Optional fields (user can add manually if needed)
+    phone_number = models.CharField(max_length=15, blank=True, null=True, help_text="Optional phone number")
+    
+    # System fields
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    
+    # Note: first_name, last_name, avatar_url are fetched from Google when needed
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = [
-        "first_name",
-        "last_name",
-        "phone_number",
-    ]
+    REQUIRED_FIELDS = []  # No required fields for Google SSO
 
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.first_name + " " + self.last_name
+        return self.email
 
 
 class Team(models.Model):

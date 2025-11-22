@@ -4,11 +4,13 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User objects"""
-
-    password = serializers.CharField(
-        write_only=True, required=True, min_length=8, style={"input_type": "password"}
-    )
+    """Serializer for User objects - includes Google info when available"""
+    
+    # These fields are computed from Google, not stored in DB
+    first_name = serializers.SerializerMethodField()
+    last_name = serializers.SerializerMethodField()
+    avatar_url = serializers.SerializerMethodField()
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -17,18 +19,48 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "first_name",
             "last_name",
+            "full_name",
             "phone_number",
-            "profile_pic",
-            "password",
+            "avatar_url",
+            "google_id",
             "is_active",
+            "date_joined",
         ]
-
-    def create(self, validated_data):
-        password = validated_data.pop("password")
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+        read_only_fields = ["id", "is_active", "date_joined", "google_id", "first_name", "last_name", "avatar_url", "full_name"]
+    
+    def get_first_name(self, obj):
+        """Get first name from Google info in context or session"""
+        request = self.context.get('request')
+        if request:
+            google_info = request.session.get('google_user_info', {})
+            return google_info.get('first_name', '')
+        return ''
+    
+    def get_last_name(self, obj):
+        """Get last name from Google info in context or session"""
+        request = self.context.get('request')
+        if request:
+            google_info = request.session.get('google_user_info', {})
+            return google_info.get('last_name', '')
+        return ''
+    
+    def get_avatar_url(self, obj):
+        """Get avatar URL from Google info in context or session"""
+        request = self.context.get('request')
+        if request:
+            google_info = request.session.get('google_user_info', {})
+            return google_info.get('avatar_url', '')
+        return ''
+    
+    def get_full_name(self, obj):
+        """Get full name from Google info"""
+        request = self.context.get('request')
+        if request:
+            google_info = request.session.get('google_user_info', {})
+            first = google_info.get('first_name', '')
+            last = google_info.get('last_name', '')
+            return f"{first} {last}".strip() or obj.email
+        return obj.email
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

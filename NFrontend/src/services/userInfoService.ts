@@ -4,7 +4,8 @@ import { User } from "@/types/user";
 
 const userInfoService = {
   async getUserInfo(): Promise<User> {
-    const response = await api.get<User>(URLS.USER_INFO);
+    // Use the new auth/me endpoint for session-based auth
+    const response = await api.get<User>(URLS.USER_ME);
     return response.data;
   },
   async getUsers(): Promise<User[]> {

@@ -20,23 +20,33 @@ import NavUserComponent from "../common/NavUserComponent";
 import EnhancedBreadcrumb from "../common/EnhancedBreadcrumb";
 import GlobalSearch from "../common/GlobalSearch";
 import NotificationCenter from "../common/NotificationCenter";
-import { useUser } from "@/hooks/useUser";
+import { useSession } from "next-auth/react";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useUser();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Don't show sidebar on auth pages
   const authPages = ["/", "/login", "/register", "/forgot-password", "/reset-password"];
-  if (authPages.includes(pathname)) {
-    return <>{children}</>;
-  }
+  const isAuthPage = authPages.includes(pathname) || pathname.startsWith("/reset-password");
+  
+  // Use NextAuth session for authentication status
+  const { data: session, status } = useSession();
 
-  // Keyboard shortcuts
+  // Redirect to login if not authenticated on protected pages
   useEffect(() => {
+    if (!isAuthPage && status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, isAuthPage, router]);
+
+  // Keyboard shortcuts - MUST be called before any conditional returns
+  useEffect(() => {
+    // Only set up keyboard shortcuts on protected pages
+    if (isAuthPage) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd/Ctrl + K for search
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -61,7 +71,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [searchOpen, router]);
+  }, [searchOpen, router, isAuthPage]);
 
   const mainNavItems = [
     {
@@ -103,6 +113,28 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   ];
 
   const isActive = (active: boolean) => active;
+
+  // Early return for auth pages - render children without sidebar
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
+
+  // Show loading while checking session
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render protected content if not authenticated
+  if (status === "unauthenticated") {
+    return null; // Middleware will handle redirect
+  }
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -208,21 +240,23 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             <NotificationCenter />
 
             {/* User Menu */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.profile_pic || undefined} alt={user?.first_name} />
-                    <AvatarFallback className="bg-gray-900 text-white text-xs font-medium">
-                      {user?.first_name?.[0]}{user?.last_name?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-64 p-0" align="end">
-                <NavUserComponent />
-              </PopoverContent>
-            </Popover>
+            {session?.user && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={session.user.image || undefined} alt={session.user.name || 'User'} />
+                      <AvatarFallback className="bg-gray-900 text-white text-xs font-medium">
+                        {session.user.name?.[0] || session.user.email?.[0] || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64 p-0" align="end">
+                  <NavUserComponent />
+                </PopoverContent>
+              </Popover>
+            )}
           </div>
         </header>
 

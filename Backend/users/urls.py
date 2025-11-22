@@ -1,10 +1,12 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
 
 from .views import (
     AddTeamMemberView,
-    RegisterView,
-    CustomTokenObtainPairView,
+    GoogleLoginView,
+    GoogleCallbackView,
+    GoogleSyncView,
+    LogoutView,
+    UserMeView,
     RemoveTeamMemberView,
     TeamDetailView,
     TeamListCreateView,
@@ -13,10 +15,15 @@ from .views import (
 )
 
 urlpatterns = [
-    path("register/", RegisterView.as_view(), name="register"),
-    path("login/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    # Google OAuth endpoints
+    path("auth/google/login/", GoogleLoginView.as_view(), name="google-login"),
+    path("auth/google/callback/", GoogleCallbackView.as_view(), name="google-callback"),
+    path("auth/google/sync/", GoogleSyncView.as_view(), name="google-sync"),  # For NextAuth.js
+    path("auth/logout/", LogoutView.as_view(), name="logout"),
+    path("auth/me/", UserMeView.as_view(), name="user-me"),
+    # Legacy endpoints (kept for backward compatibility)
     path("user/info/", UserInfoView.as_view(), name="user-info"),
+    # Team endpoints
     path("teams/", TeamListCreateView.as_view(), name="team-list-create"),
     path(
         "teams/<int:team_id>/add-member/",

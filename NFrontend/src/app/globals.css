@@ -12,6 +12,70 @@
   }
 }
 
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(249, 115, 22, 0.6);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -198,5 +262,89 @@
   
   .pm-project-status-dot-planning {
     @apply bg-blue-500;
+  }
+
+  /* Orange Theme Colors */
+  .pm-orange {
+    @apply text-orange-600;
+  }
+  
+  .pm-orange-bg {
+    @apply bg-orange-600;
+  }
+  
+  .pm-orange-light {
+    @apply bg-orange-50 text-orange-700 border-orange-200;
+  }
+  
+  .pm-orange-gradient {
+    @apply bg-gradient-to-r from-orange-500 to-orange-600;
+  }
+  
+  .pm-orange-glow {
+    @apply shadow-lg shadow-orange-500/20;
+  }
+
+  /* Glassmorphism Effects */
+  .pm-glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-xl;
+  }
+  
+  .pm-glass-dark {
+    @apply bg-black/20 backdrop-blur-xl border border-white/10 shadow-xl;
+  }
+  
+  .pm-glass-orange {
+    @apply bg-orange-500/10 backdrop-blur-xl border border-orange-200/30 shadow-xl;
+  }
+  
+  .pm-glass-card {
+    @apply bg-white/70 backdrop-blur-lg border border-white/30 shadow-lg hover:bg-white/80 transition-all duration-300;
+  }
+
+  /* Animation Utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  .animate-slide-in-left {
+    animation: slideInLeft 0.6s ease-out forwards;
+  }
+  
+  .animate-slide-in-right {
+    animation: slideInRight 0.6s ease-out forwards;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 3s ease infinite;
+  }
+  
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+  
+  .delay-400 {
+    animation-delay: 400ms;
+  }
+  
+  .delay-500 {
+    animation-delay: 500ms;
   }
 }

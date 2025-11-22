@@ -32,11 +32,13 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    # your frontend URL
+    "http://localhost:3000",  # Next.js default port
+    "http://127.0.0.1:3000",
+    # Add your production frontend URL here
 ]
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -68,6 +70,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    # CSRF middleware - can be exempted for API endpoints if needed
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -158,10 +161,18 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWS_CREDENTIALS = True
 
+# Session configuration (12 hours = 43200 seconds)
+SESSION_COOKIE_AGE = 43200  # 12 hours
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "true"  # Set to True in production with HTTPS
+SESSION_COOKIE_SAMESITE = "Strict"
+SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Using database for sessions
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "users.authentication.CustomSessionAuthentication",
+        # Keep JWT for backward compatibility if needed
+        # "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -224,3 +235,13 @@ CELERY_RESULT_BACKEND = os.getenv("REDIS_URI")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
+
+# Cache configuration (for storing Google user info temporarily)
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        # For production, use Redis:
+        # 'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        # 'LOCATION': os.getenv("REDIS_URI", "redis://127.0.0.1:6379/1"),
+    }
+}
