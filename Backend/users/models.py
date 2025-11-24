@@ -101,3 +101,59 @@ class TeamMembership(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.team.name} ({self.role})"
+
+
+class TeamInvitation(models.Model):
+    """Model for team invitations sent via email"""
+    
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='invitations')
+    email = models.EmailField(help_text="Email address of the invited user")
+    role = models.CharField(
+        max_length=50,
+        choices=[
+            ("member", "Member"),
+            ("admin", "Admin"),
+            ("owner", "Owner"),
+            ("developer", "Developer"),
+        ],
+        default="member",
+    )
+    invited_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_invitations')
+    token = models.CharField(max_length=64, unique=True, help_text="Unique token for invitation acceptance")
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ("pending", "Pending"),
+            ("accepted", "Accepted"),
+            ("expired", "Expired"),
+            ("cancelled", "Cancelled"),
+        ],
+        default="pending",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(help_text="Invitation expiration time (7 days from creation)")
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        # Allow multiple invitations per email/team, but only one pending at a time
+        # Remove unique_together to allow multiple invitations (expired ones can coexist)
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=['token']),
+            models.Index(fields=['email', 'status']),
+            models.Index(fields=['team', 'email', 'status']),
+        ]
+    
+    def __str__(self):
+        return f"Invitation to {self.email} for {self.team.name} ({self.status})"
+    
+    def is_expired(self):
+        """Check if invitation has expired"""
+        return timezone.now() > self.expires_at
+    
+    def save(self, *args, **kwargs):
+        """Set expiration date if not already set"""
+        if not self.expires_at:
+            from datetime import timedelta
+            self.expires_at = timezone.now() + timedelta(days=7)
+        super().save(*args, **kwargs)

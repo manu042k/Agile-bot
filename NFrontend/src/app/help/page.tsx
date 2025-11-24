@@ -86,7 +86,7 @@ export default function HelpPage() {
             {/* FAQ Tab */}
             {tab === "faq" && (
               <>
-            {/* Quick Actions */}
+                {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-4">
               <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
                 <div className="flex items-center gap-3">
@@ -207,6 +207,24 @@ export default function HelpPage() {
                 ))}
               </div>
             </div>
+              </>
+            )}
+
+            {/* Documentation Tab */}
+            {tab === "docs" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Documentation</h2>
+                <p className="text-gray-600">Documentation content coming soon...</p>
+              </div>
+            )}
+
+            {/* Contact Support Tab */}
+            {tab === "support" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Support</h2>
+                <p className="text-gray-600">Support contact form coming soon...</p>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}

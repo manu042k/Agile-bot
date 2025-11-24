@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import projectService from '@/services/projectService';
-import { Project } from '@/types/project';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import projectService from "@/services/projectService";
+import { Project } from "@/types/project";
+import toast from "react-hot-toast";
 
 export const useProjects = () => {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -15,9 +15,9 @@ export const useProjects = () => {
       const response = await projectService.getProjects();
       setProjects(response);
     } catch (err: any) {
-      console.error('Failed to fetch projects:', err);
+      console.error("Failed to fetch projects:", err);
       setError(err);
-      toast.error('Failed to fetch projects');
+      toast.error("Failed to fetch projects");
     } finally {
       setLoading(false);
     }
@@ -27,11 +27,11 @@ export const useProjects = () => {
     fetchProjects();
   }, []);
 
-  return { 
-    projects, 
-    loading, 
-    error, 
-    refetch: fetchProjects 
+  return {
+    projects,
+    loading,
+    error,
+    refetch: fetchProjects,
   };
 };
 
@@ -41,7 +41,7 @@ export const useProject = (projectId: string) => {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchProject = async () => {
-    if (!projectId || projectId === 'undefined') {
+    if (!projectId || projectId === "undefined") {
       setLoading(false);
       return;
     }
@@ -52,9 +52,9 @@ export const useProject = (projectId: string) => {
       const response = await projectService.getProject(projectId);
       setProject(response);
     } catch (err: any) {
-      console.error('Failed to fetch project:', err);
+      console.error("Failed to fetch project:", err);
       setError(err);
-      toast.error('Failed to fetch project details');
+      toast.error("Failed to fetch project details");
     } finally {
       setLoading(false);
     }
@@ -64,11 +64,11 @@ export const useProject = (projectId: string) => {
     fetchProject();
   }, [projectId]);
 
-  return { 
-    project, 
-    loading, 
-    error, 
+  return {
+    project,
+    loading,
+    error,
     refetch: fetchProject,
-    setProject 
+    setProject,
   };
 };

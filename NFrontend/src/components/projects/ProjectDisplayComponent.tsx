@@ -114,42 +114,50 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Professional Project Header */}
-      <div className="bg-white border-b-2 border-gray-200 pb-6">
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-4 mb-3">
-              <h1 className="text-4xl font-bold text-gray-900">
-                {project.name}
-              </h1>
-              <span className="inline-flex items-center px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide bg-gray-100 text-gray-700 border border-gray-300">
-                {project.visibility}
-              </span>
-            </div>
-            <p className="text-gray-600 text-lg leading-relaxed max-w-3xl">{project.description}</p>
+    <div className="space-y-4">
+      {/* Project Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              {project.name}
+            </h1>
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+              {project.visibility}
+            </span>
           </div>
+          <p className="text-muted-foreground text-lg">{project.description}</p>
         </div>
       </div>
 
-      {/* Professional Action Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Action Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         {/* Upload Document Card */}
         <Dialog
           open={isOverviewDialogOpen}
           onOpenChange={setIsOverviewDialogOpen}
         >
           <DialogTrigger asChild>
-            <button className="bg-white border-2 border-gray-200 rounded-lg p-5 text-left group hover:border-gray-900 hover:shadow-lg transition-all duration-200">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-black transition-colors">
-                  <svg className="w-6 h-6 text-gray-700 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            <button className="crm-card crm-card-hover p-4 text-left group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <svg
+                    className="w-5 h-5 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
                   </svg>
                 </div>
                 <div>
-                  <p className="font-bold text-base text-gray-900 mb-1">Upload Document</p>
-                  <p className="text-xs text-gray-600 font-medium">Requirements</p>
+                  <p className="font-semibold text-sm">Upload Document</p>
+                  <p className="text-xs text-muted-foreground">Requirements</p>
                 </div>
               </div>
             </button>
@@ -162,19 +170,29 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
         {/* Team Management Card */}
         {!project?.team ? (
           <>
-            <button 
+            <button
               onClick={() => router.push("/teams")}
-              className="bg-white border-2 border-gray-200 rounded-lg p-5 text-left group hover:border-gray-900 hover:shadow-lg transition-all duration-200"
+              className="crm-card crm-card-hover p-4 text-left group"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-black transition-colors">
-                  <svg className="w-6 h-6 text-gray-700 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <svg
+                    className="w-5 h-5 text-primary"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                 </div>
                 <div>
-                  <p className="font-bold text-base text-gray-900 mb-1">Create Team</p>
-                  <p className="text-xs text-gray-600 font-medium">New team</p>
+                  <p className="font-semibold text-sm">Create Team</p>
+                  <p className="text-xs text-muted-foreground">New team</p>
                 </div>
               </div>
             </button>
@@ -184,16 +202,28 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
               onOpenChange={setIsAssignDialogOpen}
             >
               <DialogTrigger asChild>
-                <button className="bg-white border-2 border-gray-200 rounded-lg p-5 text-left group hover:border-gray-900 hover:shadow-lg transition-all duration-200">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-black transition-colors">
-                      <svg className="w-6 h-6 text-gray-700 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                <button className="crm-card crm-card-hover p-4 text-left group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <svg
+                        className="w-5 h-5 text-primary"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                        />
                       </svg>
                     </div>
                     <div>
-                      <p className="font-bold text-base text-gray-900 mb-1">Assign Team</p>
-                      <p className="text-xs text-gray-600 font-medium">Select team</p>
+                      <p className="font-semibold text-sm">Assign Team</p>
+                      <p className="text-xs text-muted-foreground">
+                        Select team
+                      </p>
                     </div>
                   </div>
                 </button>
@@ -226,19 +256,31 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
             </Dialog>
           </>
         ) : (
-          <button 
+          <button
             onClick={() => router.push(`/team/${project.team.id}`)}
-            className="bg-white border-2 border-gray-200 rounded-lg p-5 text-left group hover:border-gray-900 hover:shadow-lg transition-all duration-200"
+            className="crm-card crm-card-hover p-4 text-left group"
           >
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-black transition-colors">
-                <svg className="w-6 h-6 text-gray-700 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                <svg
+                  className="w-5 h-5 text-green-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
               <div>
-                <p className="font-bold text-base text-gray-900 mb-1">View Team</p>
-                <p className="text-xs text-gray-600 font-medium">{project.team.name}</p>
+                <p className="font-semibold text-sm">View Team</p>
+                <p className="text-xs text-muted-foreground">
+                  {project.team.name}
+                </p>
               </div>
             </div>
           </button>
@@ -247,16 +289,28 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
         {/* Delete Project Card */}
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <button className="bg-white border-2 border-gray-200 rounded-lg p-5 text-left group hover:border-red-600 hover:shadow-lg transition-all duration-200">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-lg bg-red-50 flex items-center justify-center group-hover:bg-red-600 transition-colors">
-                  <svg className="w-6 h-6 text-red-600 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <button className="crm-card hover:border-destructive/50 hover:shadow-lg transition-all duration-300 p-4 text-left group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-destructive/10 flex items-center justify-center group-hover:bg-destructive/20 transition-colors">
+                  <svg
+                    className="w-5 h-5 text-destructive"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
                   </svg>
                 </div>
                 <div>
-                  <p className="font-bold text-base text-red-600 mb-1">Delete Project</p>
-                  <p className="text-xs text-gray-600 font-medium">Permanent</p>
+                  <p className="font-semibold text-sm text-destructive">
+                    Delete Project
+                  </p>
+                  <p className="text-xs text-muted-foreground">Permanent</p>
                 </div>
               </div>
             </button>
@@ -265,8 +319,8 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
             <AlertDialogHeader>
               <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
               <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete
-                your project and remove your data from our servers.
+                This action cannot be undone. This will permanently delete your
+                project and remove your data from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>

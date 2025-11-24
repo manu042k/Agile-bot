@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -10,7 +10,10 @@ import toast from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-export default function LoginPage() {
+// Disable static generation for this page (uses useSearchParams)
+export const dynamic = "force-dynamic";
+
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
@@ -37,20 +40,34 @@ export default function LoginPage() {
   const handleGoogleLogin = async () => {
     setIsGoogleLoading(true);
     try {
+      console.log("[Login] Initiating Google sign in...");
+
       // Use NextAuth.js signIn with Google provider
+      // When redirect: true, the browser will redirect to Google OAuth
+      // This function may not return if redirect succeeds
       const result = await signIn("google", {
         callbackUrl: "/projects",
-        redirect: true, // NextAuth will handle the redirect
+        redirect: true, // NextAuth will handle the redirect to Google
       });
 
-      // If redirect is false, there was an error
+      // This code typically won't execute if redirect succeeds
+      // But if there's an error, we might get here
       if (result?.error) {
-        throw new Error(result.error);
+        console.error("[Login] Sign in error:", result.error);
+        toast.error(
+          result.error === "OAuthSignin"
+            ? "Failed to initiate Google sign in. Please check your Google OAuth configuration."
+            : result.error === "OAuthCallback"
+            ? "Error during Google authentication callback."
+            : "Failed to sign in with Google. Please try again."
+        );
+        setIsGoogleLoading(false);
       }
     } catch (error: any) {
-      console.error("Google login error:", error);
+      console.error("[Login] Google login exception:", error);
       toast.error(
-        error.message || "Failed to initiate Google login. Please try again."
+        error.message ||
+          "Failed to initiate Google login. Please check the console for details."
       );
       setIsGoogleLoading(false);
     }
@@ -214,5 +231,22 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-900" />
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

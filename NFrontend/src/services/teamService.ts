@@ -23,10 +23,10 @@ const teamService = {
     const response = await api.get<Team>(`${URLS.TEAMS}${teamId}/`);
     return response.data;
   },
-  async addMember(teamId: number, user: any): Promise<string> {
-    const response = await api.post<string>(
+  async addMember(teamId: number, data: { user_email: string; role: string }): Promise<any> {
+    const response = await api.post(
       `${URLS.TEAMS}${teamId}${URLS.ADD_MEMBER}`,
-      user
+      data
     );
     return response.data;
   },
@@ -39,13 +39,37 @@ const teamService = {
 
   async updateTeamMemberRole(
     teamId: number,
-    memberId: string,
+    memberId: number | string,
     role: TeamMemberRole
-  ): Promise<any> {
-    const response = await api.patch(
-      `${URLS.TEAMS}${teamId}/members/${memberId}/`,
+  ): Promise<Team> {
+    const response = await api.patch<Team>(
+      `${URLS.TEAMS}${teamId}${URLS.UPDATE_MEMBER_ROLE}${memberId}/`,
       { role }
     );
+    return response.data;
+  },
+  async inviteMember(
+    teamId: number,
+    email: string,
+    role: TeamMemberRole
+  ): Promise<any> {
+    console.log('[Invite] Sending invitation:', { teamId, email, role });
+    console.log('[Invite] URL:', `${URLS.TEAMS}${teamId}${URLS.INVITE_MEMBER}`);
+    try {
+      const response = await api.post(
+        `${URLS.TEAMS}${teamId}${URLS.INVITE_MEMBER}`,
+        { email, role }
+      );
+      console.log('[Invite] Success:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('[Invite] Error:', error);
+      console.error('[Invite] Response:', error.response?.data);
+      throw error;
+    }
+  },
+  async acceptInvitation(token: string): Promise<any> {
+    const response = await api.post(URLS.ACCEPT_INVITATION, { token });
     return response.data;
   },
 };

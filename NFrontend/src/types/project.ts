@@ -7,6 +7,8 @@ export enum ProjectVisibility {
 export enum TeamMemberRole {
   Member = "member",
   Admin = "admin",
+  Owner = "owner",
+  Developer = "developer",
 }
 export interface Project {
   id: number;

@@ -203,7 +203,7 @@ const TaskPage = ({ params }: { params: { projectId: string } }) => {
                           <span className="text-xs text-gray-500">{task.assignee}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className={`pm-badge ${getPriorityColor(task.priority)}`}>
+                          <span className={`pm-badge ${getPriorityClass(task.priority)}`}>
                             <Flag className="h-3 w-3 mr-1" />
                             {task.priority}
                           </span>

@@ -1,18 +1,18 @@
-import React from 'react';
+import React from "react";
 
 interface LoadingSpinnerProps {
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   className?: string;
 }
 
-export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ 
-  size = 'md', 
-  className = '' 
+export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
+  size = "md",
+  className = "",
 }) => {
   const sizeClasses = {
-    sm: 'w-4 h-4 border-2',
-    md: 'w-8 h-8 border-2',
-    lg: 'w-12 h-12 border-3'
+    sm: "w-4 h-4 border-2",
+    md: "w-8 h-8 border-2",
+    lg: "w-12 h-12 border-3",
   };
 
   return (
@@ -29,13 +29,13 @@ interface LoadingProps {
   fullScreen?: boolean;
 }
 
-export const Loading: React.FC<LoadingProps> = ({ 
-  text = 'Loading...', 
-  fullScreen = false 
+export const Loading: React.FC<LoadingProps> = ({
+  text = "Loading...",
+  fullScreen = false,
 }) => {
   const containerClass = fullScreen
-    ? 'fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50'
-    : 'flex items-center justify-center p-12';
+    ? "fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-50"
+    : "flex items-center justify-center p-12";
 
   return (
     <div className={containerClass}>

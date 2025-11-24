@@ -2,7 +2,7 @@
  * NextAuth.js helper functions and types
  */
 import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authConfig';
 import { Session } from 'next-auth';
 
 export async function getSession(): Promise<Session | null> {

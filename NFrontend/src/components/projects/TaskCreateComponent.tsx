@@ -31,7 +31,7 @@ const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [details, setDetails] = useState<string>("");
-  const [priority, setPriority] = useState<TaskPriority>(TaskPriority.Medium);
+  const [priority, setPriority] = useState<TaskPriority>(TaskPriority.Normal);
   const [size, setSize] = useState<TaskSize>(TaskSize.Medium);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +55,7 @@ const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
       setName("");
       setDescription("");
       setDetails("");
-      setPriority(TaskPriority.Medium);
+      setPriority(TaskPriority.Normal);
       setSize(TaskSize.Medium);
       onClose();
       router.refresh();

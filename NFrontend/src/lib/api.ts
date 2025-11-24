@@ -31,7 +31,7 @@ export async function serverFetch<T>(
 
   // Include cookies in request if provided (from Server Component)
   if (cookies) {
-    headers['Cookie'] = cookies;
+    (headers as Record<string, string>)['Cookie'] = cookies;
   }
 
   const response = await fetch(url, {

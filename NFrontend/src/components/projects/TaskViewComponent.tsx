@@ -123,32 +123,32 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
     }
   };
   return (
-    <div className="space-y-6">
-      {/* Professional Task Header */}
-      <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+    <div className="space-y-4">
+      {/* Task Header */}
+      <div className="crm-card p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2 className="text-2xl font-bold tracking-tight text-foreground">
               {isEditing ? "Edit Task" : "Task Details"}
             </h2>
-            <p className="text-gray-600 text-base">
-              {isEditing ? "Update task information" : "View and manage task details"}
+            <p className="text-sm text-muted-foreground mt-1">
+              {isEditing ? "Update task information" : "View and manage task"}
             </p>
           </div>
           {!isEditing ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                size="lg"
+                size="sm"
                 onClick={() => setIsEditing(true)}
-                className="gap-2 border-2 border-gray-300 hover:border-gray-900 font-semibold"
+                className="gap-2"
               >
                 <Pen className="w-4 h-4" />
                 Edit
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="destructive" size="lg" className="gap-2 border-2 border-red-600 font-semibold">
+                  <Button variant="destructive" size="sm" className="gap-2">
                     <Trash2 className="w-4 h-4" />
                     Delete
                   </Button>
@@ -174,76 +174,76 @@ const TaskViewComponent: React.FC<Props> = ({ task, onUpdate }) => {
         </div>
       </div>
 
-      {/* Professional Task Form */}
-      <div className="bg-white border-2 border-gray-200 rounded-lg p-6">
+      {/* Task Form */}
+      <div className="crm-card p-6">
         <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Left Column */}
-        <div className="space-y-4">
-          <InputField
-            label="Name"
-            value={state.name}
-            readOnly={!isEditing}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              handleChange("name", e.target.value)
-            }
-          />
-          <SelectField
-            label="Status"
-            value={state.status}
-            options={Object.values(TaskStatus)}
-            disabled={!isEditing}
-            onChange={(value: string) => handleChange("status", value)}
-          />
-          <SelectField
-            label="Priority"
-            value={state.priority}
-            options={Object.values(TaskPriority)}
-            disabled={!isEditing}
-            onChange={(value: string) => handleChange("priority", value)}
-          />
-          <SelectField
-            label="Size"
-            value={state.size}
-            options={Object.values(TaskSize)}
-            disabled={!isEditing}
-            onChange={(value: string) => handleChange("size", value)}
-          />
-          <AssignedToField
-            isEditing={isEditing}
-            assignedTo={state.assigned_to}
-            projectMembers={projectMembers}
-            onChange={handleAssignedToChange}
-          />
-        </div>
+          {/* Left Column */}
+          <div className="space-y-4">
+            <InputField
+              label="Name"
+              value={state.name}
+              readOnly={!isEditing}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                handleChange("name", e.target.value)
+              }
+            />
+            <SelectField
+              label="Status"
+              value={state.status}
+              options={Object.values(TaskStatus)}
+              disabled={!isEditing}
+              onChange={(value: string) => handleChange("status", value)}
+            />
+            <SelectField
+              label="Priority"
+              value={state.priority}
+              options={Object.values(TaskPriority)}
+              disabled={!isEditing}
+              onChange={(value: string) => handleChange("priority", value)}
+            />
+            <SelectField
+              label="Size"
+              value={state.size}
+              options={Object.values(TaskSize)}
+              disabled={!isEditing}
+              onChange={(value: string) => handleChange("size", value)}
+            />
+            <AssignedToField
+              isEditing={isEditing}
+              assignedTo={state.assigned_to}
+              projectMembers={projectMembers}
+              onChange={handleAssignedToChange}
+            />
+          </div>
 
-        {/* Right Column */}
-        <div className="space-y-4">
-          <TextareaField
-            label="Description"
-            value={state.description}
-            readOnly={!isEditing}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              handleChange("description", e.target.value)
-            }
-          />
-          <TextareaField
-            label="Details"
-            value={state.details}
-            readOnly={!isEditing}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-              handleChange("details", e.target.value)
-            }
-          />
-        </div>
+          {/* Right Column */}
+          <div className="space-y-4">
+            <TextareaField
+              label="Description"
+              value={state.description}
+              readOnly={!isEditing}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleChange("description", e.target.value)
+              }
+            />
+            <TextareaField
+              label="Details"
+              value={state.details}
+              readOnly={!isEditing}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                handleChange("details", e.target.value)
+              }
+            />
+          </div>
         </form>
 
-        {/* Professional Action Buttons */}
+        {/* Action Buttons */}
         {isEditing && (
-          <div className="flex items-center gap-4 pt-6 border-t-2 border-gray-200">
-            <Button onClick={handleSave} className="min-w-32 bg-black hover:bg-gray-900 text-white font-semibold h-11 shadow-md">
+          <div className="flex items-center gap-3 pt-4 border-t">
+            <Button onClick={handleSave} className="min-w-24">
               Save Changes
             </Button>
-            <Button variant="outline" onClick={handleCancel} className="min-w-32 border-2 border-gray-300 hover:border-gray-900 font-semibold h-11">
+            <Button variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
           </div>

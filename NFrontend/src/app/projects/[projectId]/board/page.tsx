@@ -10,15 +10,15 @@ import Link from "next/link";
 import { getStatusColumnColor, getPriorityClass } from "@/lib/colorUtils";
 
 // Mock tasks data for this project
-const getMockTasks = (projectId: string) => [
-  { id: 1, title: "Implement user authentication", assignee: "John Doe", dueDate: "2024-02-15", priority: "high", status: "in_progress", tags: ["Backend", "Security"], description: "Set up JWT authentication with refresh tokens" },
-  { id: 2, title: "Design product catalog UI", assignee: "Jane Smith", dueDate: "2024-02-18", priority: "medium", status: "todo", tags: ["Frontend", "UI"], description: "Create responsive product listing page" },
-  { id: 3, title: "Set up shopping cart functionality", assignee: "Mike Johnson", dueDate: "2024-02-20", priority: "high", status: "todo", tags: ["Frontend", "Backend"], description: "Implement cart state management and API" },
-  { id: 4, title: "Payment integration", assignee: "Sarah Wilson", dueDate: "2024-02-25", priority: "high", status: "backlog", tags: ["Backend", "Payment"], description: "Integrate Stripe payment gateway" },
-  { id: 5, title: "Write API documentation", assignee: "Alex Brown", dueDate: "2024-02-22", priority: "low", status: "done", tags: ["Documentation"], description: "Document all REST API endpoints" },
-  { id: 6, title: "Database schema design", assignee: "Chris Lee", dueDate: "2024-02-17", priority: "high", status: "done", tags: ["Database"], description: "Design and implement database schema" },
-  { id: 7, title: "User profile page", assignee: "John Doe", dueDate: "2024-02-19", priority: "medium", status: "in_progress", tags: ["Frontend"], description: "Create user profile page with edit functionality" },
-  { id: 8, title: "Email notifications", assignee: "Jane Smith", dueDate: "2024-02-21", priority: "low", status: "backlog", tags: ["Backend"], description: "Set up email notification system" },
+const getMockTasks = (projectId: string): Task[] => [
+  { id: 1, title: "Implement user authentication", assignee: "John Doe", dueDate: "2024-02-15", priority: "high" as const, status: "in_progress", tags: ["Backend", "Security"], description: "Set up JWT authentication with refresh tokens" },
+  { id: 2, title: "Design product catalog UI", assignee: "Jane Smith", dueDate: "2024-02-18", priority: "medium" as const, status: "todo", tags: ["Frontend", "UI"], description: "Create responsive product listing page" },
+  { id: 3, title: "Set up shopping cart functionality", assignee: "Mike Johnson", dueDate: "2024-02-20", priority: "high" as const, status: "todo", tags: ["Frontend", "Backend"], description: "Implement cart state management and API" },
+  { id: 4, title: "Payment integration", assignee: "Sarah Wilson", dueDate: "2024-02-25", priority: "high" as const, status: "backlog", tags: ["Backend", "Payment"], description: "Integrate Stripe payment gateway" },
+  { id: 5, title: "Write API documentation", assignee: "Alex Brown", dueDate: "2024-02-22", priority: "low" as const, status: "done", tags: ["Documentation"], description: "Document all REST API endpoints" },
+  { id: 6, title: "Database schema design", assignee: "Chris Lee", dueDate: "2024-02-17", priority: "high" as const, status: "done", tags: ["Database"], description: "Design and implement database schema" },
+  { id: 7, title: "User profile page", assignee: "John Doe", dueDate: "2024-02-19", priority: "medium" as const, status: "in_progress", tags: ["Frontend"], description: "Create user profile page with edit functionality" },
+  { id: 8, title: "Email notifications", assignee: "Jane Smith", dueDate: "2024-02-21", priority: "low" as const, status: "backlog", tags: ["Backend"], description: "Set up email notification system" },
 ];
 
 interface Task {

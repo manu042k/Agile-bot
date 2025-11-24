@@ -34,6 +34,14 @@ DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
+# CSRF trusted origins (required for Django 4.0+)
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",  # Next.js default port
@@ -70,12 +78,19 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
+    # Custom middleware to exempt API routes from CSRF (must be before CSRF middleware)
+    "users.middleware.DisableCSRFForAPI",
     # CSRF middleware - can be exempted for API endpoints if needed
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# Disable CSRF for API endpoints (handled by DRF)
+CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token if needed
+CSRF_USE_SESSIONS = False
 
 ROOT_URLCONF = "agileBotApis.urls"
 
@@ -159,7 +174,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWS_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True  # Fixed typo: ALLOWS -> ALLOW
 
 # Session configuration (12 hours = 43200 seconds)
 SESSION_COOKIE_AGE = 43200  # 12 hours
@@ -194,6 +209,20 @@ SIMPLE_JWT = {
     "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
 
+
+# Email configuration (SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', 'False').lower() == 'true'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# Frontend URL for invitation links
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 LOGGING = {
     "version": 1,

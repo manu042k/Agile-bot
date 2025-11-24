@@ -69,7 +69,7 @@ export default function ReportsPage() {
             {/* All Reports Tab */}
             {tab === "all" && (
               <>
-            {/* Quick Actions */}
+                {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-4">
               <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
                 <div className="flex items-center gap-3">
@@ -172,6 +172,24 @@ export default function ReportsPage() {
                 ))}
               </div>
             </div>
+              </>
+            )}
+
+            {/* Analytics Tab */}
+            {tab === "analytics" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Analytics</h2>
+                <p className="text-gray-600">Analytics content coming soon...</p>
+              </div>
+            )}
+
+            {/* Scheduled Tab */}
+            {tab === "scheduled" && (
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Scheduled Reports</h2>
+                <p className="text-gray-600">Scheduled reports content coming soon...</p>
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}

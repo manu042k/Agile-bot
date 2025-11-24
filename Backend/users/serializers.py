@@ -111,7 +111,5 @@ class AddTeamMemberSerializer(serializers.Serializer):
     )
 
     def validate_user_email(self, value):
-        user = User
-        if not user.objects.filter(email=value).exists():
-            raise serializers.ValidationError("User with this email does not exist.")
+        # Note: User existence check removed - use invitation endpoint for new users
         return value

@@ -67,8 +67,14 @@ const TeamMemberPage = ({ params }: { params: { teamId: string } }) => {
 
     try {
       if (!teamId) return;
+      // Find the user email from the selected user ID
+      const selectedUserObj = users?.find(u => u.id === selectedUser);
+      if (!selectedUserObj) {
+        toast.error("User not found");
+        return;
+      }
       await teamService.addMember(parseInt(teamId), {
-        user_id: selectedUser,
+        user_email: selectedUserObj.email,
         role: selectedRole,
       });
       toast.success("Member added successfully!");

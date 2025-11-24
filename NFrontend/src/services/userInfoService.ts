@@ -8,8 +8,22 @@ const userInfoService = {
     const response = await api.get<User>(URLS.USER_ME);
     return response.data;
   },
-  async getUsers(): Promise<User[]> {
-    const response = await api.get<User[]>(URLS.USERS);
+  async getUsers(search?: string, isActive?: boolean): Promise<User[]> {
+    // Get users with optional search and filtering
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (isActive !== undefined) params.append('is_active', isActive.toString());
+    
+    const url = params.toString() 
+      ? `${URLS.USERS}?${params.toString()}`
+      : URLS.USERS;
+    
+    const response = await api.get<User[]>(url);
+    return response.data;
+  },
+  async getUserById(userId: number | string): Promise<User> {
+    // Get specific user by ID
+    const response = await api.get<User>(`${URLS.USER_DETAIL}${userId}/`);
     return response.data;
   },
 };

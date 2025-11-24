@@ -10,8 +10,12 @@ from .views import (
     RemoveTeamMemberView,
     TeamDetailView,
     TeamListCreateView,
+    UpdateTeamMemberRoleView,
     UserInfoView,
     UserListView,
+    UserDetailView,
+    InviteTeamMemberView,
+    AcceptInvitationView,
 )
 
 urlpatterns = [
@@ -30,11 +34,27 @@ urlpatterns = [
         AddTeamMemberView.as_view(),
         name="add-team-member",
     ),
+    path(
+        "teams/<int:team_id>/invite/",
+        InviteTeamMemberView.as_view(),
+        name="invite-team-member",
+    ),
+    path(
+        "invitations/accept/",
+        AcceptInvitationView.as_view(),
+        name="accept-invitation",
+    ),
     path("teams/<int:pk>/", TeamDetailView.as_view(), name="team-detail"),
     path(
         "teams/<int:team_id>/remove-member/<int:user_id>/",
         RemoveTeamMemberView.as_view(),
         name="remove-team-member",
     ),
+    path(
+        "teams/<int:team_id>/members/<int:user_id>/",
+        UpdateTeamMemberRoleView.as_view(),
+        name="update-team-member-role",
+    ),
     path("users/", UserListView.as_view(), name="user-list"),
+    path("users/<int:id>/", UserDetailView.as_view(), name="user-detail"),
 ]

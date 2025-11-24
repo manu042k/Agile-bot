@@ -1,23 +1,16 @@
 import { LogOut, User, Users } from "lucide-react";
 import { Button } from "../ui/button";
-import { signOut } from "next-auth/react";
+import authService from "@/services/authService";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 const NavUserComponent = () => {
   const router = useRouter();
 
-  const handleLogout = async () => {
-    try {
-      await signOut({ 
-        callbackUrl: '/login',
-        redirect: true 
-      });
-      toast.success("Logout successful");
-    } catch (error) {
-      console.error('Logout error:', error);
-      toast.error("Failed to logout. Please try again.");
-    }
+  const handleLogout = () => {
+    authService.logout();
+    toast.success("Logout successful");
+    router.push("/");
   };
 
   const handdleProfile = () => {
@@ -39,7 +32,7 @@ const NavUserComponent = () => {
           </div>
           <span className="font-semibold">Profile</span>
         </button>
-        
+
         <button
           onClick={handleTeams}
           className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:bg-accent/50 rounded-lg transition-all duration-200 group"
@@ -49,9 +42,9 @@ const NavUserComponent = () => {
           </div>
           <span className="font-semibold">Teams</span>
         </button>
-        
+
         <div className="my-2 h-px bg-border" />
-        
+
         <button
           onClick={handleLogout}
           className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-lg transition-all duration-200 group"
