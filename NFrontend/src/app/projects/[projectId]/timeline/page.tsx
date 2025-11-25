@@ -166,8 +166,8 @@ const TimelinePage = () => {
                   <div className="relative h-8 bg-gray-100 rounded overflow-hidden">
                     <div
                       className={`absolute h-full rounded ${
-                        task.status === "completed" ? "bg-gray-900" :
-                        task.status === "in_progress" ? "bg-gray-600" :
+                        task.status === "completed" ? "bg-orange-600" :
+                        task.status === "in_progress" ? "bg-orange-400" :
                         "bg-gray-300"
                       }`}
                       style={{

@@ -112,7 +112,7 @@ const AnalyticsPage = () => {
                       </div>
                       <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gray-900 rounded-full transition-all"
+                          className="h-full bg-orange-600 rounded-full transition-all"
                           style={{ width: `${mockMetrics.productivityScore}%` }}
                         />
                       </div>
@@ -255,7 +255,7 @@ const AnalyticsPage = () => {
                                 }}
                               />
                               <div
-                                className="bg-gray-900"
+                                className="bg-orange-600"
                                 style={{
                                   width: `${(data.completed / 100) * 100}%`,
                                 }}
@@ -290,7 +290,7 @@ const AnalyticsPage = () => {
                         </div>
                         <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gray-600 rounded-full"
+                            className="h-full bg-orange-500 rounded-full"
                             style={{
                               width: `${
                                 (mockMetrics.activeProjects /
@@ -312,7 +312,7 @@ const AnalyticsPage = () => {
                         </div>
                         <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gray-900 rounded-full"
+                            className="h-full bg-orange-600 rounded-full"
                             style={{
                               width: `${
                                 (mockMetrics.completedProjects /
@@ -427,7 +427,7 @@ const AnalyticsPage = () => {
                             </div>
                             <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gray-900 rounded-full transition-all"
+                                className="h-full bg-orange-600 rounded-full transition-all"
                                 style={{ width: `${performance}%` }}
                               />
                             </div>

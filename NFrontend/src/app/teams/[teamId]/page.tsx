@@ -138,7 +138,7 @@ const TeamDetailPage = () => {
         <div className="px-6 py-6">
           <div className="flex items-start gap-4 mb-6">
             <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-              <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-lg">
+              <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-lg shadow-sm">
                 {getTeamAvatar(team.name)}
               </div>
             </div>
@@ -163,7 +163,7 @@ const TeamDetailPage = () => {
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                     item.active
                       ? "bg-gray-900 text-white shadow-sm"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-transparent"
                   }`}
                 >
                   <Icon className="h-4 w-4 flex-shrink-0" />

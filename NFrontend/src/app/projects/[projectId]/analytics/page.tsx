@@ -171,7 +171,7 @@ const ProjectAnalyticsPage = () => {
                   <div className="text-3xl font-semibold text-gray-900 mb-2">{count}</div>
                   <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
                     <div
-                      className="h-full bg-gray-900 rounded-full"
+                      className="h-full bg-orange-600 rounded-full"
                       style={{ width: `${percentage}%` }}
                     />
                   </div>

@@ -71,7 +71,7 @@ export default function PageHeader({
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                     item.active
                       ? "bg-gray-900 text-white shadow-sm"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-transparent"
                   }`}
                 >
                   <TabIcon className="h-4 w-4 flex-shrink-0" />

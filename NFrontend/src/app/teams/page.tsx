@@ -190,7 +190,7 @@ const TeamsPage = () => {
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gray-900 rounded-full transition-all"
+                      className="h-full bg-orange-600 rounded-full transition-all"
                       style={{ width: `${Math.min((teams.length / 10) * 100, 100)}%` }}
                     />
                   </div>
@@ -223,7 +223,7 @@ const TeamsPage = () => {
                       <div className="pm-card pm-card-hover p-5 cursor-pointer">
                         <div className="flex items-start gap-4 mb-4">
                           <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                            <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-sm">
+                            <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                               {getTeamAvatar(team.name)}
                             </div>
                           </div>

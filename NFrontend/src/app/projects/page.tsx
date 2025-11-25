@@ -300,7 +300,7 @@ const ProjectsPage = () => {
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gray-900 rounded-full transition-all"
+                      className="h-full bg-orange-600 rounded-full transition-all"
                       style={{ width: `${overallProgress}%` }}
                     />
                   </div>
@@ -398,7 +398,7 @@ const ProjectsPage = () => {
                                   </h4>
                                   <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
                                     <div
-                                      className="h-full bg-gray-900 rounded-full"
+                                      className="h-full bg-orange-600 rounded-full"
                                       style={{ width: `${project.progress}%` }}
                                     />
                                   </div>
@@ -502,7 +502,7 @@ const ProjectsPage = () => {
                               </div>
                               <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                 <div
-                                  className="h-full bg-gray-900 rounded-full transition-all duration-500"
+                                  className="h-full bg-orange-600 rounded-full transition-all duration-500"
                                   style={{ width: `${project.progress}%` }}
                                 />
                               </div>
@@ -569,7 +569,7 @@ const ProjectsPage = () => {
                                     );
                                   }
                                 }}
-                                className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900 flex-shrink-0"
+                                className="w-5 h-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500 focus:ring-offset-0 flex-shrink-0"
                                 onClick={(e) => e.stopPropagation()}
                               />
                             )}
@@ -617,7 +617,7 @@ const ProjectsPage = () => {
                                 </p>
                                 <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
                                   <div
-                                    className="h-full bg-gray-900 rounded-full transition-all"
+                                    className="h-full bg-orange-600 rounded-full transition-all"
                                     style={{ width: `${project.progress}%` }}
                                   />
                                 </div>

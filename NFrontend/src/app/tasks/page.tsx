@@ -6,6 +6,7 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { useParams, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
 import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
+import { getPriorityClass } from "@/lib/colorUtils";
 
 // Mock tasks data
 const mockTasks = [
@@ -170,7 +171,7 @@ const TasksPage = () => {
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gray-900 rounded-full transition-all"
+                      className="h-full bg-orange-600 rounded-full transition-all"
                       style={{ width: `${Math.round((mockTasks.filter(t => t.status === "done").length / mockTasks.length) * 100)}%` }}
                     />
                   </div>
@@ -211,12 +212,8 @@ const TasksPage = () => {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-3 mb-2 flex-wrap">
                                     <h3 className="font-medium text-gray-900 text-base">{task.title}</h3>
-                                    <span className={`pm-badge ${
-                                      task.priority === "high" ? "pm-priority-high" :
-                                      task.priority === "medium" ? "pm-priority-medium" :
-                                      "pm-priority-low"
-                                    } flex-shrink-0`}>
-                                      <Flag className="h-3 w-3 mr-1" />
+                                    <span className={`pm-badge inline-flex items-center gap-1 ${getPriorityClass(task.priority)} flex-shrink-0`}>
+                                      <Flag className="h-3 w-3" />
                                       {task.priority}
                                     </span>
                                   </div>
@@ -313,11 +310,7 @@ const TasksPage = () => {
                         <h4 className="font-medium text-gray-900 text-sm mb-2 line-clamp-2">{task.title}</h4>
                         <div className="flex items-center justify-between text-xs text-gray-500 mt-3">
                           <span className="truncate flex-1 min-w-0">{task.project}</span>
-                          <span className={`pm-badge ml-2 flex-shrink-0 ${
-                            task.priority === "high" ? "pm-priority-high" :
-                            task.priority === "medium" ? "pm-priority-medium" :
-                            "pm-priority-low"
-                          }`}>
+                          <span className={`pm-badge ml-2 flex-shrink-0 ${getPriorityClass(task.priority)}`}>
                             {task.priority}
                           </span>
                         </div>

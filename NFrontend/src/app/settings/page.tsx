@@ -1,12 +1,11 @@
 "use client";
 import { useState } from "react";
-import { User, Bell, Shield, Palette, Globe, Save } from "lucide-react";
+import { Bell, Shield, Palette, Globe } from "lucide-react";
 
 const SettingsPage = () => {
-  const [activeTab, setActiveTab] = useState("profile");
+  const [activeTab, setActiveTab] = useState("notifications");
 
   const tabs = [
-    { id: "profile", label: "Profile", icon: User },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "security", label: "Security", icon: Shield },
     { id: "appearance", label: "Appearance", icon: Palette },
@@ -51,42 +50,6 @@ const SettingsPage = () => {
 
             {/* Content */}
             <div className="lg:col-span-3">
-              {activeTab === "profile" && (
-                <div className="pm-card p-6 space-y-6">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h2>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                        <input type="text" className="pm-input w-full" defaultValue="John" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                        <input type="text" className="pm-input w-full" defaultValue="Doe" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input type="email" className="pm-input w-full" defaultValue="john.doe@example.com" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                        <input type="tel" className="pm-input w-full" defaultValue="+1 (555) 123-4567" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
-                        <textarea className="pm-input w-full h-24" defaultValue="Project Manager with 5+ years of experience" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-end pt-4 border-t border-gray-200">
-                    <button className="pm-button-primary inline-flex items-center gap-2">
-                      <Save className="h-4 w-4" />
-                      Save Changes
-                    </button>
-                  </div>
-                </div>
-              )}
-
               {activeTab === "notifications" && (
                 <div className="pm-card p-6 space-y-6">
                   <div>
@@ -106,7 +69,7 @@ const SettingsPage = () => {
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" className="sr-only peer" defaultChecked={idx < 3} />
-                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-gray-900/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gray-900"></div>
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-orange-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
                           </label>
                         </div>
                       ))}
@@ -120,22 +83,41 @@ const SettingsPage = () => {
                   <div>
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Security Settings</h2>
                     <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                        <input type="password" className="pm-input w-full" />
+                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h3 className="font-medium text-gray-900 mb-2">Password Management</h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Your account is managed by Google. Password changes and two-factor authentication are handled through your Google Account.
+                        </p>
+                        <a
+                          href="https://myaccount.google.com/security"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-700 underline inline-flex items-center gap-1"
+                        >
+                          Manage Google Account Security
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                        <input type="password" className="pm-input w-full" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-                        <input type="password" className="pm-input w-full" />
+                      <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                        <h3 className="font-medium text-gray-900 mb-2">Active Sessions</h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          View and manage your active sessions across all devices.
+                        </p>
+                        <a
+                          href="https://myaccount.google.com/device-activity"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-blue-600 hover:text-blue-700 underline inline-flex items-center gap-1"
+                        >
+                          View Device Activity
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex justify-end pt-4 border-t border-gray-200">
-                    <button className="pm-button-primary">Update Password</button>
                   </div>
                 </div>
               )}
@@ -195,8 +177,7 @@ const SettingsPage = () => {
                     </div>
                   </div>
                   <div className="flex justify-end pt-4 border-t border-gray-200">
-                    <button className="pm-button-primary inline-flex items-center gap-2">
-                      <Save className="h-4 w-4" />
+                    <button className="pm-button-primary">
                       Save Changes
                     </button>
                   </div>

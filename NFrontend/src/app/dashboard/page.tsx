@@ -164,7 +164,7 @@ const DashboardPage = () => {
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gray-900 rounded-full transition-all"
+                      className="h-full bg-orange-600 rounded-full transition-all"
                       style={{ width: `${Math.round((mockStats.completedTasks / mockStats.totalTasks) * 100)}%` }}
                     />
                   </div>
@@ -256,7 +256,7 @@ const DashboardPage = () => {
                       </div>
                       <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
                         <div
-                          className="h-full bg-gray-900 rounded-full transition-all"
+                          className="h-full bg-orange-600 rounded-full transition-all"
                           style={{ width: `${project.progress}%` }}
                         />
                       </div>
@@ -383,7 +383,7 @@ const DashboardPage = () => {
                         </div>
                         <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-gray-900 rounded-full transition-all"
+                            className="h-full bg-orange-600 rounded-full transition-all"
                             style={{ width: `${project.progress}%` }}
                           />
                         </div>

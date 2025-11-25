@@ -85,15 +85,15 @@ const DocumentsPage = () => {
                 <option value="Mobile Banking App">Mobile Banking App</option>
                 <option value="AI Analytics Dashboard">AI Analytics Dashboard</option>
               </select>
-              <button className="pm-button-secondary whitespace-nowrap flex-shrink-0">
-                <Filter className="h-4 w-4 mr-2" />
+              <button className="pm-button-secondary whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+                <Filter className="h-4 w-4" />
                 More Filters
               </button>
             </div>
             <Dialog>
               <DialogTrigger asChild>
-                <button className="pm-button-primary">
-                  <Upload className="h-4 w-4 mr-2" />
+                <button className="pm-button-primary inline-flex items-center gap-2">
+                  <Upload className="h-4 w-4" />
                   Upload Document
                 </button>
               </DialogTrigger>
@@ -143,7 +143,7 @@ const DocumentsPage = () => {
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gray-900 rounded-full transition-all"
+                      className="h-full bg-orange-600 rounded-full transition-all"
                       style={{ width: `${(mockDocuments.length / 20) * 100}%` }}
                     />
                   </div>
@@ -220,8 +220,8 @@ const DocumentsPage = () => {
                     {searchQuery ? "Try adjusting your search" : "Upload your first document to get started"}
                   </p>
                   {!searchQuery && (
-                    <button className="pm-button-primary">
-                      <Upload className="h-4 w-4 mr-2" />
+                    <button className="pm-button-primary inline-flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
                       Upload Document
                     </button>
                   )}

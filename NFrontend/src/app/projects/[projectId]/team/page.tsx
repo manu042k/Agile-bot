@@ -189,7 +189,7 @@ const ProjectTeamPage = () => {
                   </div>
                   <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gray-900 rounded-full transition-all"
+                      className="h-full bg-orange-600 rounded-full transition-all"
                       style={{ width: `${completionRate}%` }}
                     />
                   </div>
