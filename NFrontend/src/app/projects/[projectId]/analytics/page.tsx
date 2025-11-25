@@ -2,6 +2,7 @@
 import { useParams } from "next/navigation";
 import { TrendingUp, CheckCircle2, Clock, Users, Calendar, ArrowUp, ArrowDown } from "lucide-react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock analytics data
 const getMockAnalytics = (projectId: string) => ({
@@ -112,7 +113,8 @@ const ProjectAnalyticsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* Burndown Chart */}
           <div className="pm-card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Burndown Chart</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Burndown Chart</h2>
+            <Separator className="my-4" />
             <div className="h-64 flex items-end justify-between gap-2">
               {analytics.burndown.map((point, idx) => {
                 const maxRemaining = Math.max(...analytics.burndown.map(p => p.remaining));
@@ -137,7 +139,8 @@ const ProjectAnalyticsPage = () => {
 
           {/* Task Completion Trend */}
           <div className="pm-card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Task Completion Trend</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Task Completion Trend</h2>
+            <Separator className="my-4" />
             <div className="h-64 flex items-end justify-between gap-2">
               {analytics.taskCompletion.map((week, idx) => {
                 const maxCompleted = Math.max(...analytics.taskCompletion.map(w => w.completed));
@@ -161,7 +164,8 @@ const ProjectAnalyticsPage = () => {
 
         {/* Status Distribution */}
         <div className="pm-card p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Status Distribution</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Status Distribution</h2>
+          <Separator className="my-4" />
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.entries(analytics.statusDistribution).map(([status, count]) => {
               const total = Object.values(analytics.statusDistribution).reduce((a, b) => a + b, 0);
@@ -184,7 +188,8 @@ const ProjectAnalyticsPage = () => {
 
         {/* Team Performance */}
         <div className="pm-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Team Performance</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Team Performance</h2>
+          <Separator className="my-4" />
           <div className="space-y-4">
             {analytics.teamPerformance.map((member, idx) => (
               <div key={idx} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">

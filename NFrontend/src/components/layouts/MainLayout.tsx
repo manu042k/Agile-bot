@@ -1,6 +1,7 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -21,6 +22,7 @@ import EnhancedBreadcrumb from "../common/EnhancedBreadcrumb";
 import GlobalSearch from "../common/GlobalSearch";
 import NotificationCenter from "../common/NotificationCenter";
 import { useSession } from "next-auth/react";
+import Logo from "@/assets/logo.png";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
@@ -146,14 +148,28 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="h-16 border-b border-gray-200 flex items-center px-4">
           {!sidebarCollapsed ? (
             <Link href="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">AB</span>
+              <div className="w-8 h-8">
+                <Image
+                  src={Logo}
+                  alt="AgileBot logo"
+                  width={32}
+                  height={32}
+                  priority
+                  className="h-8 w-8 object-contain"
+                />
               </div>
               <span className="font-semibold text-gray-900">AgileBot</span>
             </Link>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center mx-auto">
-              <span className="text-white font-bold text-sm">AB</span>
+            <div className="w-8 h-8 mx-auto">
+              <Image
+                src={Logo}
+                alt="AgileBot logo"
+                width={32}
+                height={32}
+                priority
+                className="h-8 w-8 object-contain"
+              />
             </div>
           )}
         </div>

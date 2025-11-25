@@ -7,6 +7,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
 import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
 import { getPriorityClass } from "@/lib/colorUtils";
+import { Separator } from "@/components/ui/separator";
 
 // Mock tasks data
 const mockTasks = [
@@ -160,7 +161,8 @@ const TasksPage = () => {
 
             {/* Tasks Overview */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Tasks Overview</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Tasks Overview</h2>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
@@ -196,7 +198,8 @@ const TasksPage = () => {
 
             {/* Tasks List */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Tasks</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Tasks</h2>
+              <Separator className="my-4" />
               {viewMode === "list" ? (
                 filteredTasks.length > 0 ? (
                   <div className="space-y-3">
@@ -333,7 +336,8 @@ const TasksPage = () => {
           <div className="space-y-6">
             {/* Task Details */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Task Details</h3>
+              <h3 className="font-semibold text-gray-900">Task Details</h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Status</p>
@@ -357,7 +361,8 @@ const TasksPage = () => {
 
             {/* Recent Activity */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Recent Activity</h3>
+              <h3 className="font-semibold text-gray-900">Recent Activity</h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">

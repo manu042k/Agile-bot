@@ -11,6 +11,7 @@ import projectService from "@/services/projectService";
 import { Team } from "@/types/project";
 import { useUser } from "@/hooks/useUser";
 import toast from "react-hot-toast";
+import { Separator } from "@/components/ui/separator";
 
 const TeamsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,6 +68,7 @@ const TeamsPage = () => {
   };
 
   // Filter teams based on search
+  // Note: Backend already filters teams to only return teams where user is a member
   const filteredTeams = teams.filter(team => {
     const matchesSearch = team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (team.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
@@ -75,7 +77,8 @@ const TeamsPage = () => {
   });
 
   // Calculate stats
-  // Count unique members across all teams (a user can be in multiple teams)
+  // Note: Backend already filters teams to only return teams where user is a member
+  // Count unique members across all teams
   const uniqueMemberIds = new Set<number>();
   teams.forEach(team => {
     team.members.forEach(member => {
@@ -151,56 +154,68 @@ const TeamsPage = () => {
       />
 
       <div className="px-6 py-8">
-        {/* Search and Actions */}
+        {/* Search */}
         <div className="mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
-              <input
-                type="text"
-                placeholder="Search teams..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pm-input !pl-10 pr-3 w-full"
-              />
-            </div>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <button className="pm-button-primary inline-flex items-center gap-2">
-                  <CirclePlus className="h-4 w-4" />
-                  New Team
-                </button>
-              </DialogTrigger>
-              <CreateTeamComponent onTeamCreated={refreshTeams} />
-            </Dialog>
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
+            <input
+              type="text"
+              placeholder="Search teams..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pm-input !pl-10 pr-3 w-full"
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Teams Overview */}
-            <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Teams Overview</h2>
-              <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{totalMembers}</p>
-                    <p className="text-xs text-gray-500 mt-1">Total Members</p>
+            {/* New Team Button and Teams Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* New Team Button */}
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                        <CirclePlus className="h-6 w-6 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">New Team</h3>
+                        <p className="text-xs text-gray-500">Create team</p>
+                      </div>
+                    </div>
+                  </button>
+                </DialogTrigger>
+                <CreateTeamComponent onTeamCreated={refreshTeams} />
+              </Dialog>
+
+              {/* Teams Overview */}
+              <div className="pm-card p-6">
+                <h2 className="text-lg font-semibold text-gray-900">Teams Overview</h2>
+                <Separator className="my-4" />
+                <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{totalMembers}</p>
+                      <p className="text-xs text-gray-500 mt-1">Total Members</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{totalProjects}</p>
+                      <p className="text-xs text-gray-500 mt-1">Total Projects</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{teams.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Active Teams</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{totalProjects}</p>
-                    <p className="text-xs text-gray-500 mt-1">Total Projects</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{teams.length}</p>
-                    <p className="text-xs text-gray-500 mt-1">Active Teams</p>
-                  </div>
-                </div>
+              </div>
             </div>
 
             {/* Teams List */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Teams</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Teams</h2>
+              <Separator className="my-4" />
               {filteredTeams.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filteredTeams.map((team) => (
@@ -266,7 +281,8 @@ const TeamsPage = () => {
           <div className="space-y-6">
             {/* Teams Details */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Teams Details</h3>
+              <h3 className="font-semibold text-gray-900">Teams Details</h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Total Teams</p>
@@ -285,7 +301,8 @@ const TeamsPage = () => {
 
             {/* Recent Activity */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Recent Activity</h3>
+              <h3 className="font-semibold text-gray-900">Recent Activity</h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">

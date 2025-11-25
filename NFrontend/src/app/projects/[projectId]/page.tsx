@@ -8,6 +8,7 @@ import {
   Upload
 } from "lucide-react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock project data
 const getMockProject = (id: string) => ({
@@ -40,10 +41,10 @@ const ProjectDetailPage = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-4">
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
+              <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Upload className="h-5 w-5 text-gray-700" />
+                  <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                    <Upload className="h-6 w-6 text-orange-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Upload Document</h3>
@@ -52,10 +53,10 @@ const ProjectDetailPage = () => {
                 </div>
               </button>
 
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
+              <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Sparkles className="h-5 w-5 text-gray-700" />
+                  <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                    <Sparkles className="h-6 w-6 text-orange-600" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Generate Tasks</h3>
@@ -67,7 +68,8 @@ const ProjectDetailPage = () => {
 
             {/* Project Overview */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Project Overview</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Project Overview</h2>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
@@ -101,7 +103,8 @@ const ProjectDetailPage = () => {
 
             {/* Recent Activity */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
@@ -124,7 +127,8 @@ const ProjectDetailPage = () => {
           <div className="space-y-6">
             {/* Project Details */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Project Details</h3>
+              <h3 className="font-semibold text-gray-900">Project Details</h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Status</p>
@@ -149,7 +153,8 @@ const ProjectDetailPage = () => {
 
             {/* Team Members */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Team Members</h3>
+              <h3 className="font-semibold text-gray-900">Team Members</h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className="flex items-center gap-3">

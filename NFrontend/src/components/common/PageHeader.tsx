@@ -2,6 +2,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { LucideIcon } from "lucide-react";
 import Link from "next/link";
+import { Separator } from "@/components/ui/separator";
 
 interface TabItem {
   icon: LucideIcon;
@@ -48,8 +49,8 @@ export default function PageHeader({
 
   return (
     <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
-      <div className="px-6 py-6">
-        <div className="flex items-start gap-4 mb-6">
+      <div className="px-6 py-6 space-y-6">
+        <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
             <Icon className="h-6 w-6 text-gray-700" />
           </div>
@@ -58,6 +59,8 @@ export default function PageHeader({
             <p className="text-gray-600 leading-relaxed">{description}</p>
           </div>
         </div>
+
+        <Separator className="bg-gray-200" />
 
         {/* Navigation Tabs */}
         {showTabs && tabs.length > 0 && (

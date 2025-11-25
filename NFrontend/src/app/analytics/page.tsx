@@ -12,6 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock analytics data
 const mockMetrics = {
@@ -97,9 +98,10 @@ const AnalyticsPage = () => {
 
                 {/* Analytics Overview */}
                 <div className="pm-card p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">
                     Analytics Overview
                   </h2>
+                  <Separator className="my-4" />
                   <div className="space-y-4">
                     <div>
                       <div className="flex items-center justify-between text-sm mb-2">
@@ -229,9 +231,10 @@ const AnalyticsPage = () => {
                 <div className="grid grid-cols-1 gap-6">
                   {/* Task Completion Chart */}
                   <div className="pm-card p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       Task Completion Trend
                     </h2>
+                    <Separator className="my-4" />
                     <div className="space-y-4">
                       {mockChartData.map((data, idx) => (
                         <div key={idx} className="space-y-2">
@@ -275,9 +278,10 @@ const AnalyticsPage = () => {
 
                   {/* Project Status Distribution */}
                   <div className="pm-card p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       Project Status
                     </h2>
+                    <Separator className="my-4" />
                     <div className="space-y-4">
                       <div>
                         <div className="flex items-center justify-between mb-2">
@@ -354,9 +358,10 @@ const AnalyticsPage = () => {
 
                   {/* Task Status Breakdown */}
                   <div className="pm-card p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       Task Status Breakdown
                     </h2>
+                    <Separator className="my-4" />
                     <div className="space-y-4">
                       <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                         <div className="flex items-center gap-3">
@@ -409,9 +414,10 @@ const AnalyticsPage = () => {
 
                   {/* Team Performance */}
                   <div className="pm-card p-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       Team Performance
                     </h2>
+                    <Separator className="my-4" />
                     <div className="space-y-4">
                       {[1, 2, 3, 4, 5].map((i) => {
                         const performance = 60 + Math.random() * 40;
@@ -443,9 +449,10 @@ const AnalyticsPage = () => {
             {/* Performance Tab */}
             {tab === "performance" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
                   Performance Metrics
                 </h2>
+                <Separator className="my-4" />
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="pm-card p-5">
@@ -460,9 +467,10 @@ const AnalyticsPage = () => {
                     </div>
                   </div>
                   <div className="pm-card p-6">
-                    <h3 className="font-semibold text-gray-900 mb-4">
+                    <h3 className="font-semibold text-gray-900">
                       Sprint Performance
                     </h3>
+                    <Separator className="my-4" />
                     <div className="space-y-3">
                       {[1, 2, 3, 4].map((i) => (
                         <div
@@ -492,9 +500,10 @@ const AnalyticsPage = () => {
             {/* Reports Tab */}
             {tab === "reports" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">
                   Generated Reports
                 </h2>
+                <Separator className="my-4" />
                 <div className="space-y-3">
                   {[
                     {
@@ -539,9 +548,10 @@ const AnalyticsPage = () => {
           <div className="space-y-6">
             {/* Analytics Details */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">
+              <h3 className="font-semibold text-gray-900">
                 Analytics Details
               </h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Total Projects</p>
@@ -568,9 +578,10 @@ const AnalyticsPage = () => {
 
             {/* Recent Activity */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">
+              <h3 className="font-semibold text-gray-900">
                 Recent Activity
               </h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div

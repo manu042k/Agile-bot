@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, User, Flag, CalendarDays, Calendar, CalendarClock, ListTodo } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock calendar data
 const getMockTasks = () => [
@@ -103,7 +104,8 @@ const CalendarPage = () => {
 
             {/* Calendar Overview */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Calendar Overview</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Calendar Overview</h2>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
@@ -194,7 +196,8 @@ const CalendarPage = () => {
             {/* Week Tab */}
             {tab === "week" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Week View</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Week View</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-600">Week view content coming soon...</p>
               </div>
             )}
@@ -202,7 +205,8 @@ const CalendarPage = () => {
             {/* Day Tab */}
             {tab === "day" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Day View</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Day View</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-600">Day view content coming soon...</p>
               </div>
             )}
@@ -210,7 +214,8 @@ const CalendarPage = () => {
             {/* Upcoming Tab */}
             {tab === "upcoming" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Tasks</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Upcoming Tasks</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-600">Upcoming tasks content coming soon...</p>
               </div>
             )}
@@ -220,7 +225,8 @@ const CalendarPage = () => {
           <div className="space-y-6">
             {/* Calendar Details */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Calendar Details</h3>
+              <h3 className="font-semibold text-gray-900">Calendar Details</h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Current Month</p>
@@ -239,7 +245,8 @@ const CalendarPage = () => {
 
             {/* Upcoming Tasks */}
             <div className="pm-card p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Tasks</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Upcoming Tasks</h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {tasks.slice(0, 5).map(task => (
                   <div key={task.id} className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">

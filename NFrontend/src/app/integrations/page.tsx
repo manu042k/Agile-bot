@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Plug, CheckCircle, X, ExternalLink, Settings } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock integrations data
 const mockIntegrations = [
@@ -108,7 +109,8 @@ export default function IntegrationsPage() {
               <>
                 {/* Category Filter */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Categories</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Categories</h2>
+              <Separator className="my-4" />
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
                   <button
@@ -128,9 +130,10 @@ export default function IntegrationsPage() {
 
             {/* Integrations List */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
                 {selectedCategory === "All" ? "Integrations" : selectedCategory}
               </h2>
+              <Separator className="my-4" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredIntegrations.map((integration) => (
                   <div
@@ -194,7 +197,8 @@ export default function IntegrationsPage() {
             {/* Settings Tab */}
             {tab === "settings" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Integration Settings</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Integration Settings</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-600">Settings content coming soon...</p>
               </div>
             )}

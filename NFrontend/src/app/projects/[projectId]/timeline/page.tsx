@@ -2,6 +2,7 @@
 import { useParams } from "next/navigation";
 import { Calendar, Clock, User, Flag } from "lucide-react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock timeline data
 const getMockTimeline = (projectId: string) => ({
@@ -93,7 +94,8 @@ const TimelinePage = () => {
 
         {/* Milestones */}
         <div className="pm-card p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Milestones</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Milestones</h2>
+          <Separator className="my-4" />
           <div className="space-y-4">
             {timeline.milestones.map((milestone) => (
               <div key={milestone.id} className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg">
@@ -131,7 +133,8 @@ const TimelinePage = () => {
 
         {/* Gantt Chart */}
         <div className="pm-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Task Timeline</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Task Timeline</h2>
+          <Separator className="my-4" />
           <div className="space-y-4">
             {timeline.tasks.map((task) => {
               const taskDays = getDaysBetween(task.start, task.end);

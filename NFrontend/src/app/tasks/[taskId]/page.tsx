@@ -3,6 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Edit, MoreVertical, User, Calendar, Flag, Tag, MessageSquare, Clock, CheckCircle2, FileText, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/common/PageHeader";
 import { getStatusDotClass, getPriorityClass } from "@/lib/colorUtils";
 
@@ -82,6 +83,7 @@ export default function GlobalTaskDetailPage() {
                     <Edit className="h-4 w-4 text-gray-600" />
                   </button>
                 </div>
+                <Separator className="my-4" />
                 <p className="text-gray-700 whitespace-pre-line">{task.description}</p>
                 {task.details && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-lg">
@@ -93,6 +95,7 @@ export default function GlobalTaskDetailPage() {
               {/* Comments */}
               <div className="pm-card p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">Comments</h2>
+                <Separator className="my-4" />
                 <div className="space-y-4 mb-4">
                   {task.comments.map((comment) => (
                     <div key={comment.id} className="flex gap-3">
@@ -127,6 +130,7 @@ export default function GlobalTaskDetailPage() {
               {task.attachments.length > 0 && (
                 <div className="pm-card p-6">
                   <h2 className="text-lg font-semibold text-gray-900 mb-4">Attachments</h2>
+                  <Separator className="my-4" />
                   <div className="space-y-2">
                     {task.attachments.map((file) => (
                       <div key={file.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
@@ -150,6 +154,7 @@ export default function GlobalTaskDetailPage() {
               {/* Status & Priority */}
               <div className="pm-card p-5">
                 <h3 className="font-semibold text-gray-900 mb-4">Details</h3>
+                <Separator className="my-4" />
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs text-gray-500 mb-2">Status</label>
@@ -182,6 +187,7 @@ export default function GlobalTaskDetailPage() {
               {/* Assignees */}
               <div className="pm-card p-5">
                 <h3 className="font-semibold text-gray-900 mb-4">Assignees</h3>
+                <Separator className="my-4" />
                 <div className="space-y-3">
                   {task.assignees.map((assignee) => (
                     <div key={assignee.id} className="flex items-center gap-3">
@@ -205,6 +211,7 @@ export default function GlobalTaskDetailPage() {
               {/* Due Date */}
               <div className="pm-card p-5">
                 <h3 className="font-semibold text-gray-900 mb-4">Due Date</h3>
+                <Separator className="my-4" />
                 <div className="flex items-center gap-2 text-sm text-gray-700">
                   <Calendar className="h-4 w-4 text-gray-500" />
                   <span>{new Date(task.dueDate).toLocaleDateString()}</span>
@@ -214,6 +221,7 @@ export default function GlobalTaskDetailPage() {
               {/* Tags */}
               <div className="pm-card p-5">
                 <h3 className="font-semibold text-gray-900 mb-4">Tags</h3>
+                <Separator className="my-4" />
                 <div className="flex flex-wrap gap-2">
                   {task.tags.map((tag) => (
                     <span
@@ -233,6 +241,7 @@ export default function GlobalTaskDetailPage() {
               {task.relatedTasks.length > 0 && (
                 <div className="pm-card p-5">
                   <h3 className="font-semibold text-gray-900 mb-4">Related Tasks</h3>
+                  <Separator className="my-4" />
                   <div className="space-y-2">
                     {task.relatedTasks.map((relatedTask) => (
                       <Link
@@ -251,6 +260,7 @@ export default function GlobalTaskDetailPage() {
               {/* Actions */}
               <div className="pm-card p-5">
                 <h3 className="font-semibold text-gray-900 mb-4">Actions</h3>
+                <Separator className="my-4" />
                 <div className="space-y-2">
                   <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors">
                     Duplicate task

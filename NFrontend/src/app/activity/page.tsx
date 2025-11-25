@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Filter, Search, User, CheckCircle2, MessageSquare, FileText, Users, Calendar, Activity, UserCircle, FolderOpen } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock activity data
 const mockActivities = [
@@ -136,7 +137,8 @@ const ActivityPage = () => {
 
             {/* Activity Overview */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Activity Overview</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Activity Overview</h2>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
@@ -201,7 +203,8 @@ const ActivityPage = () => {
 
             {/* Activity Timeline */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Activity Feed</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Activity Feed</h2>
+              <Separator className="my-4" />
               {filteredActivities.length > 0 ? (
                 <div className="space-y-4">
                   {filteredActivities.map((activity, idx) => {
@@ -247,7 +250,8 @@ const ActivityPage = () => {
           <div className="space-y-6">
             {/* Activity Details */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Activity Details</h3>
+              <h3 className="font-semibold text-gray-900">Activity Details</h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Total Activities</p>
@@ -266,7 +270,8 @@ const ActivityPage = () => {
 
             {/* Recent Activity */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Recent Activity</h3>
+              <h3 className="font-semibold text-gray-900">Recent Activity</h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">

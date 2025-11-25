@@ -2,6 +2,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Activity, Bell, Shield, UserCircle, ExternalLink, Lock, KeyRound } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
@@ -230,6 +231,7 @@ const ProfilePage = () => {
               <Card className="pm-card border-0">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
+                  <Separator className="my-4" />
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -256,6 +258,7 @@ const ProfilePage = () => {
               <Card className="pm-card border-0">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-gray-900">Notification Preferences</h3>
+                  <Separator className="my-4" />
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
@@ -289,6 +292,7 @@ const ProfilePage = () => {
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-gray-900">Security Settings</h3>
                   <p className="text-sm text-gray-500 mt-1">Your account is secured through Google SSO</p>
+                  <Separator className="my-4" />
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="p-4 border border-gray-200 rounded-lg bg-blue-50/50">
@@ -375,6 +379,7 @@ const ProfilePage = () => {
             <Card className="pm-card border-0">
               <CardHeader>
                 <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
+                <Separator className="my-4" />
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button variant="outline" className="w-full justify-start">
@@ -400,6 +405,7 @@ const ProfilePage = () => {
             <Card className="pm-card border-0">
               <CardHeader>
                 <h3 className="text-lg font-semibold text-gray-900">Statistics</h3>
+                <Separator className="my-4" />
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>

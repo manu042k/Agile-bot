@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FileText, Download, Calendar, Filter, BarChart3, TrendingUp, Users, CheckCircle } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock reports data
 const mockReports = [
@@ -140,7 +141,8 @@ export default function ReportsPage() {
 
             {/* Reports List */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Reports</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Reports</h2>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {mockReports.map((report) => (
                   <div
@@ -178,7 +180,8 @@ export default function ReportsPage() {
             {/* Analytics Tab */}
             {tab === "analytics" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Analytics</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Analytics</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-600">Analytics content coming soon...</p>
               </div>
             )}
@@ -186,7 +189,8 @@ export default function ReportsPage() {
             {/* Scheduled Tab */}
             {tab === "scheduled" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Scheduled Reports</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Scheduled Reports</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-600">Scheduled reports content coming soon...</p>
               </div>
             )}

@@ -4,11 +4,13 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import { Loader2, Chrome, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Logo from "@/assets/logo.png";
 
 // Disable static generation for this page (uses useSearchParams)
 export const dynamic = "force-dynamic";
@@ -214,9 +216,14 @@ function LoginForm() {
               href="/"
               className="inline-block mb-4 hover:opacity-80 transition-opacity group"
             >
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-lg mb-4 shadow-lg group-hover:shadow-orange-500/20 transition-all duration-300">
-                <span className="text-2xl font-bold text-white">AB</span>
-              </div>
+              <Image
+                src={Logo}
+                alt="AgileBot logo"
+                width={64}
+                height={64}
+                className="mx-auto h-16 w-16 object-contain"
+                priority
+              />
             </Link>
             <h2 className="text-3xl font-bold text-gray-900 mb-2">
               Welcome back
@@ -228,7 +235,7 @@ function LoginForm() {
           <div className="space-y-4">
             <Button
               type="button"
-              className="w-full h-11 bg-black hover:bg-gray-800 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] group"
+              className="w-full h-11 bg-orange-600 hover:bg-orange-700 text-white font-medium transition-all duration-300 shadow-lg hover:shadow-orange-500/20 hover:scale-[1.02] group"
               onClick={handleGoogleLogin}
               disabled={isGoogleLoading}
             >

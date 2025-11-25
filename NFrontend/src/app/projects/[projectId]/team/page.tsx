@@ -5,6 +5,7 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import InviteMemberComponent from "@/components/team/InviteMemberComponent";
+import { Separator } from "@/components/ui/separator";
 
 // Mock team data
 const getMockTeam = (projectId: string) => ({
@@ -92,10 +93,11 @@ const ProjectTeamPage = () => {
 
         {/* Team Members */}
         <div className="pm-card p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">Active Members</h2>
             <span className="text-sm text-gray-500">{team.members.length} members</span>
           </div>
+          <Separator className="my-4" />
           <div className="space-y-3">
             {team.members.map((member) => {
               const RoleIcon = getRoleIcon(member.role);
@@ -136,7 +138,8 @@ const ProjectTeamPage = () => {
         {/* Pending Invites */}
         {team.pendingInvites.length > 0 && (
           <div className="pm-card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Pending Invitations</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Pending Invitations</h2>
+            <Separator className="my-4" />
             <div className="space-y-3">
               {team.pendingInvites.map((invite) => (
                 <div key={invite.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
@@ -167,7 +170,8 @@ const ProjectTeamPage = () => {
 
         {/* Workload View */}
         <div className="pm-card p-6 mt-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Workload Distribution</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Workload Distribution</h2>
+          <Separator className="my-4" />
           <div className="space-y-4">
             {team.members.map((member) => {
               const completionRate = member.tasks > 0 ? (member.completed / member.tasks) * 100 : 0;

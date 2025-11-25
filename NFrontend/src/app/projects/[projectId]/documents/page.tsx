@@ -52,27 +52,26 @@ const ProjectDocumentsPage = () => {
     <div className="min-h-screen bg-gray-50">
       <ProjectHeader />
       <div className="px-6 py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900 mb-2">Documents</h1>
-              <p className="text-gray-600">Manage project documents and files</p>
-            </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="pm-button-primary">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Document
-                </button>
-              </DialogTrigger>
-              <UploadDocumentComponent projectId={projectId} />
-            </Dialog>
-          </div>
-        </div>
+        {/* Upload Document Card and Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          {/* Upload Document Card */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                    <Upload className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Upload Document</h3>
+                    <p className="text-xs text-gray-500">Add new file</p>
+                  </div>
+                </div>
+              </button>
+            </DialogTrigger>
+            <UploadDocumentComponent projectId={projectId} />
+          </Dialog>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">{mockDocuments.length}</p>
             <p className="text-xs text-gray-500 mt-1">Total Documents</p>

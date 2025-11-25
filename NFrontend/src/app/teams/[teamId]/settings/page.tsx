@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
 
 const TeamSettingsPage = () => {
   const params = useParams();
@@ -213,6 +214,7 @@ const TeamSettingsPage = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               General Information
             </h3>
+            <Separator className="my-4" />
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -272,6 +274,7 @@ const TeamSettingsPage = () => {
               <AlertTriangle className="h-5 w-5 text-gray-700" />
               Danger Zone
             </h3>
+            <Separator className="my-4" />
             <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
               <div>
                 <p className="font-medium text-gray-900">Delete Team</p>

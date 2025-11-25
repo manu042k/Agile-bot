@@ -16,10 +16,12 @@ import {
 import Link from "next/link";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import InviteMemberComponent from "@/components/team/InviteMemberComponent";
 import teamService from "@/services/teamService";
 import { Team } from "@/types/project";
 import toast from "react-hot-toast";
+import { useUser } from "@/hooks/useUser";
 
 const getRoleIcon = (role: string) => {
   switch (role) {
@@ -50,6 +52,7 @@ const TeamMembersPage = () => {
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user: currentUser } = useUser();
 
   // Fetch team data function
   const fetchTeam = async () => {
@@ -99,7 +102,10 @@ const TeamMembersPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="pm-card p-6 text-center max-w-md">
           <p className="text-red-600 mb-4">{error || "Team not found"}</p>
-          <Link href="/teams" className="pm-button-primary inline-flex items-center gap-2">
+          <Link
+            href="/teams"
+            className="pm-button-primary inline-flex items-center gap-2"
+          >
             Back to Teams
           </Link>
         </div>
@@ -122,6 +128,14 @@ const TeamMembersPage = () => {
       pathname === item.href ||
       (item.href === `/teams/${teamId}` && pathname === `/teams/${teamId}`),
   }));
+
+  // Check if current user is admin or owner
+  const currentUserMembership = team?.members.find(
+    (member) => member.user?.id === currentUser?.id
+  );
+  const isAdmin =
+    currentUserMembership?.role === "admin" ||
+    currentUserMembership?.role === "owner";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -169,31 +183,38 @@ const TeamMembersPage = () => {
 
       {/* Main Content */}
       <div className="px-6 py-8">
-        {/* Header with Actions */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                Team Members
-              </h2>
-              <p className="text-gray-600">
-                Manage team members and their roles
-              </p>
-            </div>
+        {/* Invite Member Card and Stats */}
+        <div
+          className={`grid grid-cols-1 ${
+            isAdmin ? "md:grid-cols-4" : "md:grid-cols-3"
+          } gap-4 mb-6`}
+        >
+          {/* Invite Member Card - Only visible for admins */}
+          {isAdmin && (
             <Dialog>
               <DialogTrigger asChild>
-                <button className="pm-button-primary inline-flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  Invite Member
+                <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                      <UserPlus className="h-6 w-6 text-orange-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
+                        Invite Member
+                      </h3>
+                      <p className="text-xs text-gray-500">Add to team</p>
+                    </div>
+                  </div>
                 </button>
               </DialogTrigger>
-              <InviteMemberComponent teamId={teamId} onMemberInvited={fetchTeam} />
+              <InviteMemberComponent
+                teamId={teamId}
+                onMemberInvited={fetchTeam}
+              />
             </Dialog>
-          </div>
-        </div>
+          )}
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {/* Stats */}
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
               {team.members.length}
@@ -202,13 +223,17 @@ const TeamMembersPage = () => {
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {team.members.filter(m => m.role === "owner" || m.role === "admin").length}
+              {
+                team.members.filter(
+                  (m) => m.role === "owner" || m.role === "admin"
+                ).length
+              }
             </p>
             <p className="text-xs text-gray-500 mt-1">Admins</p>
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {team.members.filter(m => m.role === "member").length}
+              {team.members.filter((m) => m.role === "member").length}
             </p>
             <p className="text-xs text-gray-500 mt-1">Members</p>
           </div>
@@ -224,13 +249,15 @@ const TeamMembersPage = () => {
               {team.members.length} members
             </span>
           </div>
+          <Separator className="my-4" />
           <div className="space-y-3">
             {team.members.length > 0 ? (
               team.members.map((member) => {
                 const RoleIcon = getRoleIcon(member.role);
-                const userName = member.user?.first_name && member.user?.last_name
-                  ? `${member.user.first_name} ${member.user.last_name}`
-                  : member.user?.email || "Unknown User";
+                const userName =
+                  member.user?.first_name && member.user?.last_name
+                    ? `${member.user.first_name} ${member.user.last_name}`
+                    : member.user?.email || "Unknown User";
                 const userEmail = member.user?.email || "";
                 const initials = userName
                   .split(" ")
@@ -238,10 +265,10 @@ const TeamMembersPage = () => {
                   .join("")
                   .toUpperCase()
                   .substring(0, 2);
-                const joinedDate = member.joined_at 
+                const joinedDate = member.joined_at
                   ? new Date(member.joined_at).toLocaleDateString()
                   : "N/A";
-                
+
                 return (
                   <div
                     key={member.id || member.user?.id}
@@ -249,7 +276,9 @@ const TeamMembersPage = () => {
                   >
                     <Avatar className="h-12 w-12">
                       <AvatarImage
-                        src={member.user?.avatar_url || member.user?.profile_pic}
+                        src={
+                          member.user?.avatar_url || member.user?.profile_pic
+                        }
                         alt={userName}
                       />
                       <AvatarFallback className="bg-gray-900 text-white font-medium">

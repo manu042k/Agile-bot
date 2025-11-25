@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { HelpCircle, Book, MessageCircle, FileText, Sparkles, ChevronRight, Search } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import Link from "next/link";
+import { Separator } from "@/components/ui/separator";
 
 // Mock FAQ data
 const mockFAQs = [
@@ -133,7 +134,8 @@ export default function HelpPage() {
 
             {/* Documentation Sections */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Documentation</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Documentation</h2>
+              <Separator className="my-4" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {documentationSections.map((section) => {
                   const Icon = section.icon;
@@ -161,7 +163,7 @@ export default function HelpPage() {
 
             {/* FAQ */}
             <div className="pm-card p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Frequently Asked Questions</h2>
                 <div className="flex gap-2">
                   {categories.map((category) => (
@@ -179,6 +181,7 @@ export default function HelpPage() {
                   ))}
                 </div>
               </div>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {filteredFAQs.map((faq) => (
                   <div
@@ -213,7 +216,8 @@ export default function HelpPage() {
             {/* Documentation Tab */}
             {tab === "docs" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Documentation</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Documentation</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-600">Documentation content coming soon...</p>
               </div>
             )}
@@ -221,7 +225,8 @@ export default function HelpPage() {
             {/* Contact Support Tab */}
             {tab === "support" && (
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Contact Support</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Contact Support</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-600">Support contact form coming soon...</p>
               </div>
             )}

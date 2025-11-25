@@ -3,6 +3,7 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Edit, MoreVertical, User, Calendar, Flag, Tag, MessageSquare, Clock, CheckCircle2, FileText, Link as LinkIcon } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 
 // Mock task data
 const getMockTask = (projectId: string, taskId: string) => ({
@@ -122,7 +123,8 @@ const TaskDetailPage = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Description */}
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Description</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Description</h2>
+                <Separator className="my-4" />
                 <p className="text-gray-700 leading-relaxed mb-4">{task.description}</p>
                 <div className="pt-4 border-t border-gray-100">
                   <h3 className="font-medium text-gray-900 mb-2">Details</h3>
@@ -132,7 +134,8 @@ const TaskDetailPage = () => {
 
               {/* Comments */}
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Comments</h2>
+                <h2 className="text-lg font-semibold text-gray-900">Comments</h2>
+                <Separator className="my-4" />
                 <div className="space-y-4 mb-4">
                   {task.comments.map((comment) => (
                     <div key={comment.id} className="flex items-start gap-3">
@@ -168,10 +171,11 @@ const TaskDetailPage = () => {
 
               {/* Subtasks */}
               <div className="pm-card p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">Subtasks</h2>
                   <button className="text-sm text-gray-600 hover:text-gray-900">+ Add subtask</button>
                 </div>
+                <Separator className="my-4" />
                 <div className="space-y-2">
                   {task.subtasks.map((subtask) => (
                     <div
@@ -200,7 +204,8 @@ const TaskDetailPage = () => {
               {/* Attachments */}
               {task.attachments.length > 0 && (
                 <div className="pm-card p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">Attachments</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Attachments</h2>
+                  <Separator className="my-4" />
                   <div className="space-y-2">
                     {task.attachments.map((file) => (
                       <div key={file.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">

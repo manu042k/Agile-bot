@@ -29,6 +29,7 @@ import {
   getProjectStatusBadgeClass,
   getProjectStatusDotClass,
 } from "@/lib/colorUtils";
+import { Separator } from "@/components/ui/separator";
 
 // Mock data
 const mockProjects = [
@@ -235,15 +236,6 @@ const ProjectsPage = () => {
                 </div>
               </div>
             </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="pm-button-primary inline-flex items-center gap-2">
-                  <CirclePlus className="h-4 w-4" />
-                  New Project
-                </button>
-              </DialogTrigger>
-              <CreateProjectComponent />
-            </Dialog>
           </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
@@ -253,10 +245,10 @@ const ProjectsPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
+                  <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                        <CirclePlus className="h-5 w-5 text-gray-700" />
+                      <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                        <CirclePlus className="h-6 w-6 text-orange-600" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
@@ -287,9 +279,10 @@ const ProjectsPage = () => {
 
             {/* Projects Overview */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
                 Projects Overview
               </h2>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
@@ -331,7 +324,7 @@ const ProjectsPage = () => {
 
             {/* Projects List */}
             <div className="pm-card p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">
                   Projects
                 </h2>
@@ -369,6 +362,7 @@ const ProjectsPage = () => {
                   </div>
                 )}
               </div>
+              <Separator className="my-4" />
               {filteredProjects.length > 0 ? (
                 viewMode === "board" ? (
                   <div className="grid grid-cols-4 gap-4">
@@ -667,6 +661,7 @@ const ProjectsPage = () => {
               <h3 className="font-semibold text-gray-900 mb-4">
                 Projects Details
               </h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Total Projects</p>
@@ -694,6 +689,7 @@ const ProjectsPage = () => {
               <h3 className="font-semibold text-gray-900 mb-4">
                 Recent Activity
               </h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
                   <div

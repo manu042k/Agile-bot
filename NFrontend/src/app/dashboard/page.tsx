@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/common/PageHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock data
 const mockStats = {
@@ -153,7 +154,8 @@ const DashboardPage = () => {
 
             {/* Dashboard Overview */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Dashboard Overview</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Dashboard Overview</h2>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
@@ -189,13 +191,14 @@ const DashboardPage = () => {
 
             {/* My Tasks */}
             <div className="pm-card p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">My Tasks</h2>
                 <Link href="/tasks" className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
                   View all
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {mockMyTasks.map((task) => {
                   const projectId = task.id % 3 + 1; // Mock: derive from task ID
@@ -239,13 +242,14 @@ const DashboardPage = () => {
 
             {/* Recent Projects */}
             <div className="pm-card p-6">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
                 <Link href="/projects" className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
                   View all
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 {mockRecentProjects.map((project) => (
                   <Link key={project.id} href={`/projects/${project.id}`}>
@@ -274,7 +278,8 @@ const DashboardPage = () => {
           <div className="space-y-6">
             {/* Dashboard Details */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Dashboard Details</h3>
+              <h3 className="font-semibold text-gray-900">Dashboard Details</h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Active Projects</p>
@@ -293,7 +298,8 @@ const DashboardPage = () => {
 
             {/* Upcoming Deadlines */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Upcoming Deadlines</h3>
+              <h3 className="font-semibold text-gray-900">Upcoming Deadlines</h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {mockUpcomingDeadlines.map((item) => (
                   <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
@@ -333,7 +339,8 @@ const DashboardPage = () => {
         {tab === "my-tasks" && (
           <div className="space-y-6">
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">My Tasks</h2>
+              <h2 className="text-lg font-semibold text-gray-900">My Tasks</h2>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {mockMyTasks.map((task) => (
                   <div key={task.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
@@ -371,7 +378,8 @@ const DashboardPage = () => {
         {tab === "projects" && (
           <div className="space-y-6">
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Projects</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {mockRecentProjects.map((project) => (
                   <Link key={project.id} href={`/projects/${project.id}`}>

@@ -1,26 +1,90 @@
 "use client";
 import { useState } from "react";
-import { Upload, FileText, Search, Download, Plus, File, FileCode, FileSpreadsheet, Image, FileType, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  Search,
+  Download,
+  Plus,
+  File,
+  FileCode,
+  FileSpreadsheet,
+  Image,
+  FileType,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import PageHeader from "@/components/common/PageHeader";
 import UploadDocumentComponent from "@/components/projects/UploadDocumentComponent";
+import { Separator } from "@/components/ui/separator";
 
 // Mock documents
 const mockDocuments = [
-  { id: 1, name: "Project Requirements.pdf", project: "E-Commerce Platform", uploadedBy: "John Doe", uploadedAt: "2024-02-10", size: "2.4 MB", type: "pdf" },
-  { id: 2, name: "Technical Specification.docx", project: "Mobile Banking App", uploadedBy: "Jane Smith", uploadedAt: "2024-02-08", size: "1.8 MB", type: "doc" },
-  { id: 3, name: "Design Mockups.fig", project: "AI Analytics Dashboard", uploadedBy: "Mike Johnson", uploadedAt: "2024-02-05", size: "5.2 MB", type: "fig" },
-  { id: 4, name: "API Documentation.md", project: "E-Commerce Platform", uploadedBy: "Sarah Wilson", uploadedAt: "2024-02-03", size: "0.5 MB", type: "md" },
-  { id: 5, name: "Database Schema.sql", project: "Mobile Banking App", uploadedBy: "Alex Brown", uploadedAt: "2024-02-01", size: "0.3 MB", type: "sql" },
-  { id: 6, name: "User Stories.xlsx", project: "AI Analytics Dashboard", uploadedBy: "Chris Lee", uploadedAt: "2024-01-28", size: "0.9 MB", type: "xlsx" },
+  {
+    id: 1,
+    name: "Project Requirements.pdf",
+    project: "E-Commerce Platform",
+    uploadedBy: "John Doe",
+    uploadedAt: "2024-02-10",
+    size: "2.4 MB",
+    type: "pdf",
+  },
+  {
+    id: 2,
+    name: "Technical Specification.docx",
+    project: "Mobile Banking App",
+    uploadedBy: "Jane Smith",
+    uploadedAt: "2024-02-08",
+    size: "1.8 MB",
+    type: "doc",
+  },
+  {
+    id: 3,
+    name: "Design Mockups.fig",
+    project: "AI Analytics Dashboard",
+    uploadedBy: "Mike Johnson",
+    uploadedAt: "2024-02-05",
+    size: "5.2 MB",
+    type: "fig",
+  },
+  {
+    id: 4,
+    name: "API Documentation.md",
+    project: "E-Commerce Platform",
+    uploadedBy: "Sarah Wilson",
+    uploadedAt: "2024-02-03",
+    size: "0.5 MB",
+    type: "md",
+  },
+  {
+    id: 5,
+    name: "Database Schema.sql",
+    project: "Mobile Banking App",
+    uploadedBy: "Alex Brown",
+    uploadedAt: "2024-02-01",
+    size: "0.3 MB",
+    type: "sql",
+  },
+  {
+    id: 6,
+    name: "User Stories.xlsx",
+    project: "AI Analytics Dashboard",
+    uploadedBy: "Chris Lee",
+    uploadedAt: "2024-01-28",
+    size: "0.9 MB",
+    type: "xlsx",
+  },
 ];
 
 const DocumentsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+    new Set()
+  );
 
   const toggleProject = (project: string) => {
-    setExpandedProjects(prev => {
+    setExpandedProjects((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(project)) {
         newSet.delete(project);
@@ -31,8 +95,10 @@ const DocumentsPage = () => {
     });
   };
 
-  const filteredDocuments = mockDocuments.filter(doc => {
-    const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredDocuments = mockDocuments.filter((doc) => {
+    const matchesSearch = doc.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     return matchesSearch;
   });
 
@@ -46,7 +112,9 @@ const DocumentsPage = () => {
         return <File className={iconClass} style={{ color: "#2563EB" }} />; // Blue
       case "xlsx":
       case "xls":
-        return <FileSpreadsheet className={iconClass} style={{ color: "#16A34A" }} />; // Green
+        return (
+          <FileSpreadsheet className={iconClass} style={{ color: "#16A34A" }} />
+        ); // Green
       case "md":
         return <FileCode className={iconClass} style={{ color: "#7C3AED" }} />; // Purple
       case "sql":
@@ -119,7 +187,9 @@ const DocumentsPage = () => {
                         <Plus className="h-6 w-6 text-orange-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Add Document</h3>
+                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
+                          Add Document
+                        </h3>
                         <p className="text-xs text-gray-500">New document</p>
                       </div>
                     </div>
@@ -130,48 +200,77 @@ const DocumentsPage = () => {
 
               {/* Documents Overview */}
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Documents Overview</h2>
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Documents Overview
+                </h2>
+                <Separator className="my-4" />
                 <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">{mockDocuments.length}</p>
-                      <p className="text-xs text-gray-500 mt-1">Total Documents</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">{new Set(mockDocuments.map(d => d.project)).size}</p>
-                      <p className="text-xs text-gray-500 mt-1">Projects</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">{new Set(mockDocuments.map(d => d.type)).size}</p>
-                      <p className="text-xs text-gray-500 mt-1">File Types</p>
-                    </div>
+                  <div>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {mockDocuments.length}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Total Documents
+                    </p>
                   </div>
+                  <div>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {new Set(mockDocuments.map((d) => d.project)).size}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">Projects</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold text-gray-900">
+                      {new Set(mockDocuments.map((d) => d.type)).size}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">File Types</p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Documents by Project */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
                 Documents by Project
               </h2>
-              {Array.from(new Set(filteredDocuments.map(d => d.project))).length > 0 ? (
+              <Separator className="my-4" />
+              {Array.from(new Set(filteredDocuments.map((d) => d.project)))
+                .length > 0 ? (
                 <div className="space-y-6">
-                  {Array.from(new Set(filteredDocuments.map(d => d.project))).map((project) => {
-                    const projectDocs = filteredDocuments.filter(d => d.project === project);
+                  {Array.from(
+                    new Set(filteredDocuments.map((d) => d.project))
+                  ).map((project) => {
+                    const projectDocs = filteredDocuments.filter(
+                      (d) => d.project === project
+                    );
                     const isExpanded = expandedProjects.has(project);
                     const hasMoreThanThree = projectDocs.length > 3;
-                    const displayDocs = hasMoreThanThree && !isExpanded ? projectDocs.slice(0, 3) : projectDocs;
+                    const displayDocs =
+                      hasMoreThanThree && !isExpanded
+                        ? projectDocs.slice(0, 3)
+                        : projectDocs;
                     const remainingCount = projectDocs.length - 3;
 
                     return (
-                      <div key={project} className="border border-gray-200 rounded-lg p-4">
+                      <div
+                        key={project}
+                        className="border border-gray-200 rounded-lg p-4"
+                      >
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-semibold text-gray-900">{project}</h3>
+                          <h3 className="font-semibold text-gray-900">
+                            {project}
+                          </h3>
                           {hasMoreThanThree && (
                             <button
                               onClick={() => toggleProject(project)}
-                              className="flex items-center gap-1 text-sm text-gray-600 hover:text-orange-600 transition-colors px-2 py-1 rounded hover:bg-orange-50"
+                              className="flex items-center gap-1 text-sm text-gray-600 transition-colors px-2 py-1 rounded hover:bg-orange-50"
                             >
-                              <span>{isExpanded ? "Show less" : `Show ${remainingCount} more`}</span>
+                              <span>
+                                {isExpanded
+                                  ? "Show less"
+                                  : `Show ${remainingCount} more`}
+                              </span>
                               {isExpanded ? (
                                 <ChevronUp className="h-4 w-4" />
                               ) : (
@@ -187,16 +286,24 @@ const DocumentsPage = () => {
                               className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 hover:border-gray-200 hover:shadow-sm transition-all duration-200 cursor-pointer group"
                             >
                               <div className="flex items-center gap-3 flex-1">
-                                <div className={`w-10 h-10 rounded-lg ${getFileIconBg(doc.type)} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
+                                <div
+                                  className={`w-10 h-10 rounded-lg ${getFileIconBg(
+                                    doc.type
+                                  )} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}
+                                >
                                   {getFileIcon(doc.type)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-gray-900 text-sm group-hover:text-orange-600 transition-colors truncate">{doc.name}</p>
-                                  <p className="text-xs text-gray-500">{doc.size} • {doc.uploadedAt}</p>
+                                  <p className="font-medium text-gray-900 text-sm transition-colors truncate">
+                                    {doc.name}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {doc.size} • {doc.uploadedAt}
+                                  </p>
                                 </div>
                               </div>
-                              <button className="p-2 rounded-lg hover:bg-orange-100 hover:text-orange-600 transition-colors opacity-0 group-hover:opacity-100">
-                                <Download className="h-4 w-4 text-gray-600 group-hover:text-orange-600 transition-colors" />
+                              <button className="p-2 rounded-lg hover:bg-orange-100 transition-colors opacity-0 group-hover:opacity-100">
+                                <Download className="h-4 w-4 text-gray-600 transition-colors" />
                               </button>
                             </div>
                           ))}
@@ -219,8 +326,8 @@ const DocumentsPage = () => {
                     {searchQuery ? "No documents found" : "No documents yet"}
                   </h3>
                   <p className="text-sm text-gray-500 mb-8 max-w-sm mx-auto">
-                    {searchQuery 
-                      ? "Try adjusting your search query or clear filters to see more results" 
+                    {searchQuery
+                      ? "Try adjusting your search query or clear filters to see more results"
                       : "Get started by uploading your first document. Organize project files, share requirements, and collaborate with your team."}
                   </p>
                   {!searchQuery && (
@@ -243,18 +350,22 @@ const DocumentsPage = () => {
           <div className="space-y-6">
             {/* Recent Activity */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Recent Activity</h3>
+              <h3 className="font-semibold text-gray-900">Recent Activity</h3>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
                     <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
                       <FileText className="h-3 w-3 text-gray-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-900">
-                        Document uploaded
+                      <p className="text-xs text-gray-900">Document uploaded</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {i} hour{i > 1 ? "s" : ""} ago
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5">{i} hour{i > 1 ? 's' : ''} ago</p>
                     </div>
                   </div>
                 ))}
@@ -268,4 +379,3 @@ const DocumentsPage = () => {
 };
 
 export default DocumentsPage;
-

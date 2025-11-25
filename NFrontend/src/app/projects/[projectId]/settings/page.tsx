@@ -3,6 +3,7 @@ import { useParams } from "next/navigation";
 import { Save, Trash2, Archive, Globe, Lock, Users, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
+import { Separator } from "@/components/ui/separator";
 
 // Mock project settings
 const getMockProject = (projectId: string) => ({
@@ -43,7 +44,8 @@ const ProjectSettingsPage = () => {
         <div className="max-w-4xl space-y-6">
           {/* General Settings */}
           <div className="pm-card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">General Information</h2>
+            <h2 className="text-lg font-semibold text-gray-900">General Information</h2>
+            <Separator className="my-4" />
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Project Name</label>
@@ -92,7 +94,8 @@ const ProjectSettingsPage = () => {
 
           {/* Visibility Settings */}
           <div className="pm-card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Visibility</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Visibility</h2>
+            <Separator className="my-4" />
             <div className="space-y-3">
               <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-300 transition-colors">
                 <input
@@ -133,7 +136,8 @@ const ProjectSettingsPage = () => {
 
           {/* Team Settings */}
           <div className="pm-card p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Team</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Team</h2>
+            <Separator className="my-4" />
             <div className="space-y-3">
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div className="flex items-center gap-3">
@@ -152,10 +156,11 @@ const ProjectSettingsPage = () => {
 
           {/* Danger Zone */}
           <div className="pm-card p-6 border-2 border-gray-300">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-gray-700" />
               Danger Zone
             </h2>
+            <Separator className="my-4" />
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                 <div>

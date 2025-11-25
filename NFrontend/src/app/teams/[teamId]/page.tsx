@@ -16,6 +16,7 @@ import teamService from "@/services/teamService";
 import projectService from "@/services/projectService";
 import { Team, Project } from "@/types/project";
 import toast from "react-hot-toast";
+import { Separator } from "@/components/ui/separator";
 
 const getRoleIcon = (role: string) => {
   switch (role) {
@@ -204,9 +205,10 @@ const TeamDetailPage = () => {
 
             {/* Recent Activity */}
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">
                 Recent Activity
               </h2>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 <div className="text-center py-8 text-gray-500">
                   <p className="text-sm">No recent activity</p>
@@ -219,7 +221,8 @@ const TeamDetailPage = () => {
           <div className="space-y-6">
             {/* Team Details */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Team Details</h3>
+              <h3 className="font-semibold text-gray-900">Team Details</h3>
+              <Separator className="my-4" />
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Created</p>
@@ -238,7 +241,7 @@ const TeamDetailPage = () => {
 
             {/* Team Members Preview */}
             <div className="pm-card p-5">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-gray-900">Team Members</h3>
                 <Link
                   href={`/teams/${teamId}/members`}
@@ -247,6 +250,7 @@ const TeamDetailPage = () => {
                   View all
                 </Link>
               </div>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {team.members.length > 0 ? (
                   team.members.slice(0, 3).map((member) => {
@@ -298,7 +302,7 @@ const TeamDetailPage = () => {
 
             {/* Team Projects Preview */}
             <div className="pm-card p-5">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-gray-900">Projects</h3>
                 <Link
                   href={`/teams/${teamId}/projects`}
@@ -307,6 +311,7 @@ const TeamDetailPage = () => {
                   View all
                 </Link>
               </div>
+              <Separator className="my-4" />
               <div className="space-y-3">
                 {projects.length > 0 ? (
                   projects.slice(0, 3).map((project) => (

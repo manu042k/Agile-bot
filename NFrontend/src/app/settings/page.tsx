@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Bell, Shield, Palette, Globe, Settings } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
+import { Separator } from "@/components/ui/separator";
 
 const SettingsPage = () => {
   const [activeTab, setActiveTab] = useState("notifications");
@@ -54,9 +55,10 @@ const SettingsPage = () => {
               {activeTab === "notifications" && (
                 <div className="pm-card p-6 space-y-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       Notification Preferences
                     </h2>
+                    <Separator className="my-4" />
                     <div className="space-y-4">
                       {[
                         {
@@ -114,9 +116,10 @@ const SettingsPage = () => {
               {activeTab === "security" && (
                 <div className="pm-card p-6 space-y-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       Security Settings
                     </h2>
+                    <Separator className="my-4" />
                     <div className="space-y-4">
                       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <h3 className="font-medium text-gray-900 mb-2">
@@ -187,9 +190,10 @@ const SettingsPage = () => {
               {activeTab === "appearance" && (
                 <div className="pm-card p-6 space-y-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       Appearance
                     </h2>
+                    <Separator className="my-4" />
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -216,9 +220,10 @@ const SettingsPage = () => {
               {activeTab === "general" && (
                 <div className="pm-card p-6 space-y-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
                       General Settings
                     </h2>
+                    <Separator className="my-4" />
                     <div className="space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
