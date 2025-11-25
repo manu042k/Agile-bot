@@ -105,8 +105,8 @@ const TeamsPage = () => {
             </div>
             <Dialog>
               <DialogTrigger asChild>
-                <button className="pm-button-primary">
-                  <CirclePlus className="h-4 w-4 mr-2" />
+                <button className="pm-button-primary inline-flex items-center gap-2">
+                  <CirclePlus className="h-4 w-4" />
                   New Team
                 </button>
               </DialogTrigger>

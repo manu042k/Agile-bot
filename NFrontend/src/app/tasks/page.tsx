@@ -97,8 +97,8 @@ const TasksPage = () => {
                 <option value="in_progress">In Progress</option>
                 <option value="done">Done</option>
               </select>
-              <button className="pm-button-secondary whitespace-nowrap flex-shrink-0">
-                <Filter className="h-4 w-4 mr-2" />
+              <button className="pm-button-secondary whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+                <Filter className="h-4 w-4" />
                 More Filters
               </button>
             </div>
@@ -119,8 +119,8 @@ const TasksPage = () => {
                   <LayoutGrid className="h-4 w-4" />
                 </button>
               </div>
-              <button className="pm-button-primary">
-                <Plus className="h-4 w-4 mr-2" />
+              <button className="pm-button-primary inline-flex items-center gap-2">
+                <Plus className="h-4 w-4" />
                 New Task
               </button>
             </div>
@@ -277,8 +277,8 @@ const TasksPage = () => {
                         : "Get started by creating your first task"}
                     </p>
                     {!searchQuery && filterStatus === "all" && (
-                      <button className="pm-button-primary">
-                        <Plus className="h-4 w-4 mr-2" />
+                      <button className="pm-button-primary inline-flex items-center gap-2">
+                        <Plus className="h-4 w-4" />
                         Create Task
                       </button>
                     )}

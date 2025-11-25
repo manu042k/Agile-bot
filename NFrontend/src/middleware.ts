@@ -36,14 +36,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // If user is authenticated and trying to access auth pages (except /invitations/accept)
-  if (token && ["/login", "/register", "/forgot-password"].includes(pathname)) {
-    // Don't redirect from /invitations/accept even if authenticated
-    if (pathname !== "/invitations/accept") {
-      const projectsUrl = new URL("/projects", request.url);
-      return NextResponse.redirect(projectsUrl);
-    }
+  // Allow access to login page even if authenticated (users can sign in with different account)
+  // Only redirect from register/forgot-password if authenticated
+  if (token && ["/register", "/forgot-password"].includes(pathname)) {
+    const projectsUrl = new URL("/projects", request.url);
+    return NextResponse.redirect(projectsUrl);
   }
+
+  // Login page is always accessible, even if authenticated
 
   return NextResponse.next();
 }

@@ -113,8 +113,8 @@ const TaskPage = ({ params }: { params: { projectId: string } }) => {
             <div className="flex items-center gap-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="pm-button-primary">
-                    <Plus className="h-4 w-4 mr-2" />
+                  <button className="pm-button-primary inline-flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
                     New Task
                   </button>
                 </DialogTrigger>
@@ -135,8 +135,8 @@ const TaskPage = ({ params }: { params: { projectId: string } }) => {
                 className="pm-input pl-10 w-full"
               />
             </div>
-            <button className="pm-button-secondary">
-              <Filter className="h-4 w-4 mr-2" />
+            <button className="pm-button-secondary inline-flex items-center gap-2">
+              <Filter className="h-4 w-4" />
               Filter
             </button>
           </div>

@@ -60,8 +60,8 @@ const ProjectTeamPage = () => {
             </div>
             <Dialog>
               <DialogTrigger asChild>
-                <button className="pm-button-primary">
-                  <UserPlus className="h-4 w-4 mr-2" />
+                <button className="pm-button-primary inline-flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
                   Invite Member
                 </button>
               </DialogTrigger>

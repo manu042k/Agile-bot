@@ -1,7 +1,14 @@
 "use client";
 import { useState } from "react";
 import { useParams, usePathname } from "next/navigation";
-import { Users, FolderKanban, Settings, Plus, Search, Filter } from "lucide-react";
+import {
+  Users,
+  FolderKanban,
+  Settings,
+  Plus,
+  Search,
+  Filter,
+} from "lucide-react";
 import Link from "next/link";
 
 // Mock team data
@@ -9,9 +16,36 @@ const getMockTeam = (teamId: string) => ({
   id: teamId,
   name: "Development Team",
   projects: [
-    { id: 1, name: "E-Commerce Platform", description: "Build a modern e-commerce platform", progress: 65, tasks: 24, completed: 16, status: "active", created: "2024-01-15" },
-    { id: 2, name: "Mobile Banking App", description: "Develop a secure mobile banking application", progress: 42, tasks: 18, completed: 8, status: "active", created: "2024-01-20" },
-    { id: 3, name: "AI Analytics Dashboard", description: "Create an analytics dashboard with AI-powered insights", progress: 78, tasks: 45, completed: 35, status: "active", created: "2024-02-01" },
+    {
+      id: 1,
+      name: "E-Commerce Platform",
+      description: "Build a modern e-commerce platform",
+      progress: 65,
+      tasks: 24,
+      completed: 16,
+      status: "active",
+      created: "2024-01-15",
+    },
+    {
+      id: 2,
+      name: "Mobile Banking App",
+      description: "Develop a secure mobile banking application",
+      progress: 42,
+      tasks: 18,
+      completed: 8,
+      status: "active",
+      created: "2024-01-20",
+    },
+    {
+      id: 3,
+      name: "AI Analytics Dashboard",
+      description: "Create an analytics dashboard with AI-powered insights",
+      progress: 78,
+      tasks: 45,
+      completed: 35,
+      status: "active",
+      created: "2024-02-01",
+    },
   ],
 });
 
@@ -25,16 +59,23 @@ const TeamProjectsPage = () => {
   const navItems = [
     { icon: Users, label: "Overview", href: `/teams/${teamId}` },
     { icon: Users, label: "Members", href: `/teams/${teamId}/members` },
-    { icon: FolderKanban, label: "Projects", href: `/teams/${teamId}/projects` },
+    {
+      icon: FolderKanban,
+      label: "Projects",
+      href: `/teams/${teamId}/projects`,
+    },
     { icon: Settings, label: "Settings", href: `/teams/${teamId}/settings` },
-  ].map(item => ({
+  ].map((item) => ({
     ...item,
-    active: pathname === item.href || (item.href === `/teams/${teamId}` && pathname === `/teams/${teamId}`)
+    active:
+      pathname === item.href ||
+      (item.href === `/teams/${teamId}` && pathname === `/teams/${teamId}`),
   }));
 
-  const filteredProjects = team.projects.filter(project =>
-    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    project.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProjects = team.projects.filter(
+    (project) =>
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      project.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -49,8 +90,12 @@ const TeamProjectsPage = () => {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{team.name}</h1>
-              <p className="text-gray-600 leading-relaxed">Responsible for developing and maintaining the application</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {team.name}
+              </h1>
+              <p className="text-gray-600 leading-relaxed">
+                Responsible for developing and maintaining the application
+              </p>
             </div>
           </div>
 
@@ -83,11 +128,15 @@ const TeamProjectsPage = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Team Projects</h2>
-              <p className="text-gray-600">Projects associated with this team</p>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                Team Projects
+              </h2>
+              <p className="text-gray-600">
+                Projects associated with this team
+              </p>
             </div>
-            <button className="pm-button-primary">
-              <Plus className="h-4 w-4 mr-2" />
+            <button className="pm-button-primary inline-flex items-center gap-2">
+              <Plus className="h-4 w-4" />
               Create Project
             </button>
           </div>
@@ -108,12 +157,14 @@ const TeamProjectsPage = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">{team.projects.length}</p>
+            <p className="text-2xl font-semibold text-gray-900">
+              {team.projects.length}
+            </p>
             <p className="text-xs text-gray-500 mt-1">Total Projects</p>
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {team.projects.filter(p => p.status === "active").length}
+              {team.projects.filter((p) => p.status === "active").length}
             </p>
             <p className="text-xs text-gray-500 mt-1">Active</p>
           </div>
@@ -125,7 +176,11 @@ const TeamProjectsPage = () => {
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {Math.round(team.projects.reduce((sum, p) => sum + p.progress, 0) / team.projects.length)}%
+              {Math.round(
+                team.projects.reduce((sum, p) => sum + p.progress, 0) /
+                  team.projects.length
+              )}
+              %
             </p>
             <p className="text-xs text-gray-500 mt-1">Avg Progress</p>
           </div>
@@ -146,11 +201,15 @@ const TeamProjectsPage = () => {
                       <div className="p-3 rounded-xl bg-gray-900 shadow-lg">
                         <FolderKanban className="h-5 w-5 text-white" />
                       </div>
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                        project.status === "active" ? "bg-gray-200 text-gray-700 border-gray-300" :
-                        project.status === "completed" ? "bg-gray-800 text-white border-gray-900" :
-                        "bg-gray-100 text-gray-600 border-gray-200"
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${
+                          project.status === "active"
+                            ? "bg-gray-200 text-gray-700 border-gray-300"
+                            : project.status === "completed"
+                            ? "bg-gray-800 text-white border-gray-900"
+                            : "bg-gray-100 text-gray-600 border-gray-200"
+                        }`}
+                      >
                         {project.status}
                       </span>
                     </div>
@@ -166,7 +225,9 @@ const TeamProjectsPage = () => {
                   <div className="mb-5 flex-1">
                     <div className="flex items-center justify-between text-xs font-medium text-gray-600 mb-2">
                       <span>Progress</span>
-                      <span className="font-bold text-gray-900">{project.progress}%</span>
+                      <span className="font-bold text-gray-900">
+                        {project.progress}%
+                      </span>
                     </div>
                     <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                       <div
@@ -179,7 +240,9 @@ const TeamProjectsPage = () => {
                   {/* Footer */}
                   <div className="pt-4 border-t border-gray-100">
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{project.completed}/{project.tasks} tasks completed</span>
+                      <span>
+                        {project.completed}/{project.tasks} tasks completed
+                      </span>
                       <span>Created {project.created}</span>
                     </div>
                   </div>
@@ -193,13 +256,17 @@ const TeamProjectsPage = () => {
               <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                 <FolderKanban className="h-8 w-8 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No projects found</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No projects found
+              </h3>
               <p className="text-sm text-gray-500 mb-6">
-                {searchQuery ? "Try adjusting your search" : "Create a project for this team"}
+                {searchQuery
+                  ? "Try adjusting your search"
+                  : "Create a project for this team"}
               </p>
               {!searchQuery && (
-                <button className="pm-button-primary">
-                  <Plus className="h-4 w-4 mr-2" />
+                <button className="pm-button-primary inline-flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
                   Create Project
                 </button>
               )}
@@ -212,4 +279,3 @@ const TeamProjectsPage = () => {
 };
 
 export default TeamProjectsPage;
-

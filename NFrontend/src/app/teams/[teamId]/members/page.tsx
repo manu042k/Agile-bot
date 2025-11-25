@@ -1,6 +1,16 @@
 "use client";
 import { useParams, usePathname } from "next/navigation";
-import { Users, UserPlus, Mail, Crown, Shield, User, MoreVertical, Settings, FolderKanban } from "lucide-react";
+import {
+  Users,
+  UserPlus,
+  Mail,
+  Crown,
+  Shield,
+  User,
+  MoreVertical,
+  Settings,
+  FolderKanban,
+} from "lucide-react";
 import Link from "next/link";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,14 +22,65 @@ const getMockTeam = (teamId: string) => ({
   name: "Development Team",
   description: "Responsible for developing and maintaining the application",
   members: [
-    { id: 1, name: "John Doe", email: "john@example.com", role: "owner", avatar: null, joinedAt: "2024-01-10", tasks: 8, completed: 5 },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", role: "admin", avatar: null, joinedAt: "2024-01-12", tasks: 6, completed: 4 },
-    { id: 3, name: "Mike Johnson", email: "mike@example.com", role: "member", avatar: null, joinedAt: "2024-01-15", tasks: 5, completed: 2 },
-    { id: 4, name: "Sarah Wilson", email: "sarah@example.com", role: "member", avatar: null, joinedAt: "2024-01-18", tasks: 4, completed: 3 },
-    { id: 5, name: "Alex Brown", email: "alex@example.com", role: "member", avatar: null, joinedAt: "2024-01-20", tasks: 3, completed: 2 },
+    {
+      id: 1,
+      name: "John Doe",
+      email: "john@example.com",
+      role: "owner",
+      avatar: null,
+      joinedAt: "2024-01-10",
+      tasks: 8,
+      completed: 5,
+    },
+    {
+      id: 2,
+      name: "Jane Smith",
+      email: "jane@example.com",
+      role: "admin",
+      avatar: null,
+      joinedAt: "2024-01-12",
+      tasks: 6,
+      completed: 4,
+    },
+    {
+      id: 3,
+      name: "Mike Johnson",
+      email: "mike@example.com",
+      role: "member",
+      avatar: null,
+      joinedAt: "2024-01-15",
+      tasks: 5,
+      completed: 2,
+    },
+    {
+      id: 4,
+      name: "Sarah Wilson",
+      email: "sarah@example.com",
+      role: "member",
+      avatar: null,
+      joinedAt: "2024-01-18",
+      tasks: 4,
+      completed: 3,
+    },
+    {
+      id: 5,
+      name: "Alex Brown",
+      email: "alex@example.com",
+      role: "member",
+      avatar: null,
+      joinedAt: "2024-01-20",
+      tasks: 3,
+      completed: 2,
+    },
   ],
   pendingInvites: [
-    { id: 1, email: "newmember@example.com", role: "member", invitedBy: "John Doe", invitedAt: "2024-02-10" },
+    {
+      id: 1,
+      email: "newmember@example.com",
+      role: "member",
+      invitedBy: "John Doe",
+      invitedAt: "2024-02-10",
+    },
   ],
 });
 
@@ -54,11 +115,17 @@ const TeamMembersPage = () => {
   const navItems = [
     { icon: Users, label: "Overview", href: `/teams/${teamId}` },
     { icon: Users, label: "Members", href: `/teams/${teamId}/members` },
-    { icon: FolderKanban, label: "Projects", href: `/teams/${teamId}/projects` },
+    {
+      icon: FolderKanban,
+      label: "Projects",
+      href: `/teams/${teamId}/projects`,
+    },
     { icon: Settings, label: "Settings", href: `/teams/${teamId}/settings` },
-  ].map(item => ({
+  ].map((item) => ({
     ...item,
-    active: pathname === item.href || (item.href === `/teams/${teamId}` && pathname === `/teams/${teamId}`)
+    active:
+      pathname === item.href ||
+      (item.href === `/teams/${teamId}` && pathname === `/teams/${teamId}`),
   }));
 
   return (
@@ -73,8 +140,12 @@ const TeamMembersPage = () => {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{team.name}</h1>
-              <p className="text-gray-600 leading-relaxed">{team.description}</p>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {team.name}
+              </h1>
+              <p className="text-gray-600 leading-relaxed">
+                {team.description}
+              </p>
             </div>
           </div>
 
@@ -107,13 +178,17 @@ const TeamMembersPage = () => {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Team Members</h2>
-              <p className="text-gray-600">Manage team members and their roles</p>
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                Team Members
+              </h2>
+              <p className="text-gray-600">
+                Manage team members and their roles
+              </p>
             </div>
             <Dialog>
               <DialogTrigger asChild>
-                <button className="pm-button-primary">
-                  <UserPlus className="h-4 w-4 mr-2" />
+                <button className="pm-button-primary inline-flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" />
                   Invite Member
                 </button>
               </DialogTrigger>
@@ -125,7 +200,9 @@ const TeamMembersPage = () => {
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">{team.members.length}</p>
+            <p className="text-2xl font-semibold text-gray-900">
+              {team.members.length}
+            </p>
             <p className="text-xs text-gray-500 mt-1">Active Members</p>
           </div>
           <div className="pm-card p-5">
@@ -145,24 +222,43 @@ const TeamMembersPage = () => {
         {/* Team Members */}
         <div className="pm-card p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Active Members</h3>
-            <span className="text-sm text-gray-500">{team.members.length} members</span>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Active Members
+            </h3>
+            <span className="text-sm text-gray-500">
+              {team.members.length} members
+            </span>
           </div>
           <div className="space-y-3">
             {team.members.map((member) => {
               const RoleIcon = getRoleIcon(member.role);
               return (
-                <div key={member.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                <div
+                  key={member.id}
+                  className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all"
+                >
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={member.avatar || undefined} alt={member.name} />
+                    <AvatarImage
+                      src={member.avatar || undefined}
+                      alt={member.name}
+                    />
                     <AvatarFallback className="bg-gray-900 text-white font-medium">
-                      {member.name.split(" ").map(n => n[0]).join("")}
+                      {member.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-900">{member.name}</h3>
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium border flex items-center gap-1 ${getRoleColor(member.role)}`}>
+                      <h3 className="font-semibold text-gray-900">
+                        {member.name}
+                      </h3>
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-medium border flex items-center gap-1 ${getRoleColor(
+                          member.role
+                        )}`}
+                      >
                         <RoleIcon className="h-3 w-3" />
                         {member.role}
                       </span>
@@ -189,16 +285,23 @@ const TeamMembersPage = () => {
         {/* Pending Invites */}
         {team.pendingInvites.length > 0 && (
           <div className="pm-card p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Pending Invitations</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Pending Invitations
+            </h3>
             <div className="space-y-3">
               {team.pendingInvites.map((invite) => (
-                <div key={invite.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div
+                  key={invite.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                       <Mail className="h-5 w-5 text-gray-600" />
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900">{invite.email}</p>
+                      <p className="font-medium text-gray-900">
+                        {invite.email}
+                      </p>
                       <p className="text-xs text-gray-500">
                         Invited by {invite.invitedBy} on {invite.invitedAt}
                       </p>
@@ -223,4 +326,3 @@ const TeamMembersPage = () => {
 };
 
 export default TeamMembersPage;
-

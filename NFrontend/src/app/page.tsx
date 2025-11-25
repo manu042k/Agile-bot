@@ -32,7 +32,7 @@ export default function HomePage() {
               <Link href="/register">
                 <Button className="bg-black hover:bg-gray-800 text-white font-medium shadow-lg hover:shadow-orange-500/20 transition-all duration-300">
                   Get Started
-                  <ArrowRight className="ml-2 w-4 h-4" />
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>

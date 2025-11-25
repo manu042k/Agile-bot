@@ -176,8 +176,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True  # Fixed typo: ALLOWS -> ALLOW
 
-# Session configuration (12 hours = 43200 seconds)
-SESSION_COOKIE_AGE = 43200  # 12 hours
+# Session configuration - read from environment variable
+# Default: 12 hours (43200 seconds)
+SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", "43200"))
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "true"  # Set to True in production with HTTPS
 SESSION_COOKIE_SAMESITE = "Strict"

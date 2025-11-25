@@ -193,8 +193,8 @@ const ActivityPage = () => {
             <option value="task_assigned">Task Assigned</option>
             <option value="project_updated">Project Updated</option>
           </select>
-          <button className="pm-button-secondary whitespace-nowrap flex-shrink-0">
-            <Filter className="h-4 w-4 mr-2" />
+          <button className="pm-button-secondary whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
+            <Filter className="h-4 w-4" />
             More Filters
           </button>
         </div>

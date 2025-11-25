@@ -207,8 +207,8 @@ const TeamSettingsPage = () => {
                   cannot be undone.
                 </p>
               </div>
-              <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
-                <Trash2 className="h-4 w-4 mr-2 inline" />
+              <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium inline-flex items-center gap-2">
+                <Trash2 className="h-4 w-4" />
                 Delete
               </button>
             </div>
@@ -220,9 +220,9 @@ const TeamSettingsPage = () => {
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="pm-button-primary"
+              className="pm-button-primary inline-flex items-center gap-2"
             >
-              <Save className="h-4 w-4 mr-2" />
+              <Save className="h-4 w-4" />
               {isSaving ? "Saving..." : "Save Changes"}
             </button>
           </div>

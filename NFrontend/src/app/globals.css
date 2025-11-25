@@ -96,4 +96,173 @@
   .crm-input {
     @apply rounded-md border-border bg-white focus:ring-2 focus:ring-primary/20;
   }
+
+  /* Project Management Card Styles - Black & Orange Theme */
+  .pm-card {
+    background-color: white !important;
+    border: 1px solid rgb(229 231 235) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+    transition: all 0.2s;
+  }
+  
+  .pm-card-hover {
+    @apply hover:shadow-md hover:border-gray-300 transition-all duration-200;
+  }
+  
+  /* Glass morphism card styles */
+  .pm-glass-card {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(229, 231, 235, 0.5) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+    transition: all 0.2s;
+  }
+  
+  .pm-glass-dark {
+    background-color: rgba(17, 24, 39, 0.8) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(31, 41, 55, 0.5) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+    transition: all 0.2s;
+  }
+  
+  .pm-glass-orange {
+    background-color: rgba(255, 237, 213, 0.8) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    border: 1px solid rgba(254, 215, 170, 0.5) !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05) !important;
+    transition: all 0.2s;
+  }
+  
+  /* Badge styles */
+  .pm-badge {
+    @apply px-2 py-1 text-xs font-medium rounded-full;
+  }
+  
+  /* Status dot styles */
+  .pm-status-done {
+    @apply bg-green-500;
+  }
+  
+  .pm-status-progress {
+    @apply bg-amber-500;
+  }
+  
+  .pm-status-todo {
+    @apply bg-blue-500;
+  }
+  
+  .pm-status-backlog {
+    @apply bg-gray-400;
+  }
+  
+  /* Status badge styles */
+  .pm-status-badge-done {
+    @apply bg-green-100 text-green-700 border-green-300;
+  }
+  
+  .pm-status-badge-progress {
+    @apply bg-amber-100 text-amber-700 border-amber-300;
+  }
+  
+  .pm-status-badge-todo {
+    @apply bg-blue-100 text-blue-700 border-blue-300;
+  }
+  
+  .pm-status-badge-backlog {
+    @apply bg-gray-100 text-gray-700 border-gray-300;
+  }
+  
+  /* Priority styles */
+  .pm-priority-high {
+    @apply bg-red-100 text-red-700 border-red-300;
+  }
+  
+  .pm-priority-medium {
+    @apply bg-yellow-100 text-yellow-700 border-yellow-300;
+  }
+  
+  .pm-priority-low {
+    @apply bg-gray-100 text-gray-700 border-gray-300;
+  }
+  
+  /* Role styles */
+  .pm-role-owner {
+    @apply bg-purple-100 text-purple-700 border-purple-300;
+  }
+  
+  .pm-role-admin {
+    @apply bg-blue-100 text-blue-700 border-blue-300;
+  }
+  
+  .pm-role-member {
+    @apply bg-gray-100 text-gray-700 border-gray-300;
+  }
+  
+  /* Project status styles */
+  .pm-project-status-active {
+    @apply bg-green-100 text-green-700 border-green-300;
+  }
+  
+  .pm-project-status-completed {
+    @apply bg-gray-100 text-gray-700 border-gray-300;
+  }
+  
+  .pm-project-status-planning {
+    @apply bg-blue-100 text-blue-700 border-blue-300;
+  }
+  
+  .pm-project-status-dot-active {
+    @apply bg-green-500;
+  }
+  
+  .pm-project-status-dot-completed {
+    @apply bg-gray-400;
+  }
+  
+  .pm-project-status-dot-planning {
+    @apply bg-blue-500;
+  }
+  
+  /* Input styles */
+  .pm-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all;
+  }
+  
+  /* Button styles */
+  .pm-button-primary {
+    @apply bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 shadow-sm hover:shadow-md;
+  }
+  
+  .pm-button-secondary {
+    @apply bg-white border border-gray-300 text-gray-900 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200;
+  }
+  
+  /* Button icon spacing fix - remove margins from icons inside buttons */
+  button svg,
+  [role="button"] svg,
+  .pm-button-primary svg,
+  .pm-button-secondary svg {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  
+  /* Ensure buttons with icons use flexbox for proper spacing */
+  .pm-button-primary,
+  .pm-button-secondary {
+    @apply inline-flex items-center gap-2;
+  }
+  
+  /* Default icon size in buttons if not specified */
+  button svg:not([class*="h-"]):not([class*="w-"]):not([class*="size-"]) {
+    width: 1rem;
+    height: 1rem;
+  }
 }

@@ -4,3 +4,6 @@ import { authOptions } from "@/lib/authConfig";
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
+
+// For Next.js 14 App Router compatibility
+export const dynamic = "force-dynamic";

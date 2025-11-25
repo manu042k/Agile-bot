@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Loader2, Chrome, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
@@ -18,15 +18,16 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const { data: session, status } = useSession();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
-  // Redirect if already authenticated
+  // Always show login page, don't auto-redirect authenticated users
+  // Users can still sign in with a different account if needed
   useEffect(() => {
-    if (status === "authenticated" && session) {
-      // Get callback URL from query params or default to projects
-      const callbackUrl = searchParams.get("callbackUrl") || "/projects";
-      router.replace(callbackUrl);
+    // Just stop checking session - always show login page
+    if (status !== "loading") {
+      setIsCheckingSession(false);
     }
-  }, [status, session, router, searchParams]);
+  }, [status]);
 
   // Handle OAuth callback errors
   useEffect(() => {
@@ -42,11 +43,25 @@ function LoginForm() {
     try {
       console.log("[Login] Initiating Google sign in...");
 
+      // Always sign out any existing session to ensure fresh OAuth flow
+      // This ensures Google always shows the consent page
+      if (status === "authenticated") {
+        console.log(
+          "[Login] Clearing existing session for fresh authentication..."
+        );
+        await signOut({ redirect: false });
+        // Wait a moment for session to clear
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      // Get callback URL from query params or default to projects
+      const callbackUrl = searchParams.get("callbackUrl") || "/projects";
+
       // Use NextAuth.js signIn with Google provider
       // When redirect: true, the browser will redirect to Google OAuth
-      // This function may not return if redirect succeeds
+      // The prompt: "select_account consent" in authConfig ensures consent screen is shown
       const result = await signIn("google", {
-        callbackUrl: "/projects",
+        callbackUrl: callbackUrl,
         redirect: true, // NextAuth will handle the redirect to Google
       });
 
@@ -54,13 +69,42 @@ function LoginForm() {
       // But if there's an error, we might get here
       if (result?.error) {
         console.error("[Login] Sign in error:", result.error);
-        toast.error(
-          result.error === "OAuthSignin"
-            ? "Failed to initiate Google sign in. Please check your Google OAuth configuration."
-            : result.error === "OAuthCallback"
-            ? "Error during Google authentication callback."
-            : "Failed to sign in with Google. Please try again."
-        );
+        let errorMessage = "Failed to sign in with Google. Please try again.";
+
+        switch (result.error) {
+          case "OAuthSignin":
+            errorMessage =
+              "Failed to initiate Google sign in. Please check your Google OAuth configuration.";
+            break;
+          case "OAuthCallback":
+            errorMessage = "Error during Google authentication callback.";
+            break;
+          case "OAuthCreateAccount":
+            errorMessage = "Could not create account. Please try again.";
+            break;
+          case "EmailCreateAccount":
+            errorMessage = "Could not create account with this email.";
+            break;
+          case "Callback":
+            errorMessage = "Error in authentication callback.";
+            break;
+          case "OAuthAccountNotLinked":
+            errorMessage = "Account is already linked to another provider.";
+            break;
+          case "EmailSignin":
+            errorMessage = "Email sign in error.";
+            break;
+          case "CredentialsSignin":
+            errorMessage = "Invalid credentials.";
+            break;
+          case "SessionRequired":
+            errorMessage = "Please sign in to access this page.";
+            break;
+          default:
+            errorMessage = `Authentication error: ${result.error}`;
+        }
+
+        toast.error(errorMessage);
         setIsGoogleLoading(false);
       }
     } catch (error: any) {
@@ -72,6 +116,18 @@ function LoginForm() {
       setIsGoogleLoading(false);
     }
   };
+
+  // Show loading state while checking session
+  if (isCheckingSession && status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-900" />
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-gray-50 via-white to-orange-50/30">
@@ -178,12 +234,12 @@ function LoginForm() {
             >
               {isGoogleLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                   Redirecting to Google...
                 </>
               ) : (
                 <>
-                  <Chrome className="mr-2 h-5 w-5" />
+                  <Chrome className="h-5 w-5" />
                   Sign in with Google
                 </>
               )}

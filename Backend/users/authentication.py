@@ -1,12 +1,14 @@
 """
 Custom authentication class for Django REST Framework
-Handles session-based authentication with 12-hour expiration
+Handles session-based authentication with configurable expiration
 """
 from rest_framework.authentication import SessionAuthentication
 from django.contrib.sessions.models import Session
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.conf import settings
 from datetime import datetime, timedelta
+import os
 
 User = get_user_model()
 
@@ -45,7 +47,11 @@ class CustomSessionAuthentication(SessionAuthentication):
         # Decode session data
         session_data = session.get_decoded()
         
-        # Check if session was created more than 12 hours ago
+        # Get session timeout from settings (in seconds), default to 12 hours
+        session_timeout_seconds = getattr(settings, 'SESSION_COOKIE_AGE', 43200)
+        session_timeout_hours = session_timeout_seconds / 3600
+        
+        # Check if session was created more than the configured timeout ago
         session_created = session_data.get('session_created')
         if session_created:
             try:
@@ -53,7 +59,7 @@ class CustomSessionAuthentication(SessionAuthentication):
                 if timezone.is_naive(created_time):
                     created_time = timezone.make_aware(created_time)
                 
-                if timezone.now() - created_time > timedelta(hours=12):
+                if timezone.now() - created_time > timedelta(seconds=session_timeout_seconds):
                     # Session expired - delete it
                     session.delete()
                     return None

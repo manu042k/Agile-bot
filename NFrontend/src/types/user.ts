@@ -3,8 +3,11 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
-  password: string;
-  phone_number: string;
+  full_name?: string;
+  phone_number?: string | null;
   profile_pic?: string;
+  avatar_url?: string;
   is_active?: boolean;
+  date_joined?: string;
+  google_id?: string;
 }

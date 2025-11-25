@@ -79,8 +79,8 @@ const SettingsPage = () => {
                     </div>
                   </div>
                   <div className="flex justify-end pt-4 border-t border-gray-200">
-                    <button className="pm-button-primary">
-                      <Save className="h-4 w-4 mr-2" />
+                    <button className="pm-button-primary inline-flex items-center gap-2">
+                      <Save className="h-4 w-4" />
                       Save Changes
                     </button>
                   </div>
@@ -195,8 +195,8 @@ const SettingsPage = () => {
                     </div>
                   </div>
                   <div className="flex justify-end pt-4 border-t border-gray-200">
-                    <button className="pm-button-primary">
-                      <Save className="h-4 w-4 mr-2" />
+                    <button className="pm-button-primary inline-flex items-center gap-2">
+                      <Save className="h-4 w-4" />
                       Save Changes
                     </button>
                   </div>

@@ -2,34 +2,111 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Activity, Bell, Shield, UserCircle } from "lucide-react";
+import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Activity, Bell, Shield, UserCircle, ExternalLink, Lock, KeyRound } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { signOut, useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/common/PageHeader";
-
-// Mock user data
-const mockUser = {
-  id: 1,
-  first_name: "John",
-  last_name: "Doe",
-  email: "john.doe@example.com",
-  phone_number: "+1 (555) 123-4567",
-  is_active: true,
-  profile_pic: null,
-  joined_date: "2024-01-15",
-  role: "Project Manager"
-};
+import { useUser } from "@/hooks/useUser";
+import { useMemo, useState, useEffect } from "react";
 
 const ProfilePage = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "personal";
+  const { data: session, status: sessionStatus } = useSession();
+  const { user: backendUser, loading: userLoading } = useUser();
+  const [deviceInfo, setDeviceInfo] = useState<string>("Loading...");
 
-  const handleLogout = () => {
-    toast.success("Logout successful");
-    router.push("/");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const userAgent = navigator.userAgent;
+      if (userAgent.includes("Mac")) {
+        setDeviceInfo("macOS");
+      } else if (userAgent.includes("Windows")) {
+        setDeviceInfo("Windows");
+      } else if (userAgent.includes("Linux")) {
+        setDeviceInfo("Linux");
+      } else {
+        setDeviceInfo("Unknown OS");
+      }
+    }
+  }, []);
+
+  // Parse Google name into first_name and last_name
+  const parseName = (fullName: string | null | undefined) => {
+    if (!fullName) return { first_name: "", last_name: "" };
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length === 1) {
+      return { first_name: parts[0], last_name: "" };
+    }
+    const last_name = parts.pop() || "";
+    const first_name = parts.join(" ");
+    return { first_name, last_name };
   };
+
+  // Combine NextAuth session data (from Google) with backend user data
+  const user = useMemo(() => {
+    if (sessionStatus === "loading" || userLoading) {
+      return null;
+    }
+
+    if (!session?.user) {
+      return null;
+    }
+
+    const { first_name, last_name } = parseName(session.user.name);
+    const fullName = session.user.name || "";
+    
+    return {
+      id: session.user.id || backendUser?.id || "",
+      first_name,
+      last_name,
+      full_name: fullName,
+      email: session.user.email || backendUser?.email || "",
+      phone_number: backendUser?.phone_number || "",
+      is_active: backendUser?.is_active ?? true,
+      profile_pic: session.user.image || backendUser?.avatar_url || backendUser?.profile_pic || null,
+      joined_date: backendUser?.date_joined 
+        ? new Date(backendUser.date_joined).toLocaleDateString()
+        : "",
+      role: "User" // Default role, can be enhanced later
+    };
+  }, [session, sessionStatus, backendUser, userLoading]);
+
+  const handleLogout = async () => {
+    try {
+      // Sign out from NextAuth
+      await signOut({ 
+        redirect: false,
+        callbackUrl: "/login"
+      });
+      
+      // Clear any additional auth tokens
+      if (typeof window !== "undefined") {
+        localStorage.clear();
+      }
+      
+      toast.success("Logout successful");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Failed to logout. Please try again.");
+    }
+  };
+
+  // Show loading state
+  if (sessionStatus === "loading" || userLoading || !user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -54,55 +131,93 @@ const ProfilePage = () => {
             {activeTab === "personal" && (
               <>
                 {/* Profile Card */}
-                <Card className="pm-card border-0">
-                  <CardHeader className="pb-6">
-                    <div className="flex items-center gap-6">
-                      <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
-                        <AvatarImage src={mockUser.profile_pic || undefined} alt={mockUser.first_name} />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-2xl font-bold">
-                          {mockUser.first_name[0]}{mockUser.last_name[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <h2 className="text-2xl font-semibold text-gray-900 mb-1">
-                          {mockUser.first_name} {mockUser.last_name}
-                        </h2>
-                        <p className="text-gray-500 mb-2">{mockUser.email}</p>
-                        <span className={`pm-badge ${mockUser.is_active ? "pm-status-badge-done" : "pm-status-badge-backlog"}`}>
-                          {mockUser.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                          <Mail className="h-4 w-4" />
-                          <span>Email</span>
+                <Card className="pm-card border-0 overflow-hidden">
+                  {/* Header with gradient background */}
+                  <div className="bg-gradient-to-br from-gray-50 via-white to-gray-50 border-b border-gray-100">
+                    <CardHeader className="pb-6 pt-8">
+                      <div className="flex items-start gap-6">
+                        <div className="relative">
+                          <Avatar className="h-24 w-24 border-4 border-white shadow-xl ring-4 ring-gray-100">
+                            <AvatarImage src={user.profile_pic || undefined} alt={user.first_name} />
+                            <AvatarFallback className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white text-3xl font-bold">
+                              {user.first_name?.[0]?.toUpperCase() || ""}{user.last_name?.[0]?.toUpperCase() || ""}
+                            </AvatarFallback>
+                          </Avatar>
+                          {user.is_active && (
+                            <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-4 border-white rounded-full shadow-lg"></div>
+                          )}
                         </div>
-                        <p className="text-gray-900 font-medium">{mockUser.email}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                          <Phone className="h-4 w-4" />
-                          <span>Phone</span>
+                        <div className="flex-1 pt-2">
+                          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                            {user.full_name || `${user.first_name} ${user.last_name}`.trim() || user.email}
+                          </h2>
+                          <p className="text-gray-600 mb-3 text-base">{user.email}</p>
+                          <div className="flex items-center gap-2">
+                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+                              user.is_active 
+                                ? "bg-green-100 text-green-700 border border-green-200" 
+                                : "bg-gray-100 text-gray-700 border border-gray-200"
+                            }`}>
+                              <div className={`w-2 h-2 rounded-full ${user.is_active ? "bg-green-500" : "bg-gray-400"}`}></div>
+                              {user.is_active ? "Active" : "Inactive"}
+                            </span>
+                          </div>
                         </div>
-                        <p className="text-gray-900 font-medium">{mockUser.phone_number}</p>
                       </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                          <Calendar className="h-4 w-4" />
-                          <span>Joined</span>
+                    </CardHeader>
+                  </div>
+                  
+                  {/* Details Section */}
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-lg border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 rounded-lg bg-blue-50">
+                            <Mail className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Email</p>
+                            <p className="text-sm font-semibold text-gray-900 truncate">{user.email}</p>
+                          </div>
                         </div>
-                        <p className="text-gray-900 font-medium">{mockUser.joined_date}</p>
                       </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                          <Settings className="h-4 w-4" />
-                          <span>Role</span>
+                      
+                      <div className="p-4 rounded-lg border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 rounded-lg bg-green-50">
+                            <Phone className="h-5 w-5 text-green-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Phone</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {user.phone_number || <span className="text-gray-400 italic">Not provided</span>}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-gray-900 font-medium">{mockUser.role}</p>
+                      </div>
+                      
+                      <div className="p-4 rounded-lg border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 rounded-lg bg-purple-50">
+                            <Calendar className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Joined</p>
+                            <p className="text-sm font-semibold text-gray-900">{user.joined_date || "N/A"}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-4 rounded-lg border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 rounded-lg bg-orange-50">
+                            <Settings className="h-5 w-5 text-orange-600" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Role</p>
+                            <p className="text-sm font-semibold text-gray-900">{user.role}</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -173,22 +288,81 @@ const ProfilePage = () => {
               <Card className="pm-card border-0">
                 <CardHeader>
                   <h3 className="text-lg font-semibold text-gray-900">Security Settings</h3>
+                  <p className="text-sm text-gray-500 mt-1">Your account is secured through Google SSO</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-medium text-gray-900 mb-2">Change Password</h4>
-                    <p className="text-sm text-gray-500 mb-4">Update your password to keep your account secure</p>
-                    <Button variant="outline">Change Password</Button>
+                  <div className="p-4 border border-gray-200 rounded-lg bg-blue-50/50">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-blue-100">
+                        <Lock className="h-5 w-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 mb-1">Password Management</h4>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Your password is managed by Google. To change your password, please visit your Google Account settings.
+                        </p>
+                        <a
+                          href="https://myaccount.google.com/security"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                        >
+                          Manage Google Account Security
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-4 border border-gray-200 rounded-lg">
-                    <h4 className="font-medium text-gray-900 mb-2">Two-Factor Authentication</h4>
-                    <p className="text-sm text-gray-500 mb-4">Add an extra layer of security to your account</p>
-                    <Button variant="outline">Enable 2FA</Button>
+                  
+                  <div className="p-4 border border-gray-200 rounded-lg bg-green-50/50">
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-green-100">
+                        <KeyRound className="h-5 w-5 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900 mb-1">Two-Factor Authentication</h4>
+                        <p className="text-sm text-gray-600 mb-3">
+                          Two-factor authentication is managed through your Google Account. Enable it there to secure your account across all Google services.
+                        </p>
+                        <a
+                          href="https://myaccount.google.com/signinoptions/two-step-verification"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+                        >
+                          Manage 2FA in Google Account
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
+                  
                   <div className="p-4 border border-gray-200 rounded-lg">
                     <h4 className="font-medium text-gray-900 mb-2">Active Sessions</h4>
-                    <p className="text-sm text-gray-500 mb-2">Manage your active sessions</p>
-                    <p className="text-xs text-gray-400">Current session: This device</p>
+                    <p className="text-sm text-gray-500 mb-3">Your current active session information</p>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">Current Device</p>
+                          <p className="text-xs text-gray-500">{deviceInfo}</p>
+                        </div>
+                        <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">
+                          Active
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">
+                        Session managed by NextAuth. To manage all your Google sessions, visit your Google Account.
+                      </p>
+                      <a
+                        href="https://myaccount.google.com/device-activity"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-xs font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                      >
+                        View all Google sessions
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -204,11 +378,11 @@ const ProfilePage = () => {
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button variant="outline" className="w-full justify-start">
-                  <BarChart2 className="h-4 w-4 mr-2" />
+                  <BarChart2 className="h-4 w-4" />
                   View Analytics
                 </Button>
                 <Button variant="outline" className="w-full justify-start">
-                  <Settings className="h-4 w-4 mr-2" />
+                  <Settings className="h-4 w-4" />
                   Settings
                 </Button>
                 <Button
@@ -216,7 +390,7 @@ const ProfilePage = () => {
                   className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
                   onClick={handleLogout}
                 >
-                  <LogOut className="h-4 w-4 mr-2" />
+                  <LogOut className="h-4 w-4" />
                   Logout
                 </Button>
               </CardContent>
