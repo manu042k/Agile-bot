@@ -132,41 +132,91 @@ const AcceptInvitationPage = () => {
       
       const response = await teamService.acceptInvitation(token);
       console.log("[Invitation] Step 4: API response:", response);
+      console.log("[Invitation] Response type:", typeof response);
+      console.log("[Invitation] Response keys:", response ? Object.keys(response) : "null");
       
-      // Check if response has team_id and team_name (success case)
-      if (response.team_id && response.team_name) {
+      // Handle response - could be direct object or wrapped
+      const responseData = response?.data || response;
+      
+      // Check if response indicates success (has team_id and team_name, or success message)
+      // All successful cases from backend return team_id and team_name
+      if (responseData?.team_id && responseData?.team_name) {
         setStatus("success");
-        setMessage(response.detail || "Invitation accepted successfully!");
-        setTeamId(response.team_id);
-        setTeamName(response.team_name);
+        setMessage(responseData.detail || "Invitation accepted successfully!");
+        setTeamId(responseData.team_id);
+        setTeamName(responseData.team_name);
         hasProcessedRef.current = true;
         
         toast.success("Invitation accepted successfully! You've been added to the team.");
         
         // Redirect to team page after 2 seconds, with refresh to ensure teams list is updated
         setTimeout(() => {
-          router.push(`/teams/${response.team_id}`);
+          router.push(`/teams/${responseData.team_id}`);
           // Force a refresh to ensure the team appears in the list
           router.refresh();
         }, 2000);
-      } else {
-        // Response doesn't have expected format, but might still be success
-        setStatus("success");
-        setMessage(response.detail || "Invitation processed successfully!");
-        hasProcessedRef.current = true;
-        toast.success(response.detail || "Invitation processed successfully!");
-        
-        setTimeout(() => {
-          router.push("/teams");
-          router.refresh();
-        }, 2000);
+        return; // Exit early on success
       }
+      
+      // If response has detail but no team_id, check if it's a success message
+      if (responseData?.detail) {
+        const detail = responseData.detail.toLowerCase();
+        // Check if the message indicates success (user already member, already accepted, etc.)
+        if (detail.includes("already") || detail.includes("accepted") || detail.includes("member")) {
+          // Try to extract team info from response or fetch it
+          if (responseData.team_id && responseData.team_name) {
+            setStatus("success");
+            setMessage(responseData.detail);
+            setTeamId(responseData.team_id);
+            setTeamName(responseData.team_name);
+            hasProcessedRef.current = true;
+            toast.success(responseData.detail);
+            setTimeout(() => {
+              router.push(`/teams/${responseData.team_id}`);
+              router.refresh();
+            }, 2000);
+            return;
+          }
+        }
+      }
+      
+      // If we get here, response format is unexpected but might still be success
+      // Check if we can verify the user was added by checking teams list
+      console.log("[Invitation] Unexpected response format, but treating as potential success");
+      setStatus("success");
+      setMessage(responseData?.detail || "Invitation processed successfully!");
+      hasProcessedRef.current = true;
+      toast.success(responseData?.detail || "Invitation processed successfully!");
+      
+      setTimeout(() => {
+        router.push("/teams");
+        router.refresh();
+      }, 2000);
     } catch (err: any) {
       console.error("[Invitation] Error accepting invitation:", err);
       console.error("[Invitation] Error response:", err.response?.data);
       console.error("[Invitation] Error status:", err.response?.status);
+      console.error("[Invitation] Full error:", JSON.stringify(err, null, 2));
       
-      const errorMessage = err.response?.data?.detail || err.message || "Failed to accept invitation.";
+      // Check if the error response actually contains success data
+      // Sometimes axios might throw an error even on 200 status if response format is unexpected
+      const errorResponseData = err.response?.data;
+      if (errorResponseData?.team_id && errorResponseData?.team_name) {
+        console.log("[Invitation] Error response contains success data, treating as success");
+        setStatus("success");
+        setMessage(errorResponseData.detail || "Invitation accepted successfully!");
+        setTeamId(errorResponseData.team_id);
+        setTeamName(errorResponseData.team_name);
+        hasProcessedRef.current = true;
+        toast.success("Invitation accepted successfully! You've been added to the team.");
+        setTimeout(() => {
+          router.push(`/teams/${errorResponseData.team_id}`);
+          router.refresh();
+        }, 2000);
+        return;
+      }
+      
+      const errorMessage = errorResponseData?.detail || err.message || "Failed to accept invitation.";
       
       // If 401 (unauthorized) and we haven't retried, wait and retry
       if (err.response?.status === 401 && retryCount < 3) {
@@ -182,6 +232,26 @@ const AcceptInvitationPage = () => {
         await new Promise(resolve => setTimeout(resolve, 2000 * (retryCount + 1)));
         await ensureDjangoSync();
         return acceptInvitation(retryCount + 1);
+      }
+
+      // Only show error if it's a real error (not a success wrapped in error)
+      // Check if status is 2xx (success) even though axios threw
+      if (err.response?.status >= 200 && err.response?.status < 300) {
+        console.log("[Invitation] Status is 2xx, treating as success despite error object");
+        // Try to extract team info
+        if (errorResponseData?.team_id && errorResponseData?.team_name) {
+          setStatus("success");
+          setMessage(errorResponseData.detail || "Invitation accepted successfully!");
+          setTeamId(errorResponseData.team_id);
+          setTeamName(errorResponseData.team_name);
+          hasProcessedRef.current = true;
+          toast.success("Invitation accepted successfully! You've been added to the team.");
+          setTimeout(() => {
+            router.push(`/teams/${errorResponseData.team_id}`);
+            router.refresh();
+          }, 2000);
+          return;
+        }
       }
 
       hasProcessedRef.current = false; // Allow manual retry on error

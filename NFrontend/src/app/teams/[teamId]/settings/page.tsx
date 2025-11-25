@@ -1,5 +1,6 @@
 "use client";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
   Users,
   FolderKanban,
@@ -7,27 +8,131 @@ import {
   Save,
   Trash2,
   AlertTriangle,
-  Globe,
-  Lock,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-
-// Mock team data
-const getMockTeam = (teamId: string) => ({
-  id: teamId,
-  name: "Development Team",
-  description: "Responsible for developing and maintaining the application",
-  visibility: "public",
-  created: "2024-01-10",
-});
+import teamService from "@/services/teamService";
+import { Team } from "@/types/project";
+import toast from "react-hot-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const TeamSettingsPage = () => {
   const params = useParams();
   const pathname = usePathname();
+  const router = useRouter();
   const teamId = params.teamId as string;
-  const [team, setTeam] = useState(getMockTeam(teamId));
+  const [team, setTeam] = useState<Team | null>(null);
+  const [formData, setFormData] = useState({ name: "", description: "" });
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch team data
+  useEffect(() => {
+    const fetchTeam = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const teamData = await teamService.getTeam(teamId);
+        setTeam(teamData);
+        setFormData({
+          name: teamData.name,
+          description: teamData.description || "",
+        });
+      } catch (err: any) {
+        console.error("Failed to fetch team:", err);
+        setError(err.message || "Failed to load team");
+        toast.error("Failed to load team. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (teamId) {
+      fetchTeam();
+    }
+  }, [teamId]);
+
+  // Generate team avatar initials
+  const getTeamAvatar = (name: string) => {
+    const words = name.split(" ");
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  const handleSave = async () => {
+    if (!team) return;
+
+    try {
+      setIsSaving(true);
+      await teamService.updateTeam({
+        ...team,
+        name: formData.name,
+        description: formData.description,
+      });
+      toast.success("Team updated successfully!");
+      // Refresh team data
+      const updatedTeam = await teamService.getTeam(teamId);
+      setTeam(updatedTeam);
+    } catch (err: any) {
+      console.error("Failed to update team:", err);
+      toast.error(err.message || "Failed to update team. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!team) return;
+
+    try {
+      setIsDeleting(true);
+      await teamService.deleteTeam(teamId);
+      toast.success("Team deleted successfully!");
+      router.push("/teams");
+    } catch (err: any) {
+      console.error("Failed to delete team:", err);
+      toast.error(err.message || "Failed to delete team. Please try again.");
+      setIsDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">Loading team settings...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !team) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="pm-card p-6 text-center max-w-md">
+          <p className="text-red-600 mb-4">{error || "Team not found"}</p>
+          <Link href="/teams" className="pm-button-primary inline-flex items-center gap-2">
+            Back to Teams
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const navItems = [
     { icon: Users, label: "Overview", href: `/teams/${teamId}` },
@@ -45,12 +150,6 @@ const TeamSettingsPage = () => {
       (item.href === `/teams/${teamId}` && pathname === `/teams/${teamId}`),
   }));
 
-  const handleSave = () => {
-    setIsSaving(true);
-    setTimeout(() => {
-      setIsSaving(false);
-    }, 1000);
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -60,7 +159,7 @@ const TeamSettingsPage = () => {
           <div className="flex items-start gap-4 mb-6">
             <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
               <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-lg">
-                {team.name.substring(0, 2).toUpperCase()}
+                {getTeamAvatar(team.name)}
               </div>
             </div>
             <div className="flex-1 min-w-0">
@@ -68,7 +167,7 @@ const TeamSettingsPage = () => {
                 {team.name}
               </h1>
               <p className="text-gray-600 leading-relaxed">
-                {team.description}
+                {team.description || "No description"}
               </p>
             </div>
           </div>
@@ -121,8 +220,8 @@ const TeamSettingsPage = () => {
                 </label>
                 <input
                   type="text"
-                  value={team.name}
-                  onChange={(e) => setTeam({ ...team, name: e.target.value })}
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="pm-input w-full"
                 />
               </div>
@@ -131,67 +230,41 @@ const TeamSettingsPage = () => {
                   Description
                 </label>
                 <textarea
-                  value={team.description}
+                  value={formData.description}
                   onChange={(e) =>
-                    setTeam({ ...team, description: e.target.value })
+                    setFormData({ ...formData, description: e.target.value })
                   }
                   rows={4}
                   className="pm-input w-full"
                 />
               </div>
             </div>
-          </div>
-
-          {/* Visibility Settings */}
-          <div className="pm-card p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Visibility
-            </h3>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-300 transition-colors">
-                <input
-                  type="radio"
-                  name="visibility"
-                  value="public"
-                  checked={team.visibility === "public"}
-                  onChange={(e) =>
-                    setTeam({ ...team, visibility: e.target.value })
-                  }
-                  className="w-4 h-4 text-gray-900"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-gray-600" />
-                    <span className="font-medium text-gray-900">Public</span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Anyone in your workspace can view this team
-                  </p>
-                </div>
-              </label>
-              <label className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-300 transition-colors">
-                <input
-                  type="radio"
-                  name="visibility"
-                  value="private"
-                  checked={team.visibility === "private"}
-                  onChange={(e) =>
-                    setTeam({ ...team, visibility: e.target.value })
-                  }
-                  className="w-4 h-4 text-gray-900"
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Lock className="h-4 w-4 text-gray-600" />
-                    <span className="font-medium text-gray-900">Private</span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Only team members can view this team
-                  </p>
-                </div>
-              </label>
+            
+            {/* Save and Cancel Buttons */}
+            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+              <Link href={`/teams/${teamId}`} className="pm-button-secondary">
+                Cancel
+              </Link>
+              <button
+                onClick={handleSave}
+                disabled={isSaving || (formData.name === team.name && formData.description === (team.description || ""))}
+                className="pm-button-primary inline-flex items-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Save Changes
+                  </>
+                )}
+              </button>
             </div>
           </div>
+
 
           {/* Danger Zone */}
           <div className="pm-card p-6 border-2 border-gray-300">
@@ -207,24 +280,45 @@ const TeamSettingsPage = () => {
                   cannot be undone.
                 </p>
               </div>
-              <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium inline-flex items-center gap-2">
-                <Trash2 className="h-4 w-4" />
-                Delete
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    disabled={isDeleting}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete the team
+                      &quot;{team.name}&quot; and remove all associated data from our servers.
+                      All team members will lose access to this team and its projects.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="bg-red-600 hover:bg-red-700 text-white inline-flex items-center gap-2"
+                    >
+                      {isDeleting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Deleting...
+                        </>
+                      ) : (
+                        "Delete Team"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
-          </div>
-
-          {/* Save Button */}
-          <div className="flex items-center justify-end gap-3 mt-6">
-            <button className="pm-button-secondary">Cancel</button>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="pm-button-primary inline-flex items-center gap-2"
-            >
-              <Save className="h-4 w-4" />
-              {isSaving ? "Saving..." : "Save Changes"}
-            </button>
           </div>
         </div>
       </div>

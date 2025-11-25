@@ -69,8 +69,28 @@ const teamService = {
     }
   },
   async acceptInvitation(token: string): Promise<any> {
-    const response = await api.post(URLS.ACCEPT_INVITATION, { token });
-    return response.data;
+    try {
+      console.log('[Accept Invitation] Calling API with token:', token.substring(0, 10) + '...');
+      const response = await api.post(URLS.ACCEPT_INVITATION, { token });
+      console.log('[Accept Invitation] API response status:', response.status);
+      console.log('[Accept Invitation] API response data:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('[Accept Invitation] API error:', error);
+      console.error('[Accept Invitation] Error response:', error.response?.data);
+      console.error('[Accept Invitation] Error status:', error.response?.status);
+      
+      // If the error response contains success data (team_id, team_name), return it
+      // This can happen if axios throws an error even on 200 status
+      if (error.response?.status >= 200 && error.response?.status < 300) {
+        if (error.response?.data?.team_id && error.response?.data?.team_name) {
+          console.log('[Accept Invitation] Error response contains success data, returning it');
+          return error.response.data;
+        }
+      }
+      
+      throw error;
+    }
   },
 };
 

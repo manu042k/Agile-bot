@@ -1,73 +1,21 @@
 "use client";
 import { useParams, usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import {
   Users,
   FolderKanban,
   Settings,
-  UserPlus,
-  Mail,
   Crown,
   Shield,
   User,
-  MoreVertical,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-// Mock team data
-const getMockTeam = (teamId: string) => ({
-  id: teamId,
-  name: "Development Team",
-  description: "Responsible for developing and maintaining the application",
-  members: [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john@example.com",
-      role: "owner",
-      avatar: null,
-      joinedAt: "2024-01-10",
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane@example.com",
-      role: "admin",
-      avatar: null,
-      joinedAt: "2024-01-12",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      email: "mike@example.com",
-      role: "member",
-      avatar: null,
-      joinedAt: "2024-01-15",
-    },
-    {
-      id: 4,
-      name: "Sarah Wilson",
-      email: "sarah@example.com",
-      role: "member",
-      avatar: null,
-      joinedAt: "2024-01-18",
-    },
-    {
-      id: 5,
-      name: "Alex Brown",
-      email: "alex@example.com",
-      role: "member",
-      avatar: null,
-      joinedAt: "2024-01-20",
-    },
-  ],
-  projects: [
-    { id: 1, name: "E-Commerce Platform", progress: 65, tasks: 24 },
-    { id: 2, name: "Mobile Banking App", progress: 42, tasks: 18 },
-    { id: 3, name: "AI Analytics Dashboard", progress: 78, tasks: 45 },
-  ],
-  created: "2024-01-10",
-});
+import teamService from "@/services/teamService";
+import projectService from "@/services/projectService";
+import { Team, Project } from "@/types/project";
+import toast from "react-hot-toast";
 
 const getRoleIcon = (role: string) => {
   switch (role) {
@@ -95,7 +43,77 @@ const TeamDetailPage = () => {
   const params = useParams();
   const pathname = usePathname();
   const teamId = params.teamId as string;
-  const team = getMockTeam(teamId);
+  const [team, setTeam] = useState<Team | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch team data
+  useEffect(() => {
+    const fetchTeamData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch team details
+        const teamData = await teamService.getTeam(teamId);
+        setTeam(teamData);
+
+        // Fetch all projects and filter by team
+        try {
+          const allProjects = await projectService.getProjects();
+          const teamProjects = allProjects.filter(p => p.team?.id === teamData.id);
+          setProjects(teamProjects);
+        } catch (err) {
+          console.error("Failed to fetch projects:", err);
+          setProjects([]);
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch team:", err);
+        setError(err.message || "Failed to load team");
+        toast.error("Failed to load team. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (teamId) {
+      fetchTeamData();
+    }
+  }, [teamId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">Loading team...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !team) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="pm-card p-6 text-center max-w-md">
+          <p className="text-red-600 mb-4">{error || "Team not found"}</p>
+          <Link href="/teams" className="pm-button-primary inline-flex items-center gap-2">
+            Back to Teams
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Generate team avatar initials
+  const getTeamAvatar = (name: string) => {
+    const words = name.split(" ");
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
 
   const navItems = [
     { icon: Users, label: "Overview", href: `/teams/${teamId}` },
@@ -121,7 +139,7 @@ const TeamDetailPage = () => {
           <div className="flex items-start gap-4 mb-6">
             <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
               <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-lg">
-                {team.name.substring(0, 2).toUpperCase()}
+                {getTeamAvatar(team.name)}
               </div>
             </div>
             <div className="flex-1 min-w-0">
@@ -129,7 +147,7 @@ const TeamDetailPage = () => {
                 {team.name}
               </h1>
               <p className="text-gray-600 leading-relaxed">
-                {team.description}
+                {team.description || "No description"}
               </p>
             </div>
           </div>
@@ -172,15 +190,15 @@ const TeamDetailPage = () => {
               </div>
               <div className="pm-card p-5">
                 <p className="text-2xl font-semibold text-gray-900">
-                  {team.projects.length}
+                  {projects.length}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">Projects</p>
               </div>
               <div className="pm-card p-5">
                 <p className="text-2xl font-semibold text-gray-900">
-                  {team.projects.reduce((sum, p) => sum + p.tasks, 0)}
+                  {projects.length}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
+                <p className="text-xs text-gray-500 mt-1">Active Projects</p>
               </div>
             </div>
 
@@ -190,23 +208,9 @@ const TeamDetailPage = () => {
                 Recent Activity
               </h2>
               <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                      <Users className="h-4 w-4 text-gray-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900">
-                        <span className="font-medium">John Doe</span> completed
-                        task "Implement user authentication"
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
-                    </div>
-                  </div>
-                ))}
+                <div className="text-center py-8 text-gray-500">
+                  <p className="text-sm">No recent activity</p>
+                </div>
               </div>
             </div>
           </div>
@@ -220,7 +224,7 @@ const TeamDetailPage = () => {
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Created</p>
                   <p className="text-sm font-medium text-gray-900">
-                    {team.created}
+                    {team.created_at ? new Date(team.created_at).toLocaleDateString() : "N/A"}
                   </p>
                 </div>
                 <div>
@@ -244,36 +248,51 @@ const TeamDetailPage = () => {
                 </Link>
               </div>
               <div className="space-y-3">
-                {team.members.slice(0, 3).map((member) => {
-                  const RoleIcon = getRoleIcon(member.role);
-                  return (
-                    <div key={member.id} className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gray-900 text-white text-xs">
-                          {member.name
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {member.name}
-                        </p>
-                        <p className="text-xs text-gray-500 truncate">
-                          {member.email}
-                        </p>
+                {team.members.length > 0 ? (
+                  team.members.slice(0, 3).map((member) => {
+                    const RoleIcon = getRoleIcon(member.role);
+                    const userName = member.user?.first_name && member.user?.last_name
+                      ? `${member.user.first_name} ${member.user.last_name}`
+                      : member.user?.email || "Unknown User";
+                    const userEmail = member.user?.email || "";
+                    const initials = userName
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")
+                      .toUpperCase()
+                      .substring(0, 2);
+                    
+                    return (
+                      <div key={member.id || member.user?.id} className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={member.user?.avatar_url || member.user?.profile_pic} />
+                          <AvatarFallback className="bg-gray-900 text-white text-xs">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {userName}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {userEmail}
+                          </p>
+                        </div>
+                        <span
+                          className={`px-2 py-0.5 rounded text-xs font-medium border flex items-center gap-1 ${getRoleColor(
+                            member.role
+                          )}`}
+                        >
+                          <RoleIcon className="h-3 w-3" />
+                        </span>
                       </div>
-                      <span
-                        className={`px-2 py-0.5 rounded text-xs font-medium border flex items-center gap-1 ${getRoleColor(
-                          member.role
-                        )}`}
-                      >
-                        <RoleIcon className="h-3 w-3" />
-                      </span>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No members yet
+                  </p>
+                )}
               </div>
             </div>
 
@@ -289,26 +308,26 @@ const TeamDetailPage = () => {
                 </Link>
               </div>
               <div className="space-y-3">
-                {team.projects.map((project) => (
-                  <Link key={project.id} href={`/projects/${project.id}`}>
-                    <div className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-900 text-sm">
-                          {project.name}
-                        </h4>
-                        <span className="text-xs font-medium text-gray-700">
-                          {project.progress}%
-                        </span>
+                {projects.length > 0 ? (
+                  projects.slice(0, 3).map((project) => (
+                    <Link key={project.id} href={`/projects/${project.id}`}>
+                      <div className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-gray-900 text-sm">
+                            {project.name}
+                          </h4>
+                        </div>
+                        <p className="text-xs text-gray-500 line-clamp-1">
+                          {project.description || "No description"}
+                        </p>
                       </div>
-                      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gray-900 rounded-full"
-                          style={{ width: `${project.progress}%` }}
-                        />
-                      </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    No projects yet
+                  </p>
+                )}
               </div>
             </div>
           </div>

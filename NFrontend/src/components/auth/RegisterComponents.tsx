@@ -50,7 +50,6 @@ const RegisterComponent = () => {
         first_name,
         last_name,
         phone_number,
-        id: "",
       });
       setSuccessful("Registration successful");
 

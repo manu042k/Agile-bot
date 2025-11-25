@@ -23,13 +23,15 @@ import toast from "react-hot-toast";
 import teamService from "@/services/teamService";
 
 interface InviteMemberComponentProps {
-  teamId: string;
+  teamId: string | number;
   onSuccess?: () => void;
+  onMemberInvited?: () => void;
 }
 
 const InviteMemberComponent: React.FC<InviteMemberComponentProps> = ({
   teamId,
   onSuccess,
+  onMemberInvited,
 }) => {
   const [email, setEmail] = useState<string>("");
   const [role, setRole] = useState<string>("member");
@@ -72,8 +74,9 @@ const InviteMemberComponent: React.FC<InviteMemberComponentProps> = ({
       setIsSuccess(true);
       toast.success(`Invitation sent to ${emailToShow}!`);
 
-      // Call success callback
+      // Call success callbacks
       onSuccess?.();
+      onMemberInvited?.();
 
       // Close modal after 1.5 seconds
       setTimeout(() => {

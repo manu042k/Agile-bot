@@ -12,15 +12,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import teamService from "@/services/teamService";
+import { useRouter } from "next/navigation";
 
-const CreateTeamComponent = () => {
+interface CreateTeamComponentProps {
+  onTeamCreated?: () => void;
+}
+
+const CreateTeamComponent = ({ onTeamCreated }: CreateTeamComponentProps) => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
 
   const handleCreateTeam = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
+    setIsSubmitting(true);
     try {
       const newTeam = { name, description };
 
@@ -28,9 +36,21 @@ const CreateTeamComponent = () => {
       toast.success("Team created successfully!");
       setName("");
       setDescription("");
-      window.location.reload();
+      
+      // Call the callback if provided, otherwise reload
+      if (onTeamCreated) {
+        onTeamCreated();
+        // Close dialog by navigating away (dialog will close automatically)
+        router.refresh();
+      } else {
+        window.location.reload();
+      }
     } catch (error: any) {
-      setError("Failed to create Team. Please try again.");
+      const errorMessage = error.response?.data?.message || error.message || "Failed to create Team. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -71,8 +91,12 @@ const CreateTeamComponent = () => {
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button type="submit" className="pm-button-primary w-full sm:w-auto">
-            Create Team
+          <Button 
+            type="submit" 
+            className="pm-button-primary w-full sm:w-auto"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Creating..." : "Create Team"}
           </Button>
         </DialogFooter>
         </form>

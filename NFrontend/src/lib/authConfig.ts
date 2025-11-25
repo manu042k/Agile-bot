@@ -40,10 +40,6 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  // Set the base URL for NextAuth
-  url: process.env.NEXTAUTH_URL || (process.env.NODE_ENV === "development" ? "http://localhost:3000" : undefined),
-  // Trust host for NextAuth v4
-  trustHost: true,
   callbacks: {
     async signIn({ user, account, profile }) {
       // Validate that we have the required user data
@@ -70,9 +66,9 @@ export const authOptions: NextAuthOptions = {
       if (account && user) {
         // Use the Google ID from the account as the user identifier
         token.sub = account.providerAccountId || user.id;
-        token.email = user.email ?? profile?.email ?? undefined;
-        token.name = user.name ?? profile?.name ?? undefined;
-        token.picture = user.image ?? profile?.picture ?? undefined;
+        token.email = user.email ?? (profile as any)?.email ?? undefined;
+        token.name = user.name ?? (profile as any)?.name ?? undefined;
+        token.picture = user.image ?? (profile as any)?.picture ?? undefined;
         token.accessToken = account.access_token;
       }
       // Token expiration is automatically handled by NextAuth based on maxAge

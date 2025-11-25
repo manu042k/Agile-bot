@@ -1,80 +1,145 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CirclePlus, Users, Search, UserCheck, UsersRound } from "lucide-react";
+import { CirclePlus, Users, Search, Loader2 } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import CreateTeamComponent from "@/components/team/CreateTeamComponent";
 import PageHeader from "@/components/common/PageHeader";
-
-// Mock teams data
-const mockTeams = [
-  {
-    id: 1,
-    name: "Frontend Team",
-    description: "Responsible for user interface and user experience",
-    members: 8,
-    projects: 5,
-    avatar: "FT"
-  },
-  {
-    id: 2,
-    name: "Backend Team",
-    description: "Handles server-side logic and database management",
-    members: 6,
-    projects: 4,
-    avatar: "BT"
-  },
-  {
-    id: 3,
-    name: "DevOps Team",
-    description: "Manages infrastructure, CI/CD, and deployment",
-    members: 4,
-    projects: 8,
-    avatar: "DT"
-  },
-  {
-    id: 4,
-    name: "Design Team",
-    description: "Creates visual designs and user experience flows",
-    members: 5,
-    projects: 6,
-    avatar: "DS"
-  },
-  {
-    id: 5,
-    name: "QA Team",
-    description: "Ensures quality through testing and validation",
-    members: 7,
-    projects: 10,
-    avatar: "QA"
-  }
-];
+import teamService from "@/services/teamService";
+import projectService from "@/services/projectService";
+import { Team } from "@/types/project";
+import { useUser } from "@/hooks/useUser";
+import toast from "react-hot-toast";
 
 const TeamsPage = () => {
-  const searchParams = useSearchParams();
-  const tab = searchParams.get("tab") || "all";
   const [searchQuery, setSearchQuery] = useState("");
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [projectCounts, setProjectCounts] = useState<Record<number, number>>({});
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { user: currentUser } = useUser();
 
-  // Mock current user for filtering
-  const currentUser = "John Doe";
+  // Fetch teams function
+  const fetchTeams = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const teamsData = await teamService.getTeams();
+      setTeams(teamsData);
 
-  const filteredTeams = mockTeams.filter(team => {
-    const matchesSearch = team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         team.description.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    // Apply tab filters
-    let matchesTab = true;
-    if (tab === "my-teams") {
-      // Mock: filter teams where user is a member
-      matchesTab = team.id <= 3; // Mock filter
-    } else if (tab === "members") {
-      // Show all teams for members tab
-      matchesTab = true;
+      // Fetch all projects to calculate project counts per team
+      try {
+        const projects = await projectService.getProjects();
+        const counts: Record<number, number> = {};
+        teamsData.forEach(team => {
+          counts[team.id] = projects.filter(p => p.team?.id === team.id).length;
+        });
+        setProjectCounts(counts);
+      } catch (err) {
+        console.error("Failed to fetch projects for counts:", err);
+        // Set all counts to 0 if projects fetch fails
+        const counts: Record<number, number> = {};
+        teamsData.forEach(team => {
+          counts[team.id] = 0;
+        });
+        setProjectCounts(counts);
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch teams:", err);
+      setError(err.message || "Failed to load teams");
+      toast.error("Failed to load teams. Please try again.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Fetch teams on mount
+  useEffect(() => {
+    fetchTeams();
+  }, []);
+
+  // Refresh teams list (can be called after creating a team)
+  const refreshTeams = () => {
+    setDialogOpen(false);
+    fetchTeams();
+  };
+
+  // Filter teams based on search
+  const filteredTeams = teams.filter(team => {
+    const matchesSearch = team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (team.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     
-    return matchesSearch && matchesTab;
+    return matchesSearch;
   });
+
+  // Calculate stats
+  // Count unique members across all teams (a user can be in multiple teams)
+  const uniqueMemberIds = new Set<number>();
+  teams.forEach(team => {
+    team.members.forEach(member => {
+      if (member.user?.id) {
+        uniqueMemberIds.add(member.user.id);
+      }
+    });
+  });
+  const totalMembers = uniqueMemberIds.size;
+  const totalProjects = Object.values(projectCounts).reduce((sum, count) => sum + count, 0);
+
+  // Generate avatar initials from team name
+  const getTeamAvatar = (name: string) => {
+    const words = name.split(" ");
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <PageHeader
+          title="Teams"
+          description="Manage your organization's teams and collaborate effectively"
+          icon={Users}
+          showTabs={false}
+        />
+        <div className="px-6 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Loading teams...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <PageHeader
+          title="Teams"
+          description="Manage your organization's teams and collaborate effectively"
+          icon={Users}
+          showTabs={false}
+        />
+        <div className="px-6 py-8">
+          <div className="pm-card p-6 text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="pm-button-primary"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -82,11 +147,7 @@ const TeamsPage = () => {
         title="Teams"
         description="Manage your organization's teams and collaborate effectively"
         icon={Users}
-        tabs={[
-          { icon: Users, label: "Teams", href: "/teams" },
-          { icon: UserCheck, label: "My Teams", href: "/teams?tab=my-teams" },
-          { icon: UsersRound, label: "Members", href: "/teams?tab=members" },
-        ]}
+        showTabs={false}
       />
 
       <div className="px-6 py-8">
@@ -103,14 +164,14 @@ const TeamsPage = () => {
                 className="pm-input !pl-10 pr-3 w-full"
               />
             </div>
-            <Dialog>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <button className="pm-button-primary inline-flex items-center gap-2">
                   <CirclePlus className="h-4 w-4" />
                   New Team
                 </button>
               </DialogTrigger>
-              <CreateTeamComponent />
+              <CreateTeamComponent onTeamCreated={refreshTeams} />
             </Dialog>
           </div>
         </div>
@@ -118,38 +179,6 @@ const TeamsPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-4">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                        <CirclePlus className="h-5 w-5 text-gray-700" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Create Team</h3>
-                        <p className="text-xs text-gray-500">New team</p>
-                      </div>
-                    </div>
-                  </button>
-                </DialogTrigger>
-                <CreateTeamComponent />
-              </Dialog>
-
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Users className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Manage Members</h3>
-                    <p className="text-xs text-gray-500">Team members</p>
-                  </div>
-                </div>
-              </button>
-            </div>
-
             {/* Teams Overview */}
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Teams Overview</h2>
@@ -157,27 +186,27 @@ const TeamsPage = () => {
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-gray-600">Total Teams</span>
-                    <span className="font-medium text-gray-900">{mockTeams.length}</span>
+                    <span className="font-medium text-gray-900">{teams.length}</span>
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-gray-900 rounded-full transition-all"
-                      style={{ width: `${(mockTeams.length / 10) * 100}%` }}
+                      style={{ width: `${Math.min((teams.length / 10) * 100, 100)}%` }}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
                   <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockTeams.reduce((sum, t) => sum + t.members, 0)}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{totalMembers}</p>
                     <p className="text-xs text-gray-500 mt-1">Total Members</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockTeams.reduce((sum, t) => sum + t.projects, 0)}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{totalProjects}</p>
                     <p className="text-xs text-gray-500 mt-1">Total Projects</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockTeams.length}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{teams.length}</p>
                     <p className="text-xs text-gray-500 mt-1">Active Teams</p>
                   </div>
                 </div>
@@ -187,43 +216,62 @@ const TeamsPage = () => {
             {/* Teams List */}
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Teams</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredTeams.map((team) => (
-                  <Link key={team.id} href={`/teams/${team.id}`}>
-                    <div className="pm-card pm-card-hover p-5 cursor-pointer">
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-sm">
-                            {team.avatar}
+              {filteredTeams.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredTeams.map((team) => (
+                    <Link key={team.id} href={`/teams/${team.id}`}>
+                      <div className="pm-card pm-card-hover p-5 cursor-pointer">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                            <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-sm">
+                              {getTeamAvatar(team.name)}
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-900 mb-1">{team.name}</h3>
+                            <p className="text-sm text-gray-500 line-clamp-2">{team.description || "No description"}</p>
                           </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 mb-1">{team.name}</h3>
-                          <p className="text-sm text-gray-500 line-clamp-2">{team.description}</p>
+
+                        <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-gray-400" />
+                            <span className="text-sm text-gray-600">{team.members.length} member{team.members.length !== 1 ? 's' : ''}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">{projectCounts[team.id] || 0} project{(projectCounts[team.id] || 0) !== 1 ? 's' : ''}</span>
+                          </div>
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
-                        <div className="flex items-center gap-2">
-                          <Users className="h-4 w-4 text-gray-400" />
-                          <span className="text-sm text-gray-600">{team.members} members</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-gray-600">{team.projects} projects</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              {filteredTeams.length === 0 && searchQuery && (
+                    </Link>
+                  ))}
+                </div>
+              ) : (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
                     <Users className="h-8 w-8 text-gray-400" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No teams found</h3>
-                  <p className="text-sm text-gray-500">Try adjusting your search query</p>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {searchQuery ? "No teams found" : teams.length === 0 ? "No teams yet" : "No teams match your filter"}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-4">
+                    {searchQuery 
+                      ? "Try adjusting your search query" 
+                      : teams.length === 0 
+                      ? "Create your first team to get started"
+                      : "Try changing the tab filter"}
+                  </p>
+                  {teams.length === 0 && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="pm-button-primary inline-flex items-center gap-2">
+                          <CirclePlus className="h-4 w-4" />
+                          Create Team
+                        </button>
+                      </DialogTrigger>
+                      <CreateTeamComponent onTeamCreated={refreshTeams} />
+                    </Dialog>
+                  )}
                 </div>
               )}
             </div>
@@ -237,15 +285,15 @@ const TeamsPage = () => {
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Total Teams</p>
-                  <p className="text-sm font-medium text-gray-900">{mockTeams.length}</p>
+                  <p className="text-sm font-medium text-gray-900">{teams.length}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Total Members</p>
-                  <p className="text-sm font-medium text-gray-900">{mockTeams.reduce((sum, t) => sum + t.members, 0)}</p>
+                  <p className="text-sm font-medium text-gray-900">{totalMembers}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Total Projects</p>
-                  <p className="text-sm font-medium text-gray-900">{mockTeams.reduce((sum, t) => sum + t.projects, 0)}</p>
+                  <p className="text-sm font-medium text-gray-900">{totalProjects}</p>
                 </div>
               </div>
             </div>

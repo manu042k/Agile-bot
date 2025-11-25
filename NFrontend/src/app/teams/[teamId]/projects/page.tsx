@@ -1,60 +1,95 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, usePathname } from "next/navigation";
 import {
   Users,
   FolderKanban,
   Settings,
-  Plus,
   Search,
-  Filter,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
-
-// Mock team data
-const getMockTeam = (teamId: string) => ({
-  id: teamId,
-  name: "Development Team",
-  projects: [
-    {
-      id: 1,
-      name: "E-Commerce Platform",
-      description: "Build a modern e-commerce platform",
-      progress: 65,
-      tasks: 24,
-      completed: 16,
-      status: "active",
-      created: "2024-01-15",
-    },
-    {
-      id: 2,
-      name: "Mobile Banking App",
-      description: "Develop a secure mobile banking application",
-      progress: 42,
-      tasks: 18,
-      completed: 8,
-      status: "active",
-      created: "2024-01-20",
-    },
-    {
-      id: 3,
-      name: "AI Analytics Dashboard",
-      description: "Create an analytics dashboard with AI-powered insights",
-      progress: 78,
-      tasks: 45,
-      completed: 35,
-      status: "active",
-      created: "2024-02-01",
-    },
-  ],
-});
+import teamService from "@/services/teamService";
+import projectService from "@/services/projectService";
+import { Team, Project } from "@/types/project";
+import toast from "react-hot-toast";
 
 const TeamProjectsPage = () => {
   const params = useParams();
   const pathname = usePathname();
   const teamId = params.teamId as string;
-  const team = getMockTeam(teamId);
+  const [team, setTeam] = useState<Team | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch team and projects data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch team details
+        const teamData = await teamService.getTeam(teamId);
+        setTeam(teamData);
+
+        // Fetch all projects and filter by team
+        try {
+          const allProjects = await projectService.getProjects();
+          const teamProjects = allProjects.filter(p => p.team?.id === teamData.id);
+          setProjects(teamProjects);
+        } catch (err) {
+          console.error("Failed to fetch projects:", err);
+          setProjects([]);
+        }
+      } catch (err: any) {
+        console.error("Failed to fetch team:", err);
+        setError(err.message || "Failed to load team");
+        toast.error("Failed to load team. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (teamId) {
+      fetchData();
+    }
+  }, [teamId]);
+
+  // Generate team avatar initials
+  const getTeamAvatar = (name: string) => {
+    const words = name.split(" ");
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">Loading team projects...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !team) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="pm-card p-6 text-center max-w-md">
+          <p className="text-red-600 mb-4">{error || "Team not found"}</p>
+          <Link href="/teams" className="pm-button-primary inline-flex items-center gap-2">
+            Back to Teams
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const navItems = [
     { icon: Users, label: "Overview", href: `/teams/${teamId}` },
@@ -72,10 +107,10 @@ const TeamProjectsPage = () => {
       (item.href === `/teams/${teamId}` && pathname === `/teams/${teamId}`),
   }));
 
-  const filteredProjects = team.projects.filter(
+  const filteredProjects = projects.filter(
     (project) =>
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (project.description?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false)
   );
 
   return (
@@ -86,7 +121,7 @@ const TeamProjectsPage = () => {
           <div className="flex items-start gap-4 mb-6">
             <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
               <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-lg">
-                {team.name.substring(0, 2).toUpperCase()}
+                {getTeamAvatar(team.name)}
               </div>
             </div>
             <div className="flex-1 min-w-0">
@@ -94,7 +129,7 @@ const TeamProjectsPage = () => {
                 {team.name}
               </h1>
               <p className="text-gray-600 leading-relaxed">
-                Responsible for developing and maintaining the application
+                {team.description || "No description"}
               </p>
             </div>
           </div>
@@ -124,21 +159,15 @@ const TeamProjectsPage = () => {
 
       {/* Main Content */}
       <div className="px-6 py-8">
-        {/* Header with Actions */}
+        {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                Team Projects
-              </h2>
-              <p className="text-gray-600">
-                Projects associated with this team
-              </p>
-            </div>
-            <button className="pm-button-primary inline-flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              Create Project
-            </button>
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Team Projects
+            </h2>
+            <p className="text-gray-600">
+              Projects associated with this team
+            </p>
           </div>
         </div>
 
@@ -155,34 +184,24 @@ const TeamProjectsPage = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {team.projects.length}
+              {projects.length}
             </p>
             <p className="text-xs text-gray-500 mt-1">Total Projects</p>
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {team.projects.filter((p) => p.status === "active").length}
+              {projects.length}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Active</p>
+            <p className="text-xs text-gray-500 mt-1">Active Projects</p>
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {team.projects.reduce((sum, p) => sum + p.tasks, 0)}
+              {team.members.length}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {Math.round(
-                team.projects.reduce((sum, p) => sum + p.progress, 0) /
-                  team.projects.length
-              )}
-              %
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Avg Progress</p>
+            <p className="text-xs text-gray-500 mt-1">Team Members</p>
           </div>
         </div>
 
@@ -201,49 +220,24 @@ const TeamProjectsPage = () => {
                       <div className="p-3 rounded-xl bg-gray-900 shadow-lg">
                         <FolderKanban className="h-5 w-5 text-white" />
                       </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${
-                          project.status === "active"
-                            ? "bg-gray-200 text-gray-700 border-gray-300"
-                            : project.status === "completed"
-                            ? "bg-gray-800 text-white border-gray-900"
-                            : "bg-gray-100 text-gray-600 border-gray-200"
-                        }`}
-                      >
-                        {project.status}
+                      <span className="px-3 py-1 rounded-full text-xs font-semibold border bg-gray-200 text-gray-700 border-gray-300">
+                        {project.visibility || "private"}
                       </span>
                     </div>
                     <h3 className="font-bold text-lg text-gray-900 mb-2 line-clamp-1 group-hover:text-gray-700 transition-colors">
                       {project.name}
                     </h3>
                     <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-                      {project.description}
+                      {project.description || "No description"}
                     </p>
                   </div>
 
-                  {/* Progress */}
-                  <div className="mb-5 flex-1">
-                    <div className="flex items-center justify-between text-xs font-medium text-gray-600 mb-2">
-                      <span>Progress</span>
-                      <span className="font-bold text-gray-900">
-                        {project.progress}%
-                      </span>
-                    </div>
-                    <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gray-900 rounded-full transition-all duration-500"
-                        style={{ width: `${project.progress}%` }}
-                      />
-                    </div>
-                  </div>
-
                   {/* Footer */}
-                  <div className="pt-4 border-t border-gray-100">
+                  <div className="pt-4 border-t border-gray-100 mt-auto">
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <span>
-                        {project.completed}/{project.tasks} tasks completed
+                        Created {project.created_at ? new Date(project.created_at).toLocaleDateString() : "N/A"}
                       </span>
-                      <span>Created {project.created}</span>
                     </div>
                   </div>
                 </div>
@@ -259,17 +253,11 @@ const TeamProjectsPage = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 No projects found
               </h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-gray-500">
                 {searchQuery
                   ? "Try adjusting your search"
-                  : "Create a project for this team"}
+                  : "No projects found for this team"}
               </p>
-              {!searchQuery && (
-                <button className="pm-button-primary inline-flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Create Project
-                </button>
-              )}
             </div>
           </div>
         )}
