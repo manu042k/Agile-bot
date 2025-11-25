@@ -15,6 +15,12 @@ export default function HomePage() {
   const featuresRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Show content immediately on client-side mount to prevent blank page
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      setIsVisible(true);
+    });
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -23,11 +29,14 @@ export default function HomePage() {
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: '50px' }
     );
 
-    if (heroRef.current) observer.observe(heroRef.current);
-    if (featuresRef.current) observer.observe(featuresRef.current);
+    // Use requestAnimationFrame to ensure refs are attached
+    requestAnimationFrame(() => {
+      if (heroRef.current) observer.observe(heroRef.current);
+      if (featuresRef.current) observer.observe(featuresRef.current);
+    });
 
     return () => {
       if (heroRef.current) observer.unobserve(heroRef.current);

@@ -1,8 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { Upload, FileText, Search, Filter, Download, MoreVertical, Calendar, User, Clock, FolderOpen } from "lucide-react";
-import Link from "next/link";
+import { Upload, FileText, Search, Download, Plus, File, FileCode, FileSpreadsheet, Image, FileType, ChevronDown, ChevronUp } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import PageHeader from "@/components/common/PageHeader";
 import UploadDocumentComponent from "@/components/projects/UploadDocumentComponent";
@@ -18,33 +16,67 @@ const mockDocuments = [
 ];
 
 const DocumentsPage = () => {
-  const searchParams = useSearchParams();
-  const tab = searchParams.get("tab") || "all";
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterProject, setFilterProject] = useState("all");
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+
+  const toggleProject = (project: string) => {
+    setExpandedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(project)) {
+        newSet.delete(project);
+      } else {
+        newSet.add(project);
+      }
+      return newSet;
+    });
+  };
 
   const filteredDocuments = mockDocuments.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesProject = filterProject === "all" || doc.project === filterProject;
-    
-    // Apply tab filters
-    let matchesTab = true;
-    if (tab === "recent") {
-      // Show documents uploaded in last 7 days
-      const uploadDate = new Date(doc.uploadedAt);
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      matchesTab = uploadDate > weekAgo;
-    } else if (tab === "by-project") {
-      // Group by project - show all but will be grouped
-      matchesTab = true;
-    }
-    
-    return matchesSearch && matchesProject && matchesTab;
+    return matchesSearch;
   });
 
   const getFileIcon = (type: string) => {
-    return <FileText className="h-5 w-5 text-gray-600" />;
+    const iconClass = "h-5 w-5";
+    switch (type.toLowerCase()) {
+      case "pdf":
+        return <FileText className={iconClass} style={{ color: "#DC2626" }} />; // Red
+      case "doc":
+      case "docx":
+        return <File className={iconClass} style={{ color: "#2563EB" }} />; // Blue
+      case "xlsx":
+      case "xls":
+        return <FileSpreadsheet className={iconClass} style={{ color: "#16A34A" }} />; // Green
+      case "md":
+        return <FileCode className={iconClass} style={{ color: "#7C3AED" }} />; // Purple
+      case "sql":
+        return <FileCode className={iconClass} style={{ color: "#EA580C" }} />; // Orange
+      case "fig":
+        return <Image className={iconClass} style={{ color: "#9333EA" }} />; // Purple
+      default:
+        return <FileType className={iconClass} style={{ color: "#6B7280" }} />; // Gray
+    }
+  };
+
+  const getFileIconBg = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "pdf":
+        return "bg-red-100";
+      case "doc":
+      case "docx":
+        return "bg-blue-100";
+      case "xlsx":
+      case "xls":
+        return "bg-green-100";
+      case "md":
+        return "bg-purple-100";
+      case "sql":
+        return "bg-orange-100";
+      case "fig":
+        return "bg-purple-100";
+      default:
+        return "bg-gray-100";
+    }
   };
 
   return (
@@ -53,258 +85,118 @@ const DocumentsPage = () => {
         title="Documents"
         description="Manage project documents and files across all your projects"
         icon={FileText}
-        tabs={[
-          { icon: FileText, label: "Documents", href: "/documents" },
-          { icon: Clock, label: "Recent", href: "/documents?tab=recent" },
-          { icon: FolderOpen, label: "By Project", href: "/documents?tab=by-project" },
-        ]}
+        showTabs={false}
       />
 
       <div className="px-6 py-8">
-        {/* Search and Filters */}
+        {/* Search */}
         <div className="mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
-                <input
-                  type="text"
-                  placeholder="Search documents..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pm-input !pl-10 pr-3 w-full"
-                />
-              </div>
-              <select
-                value={filterProject}
-                onChange={(e) => setFilterProject(e.target.value)}
-                className="pm-input min-w-[140px] flex-shrink-0"
-              >
-                <option value="all">All Projects</option>
-                <option value="E-Commerce Platform">E-Commerce Platform</option>
-                <option value="Mobile Banking App">Mobile Banking App</option>
-                <option value="AI Analytics Dashboard">AI Analytics Dashboard</option>
-              </select>
-              <button className="pm-button-secondary whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                More Filters
-              </button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
+              <input
+                type="text"
+                placeholder="Search documents..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pm-input !pl-10 pr-3 w-full"
+              />
             </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="pm-button-primary inline-flex items-center gap-2">
-                  <Upload className="h-4 w-4" />
-                  Upload Document
-                </button>
-              </DialogTrigger>
-              <UploadDocumentComponent />
-            </Dialog>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-4">
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Upload className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Upload Document</h3>
-                    <p className="text-xs text-gray-500">New document</p>
-                  </div>
-                </div>
-              </button>
-
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Filter className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Filter Documents</h3>
-                    <p className="text-xs text-gray-500">Advanced filters</p>
-                  </div>
-                </div>
-              </button>
-            </div>
-
-            {/* Documents Overview */}
-            <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Documents Overview</h2>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between text-sm mb-2">
-                    <span className="text-gray-600">Total Documents</span>
-                    <span className="font-medium text-gray-900">{mockDocuments.length}</span>
-                  </div>
-                  <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-orange-600 rounded-full transition-all"
-                      style={{ width: `${(mockDocuments.length / 20) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockDocuments.length}</p>
-                    <p className="text-xs text-gray-500 mt-1">Total Documents</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{new Set(mockDocuments.map(d => d.project)).size}</p>
-                    <p className="text-xs text-gray-500 mt-1">Projects</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{new Set(mockDocuments.map(d => d.type)).size}</p>
-                    <p className="text-xs text-gray-500 mt-1">File Types</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* All Documents Tab */}
-            {tab === "all" && (
-              <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Documents</h2>
-                {filteredDocuments.length > 0 ? (
-                <div className="space-y-3">
-                  {filteredDocuments.map((doc) => (
-                    <div key={doc.id} className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                          {getFileIcon(doc.type)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="font-medium text-gray-900">{doc.name}</h3>
-                            <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 border border-gray-200 uppercase">
-                              {doc.type}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <Link href={`/projects`} className="hover:text-gray-900 cursor-pointer">{doc.project}</Link>
-                            <span className="flex items-center gap-1">
-                              <User className="h-3.5 w-3.5" />
-                              {doc.uploadedBy}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <Calendar className="h-3.5 w-3.5" />
-                              {doc.uploadedAt}
-                            </span>
-                            <span>{doc.size}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors" title="Download">
-                            <Download className="h-4 w-4 text-gray-600" />
-                          </button>
-                          <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            <MoreVertical className="h-4 w-4 text-gray-500" />
-                          </button>
-                        </div>
+            {/* Add Document Button and Documents Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Add Document Button */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                        <Plus className="h-6 w-6 text-orange-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Add Document</h3>
+                        <p className="text-xs text-gray-500">New document</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                    <FileText className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No documents found</h3>
-                  <p className="text-sm text-gray-500 mb-6">
-                    {searchQuery ? "Try adjusting your search" : "Upload your first document to get started"}
-                  </p>
-                  {!searchQuery && (
-                    <button className="pm-button-primary inline-flex items-center gap-2">
-                      <Upload className="h-4 w-4" />
-                      Upload Document
-                    </button>
-                  )}
-                </div>
-              )}
-              </div>
-            )}
+                  </button>
+                </DialogTrigger>
+                <UploadDocumentComponent />
+              </Dialog>
 
-            {/* Recent Tab */}
-            {tab === "recent" && (
+              {/* Documents Overview */}
               <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Recent Documents
-                </h2>
-                {filteredDocuments.length > 0 ? (
-                  <div className="space-y-3">
-                    {filteredDocuments.map((doc) => (
-                      <div
-                        key={doc.id}
-                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all"
-                      >
-                        <div className="flex items-center gap-4 flex-1">
-                          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                            {getFileIcon(doc.type)}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-gray-900 mb-1 line-clamp-1">
-                              {doc.name}
-                            </h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <span>{doc.project}</span>
-                              <span>•</span>
-                              <span>{doc.size}</span>
-                              <span>•</span>
-                              <span>{doc.uploadedAt}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                            <Download className="h-4 w-4 text-gray-600" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Documents Overview</h2>
+                <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{mockDocuments.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Total Documents</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{new Set(mockDocuments.map(d => d.project)).size}</p>
+                      <p className="text-xs text-gray-500 mt-1">Projects</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{new Set(mockDocuments.map(d => d.type)).size}</p>
+                      <p className="text-xs text-gray-500 mt-1">File Types</p>
+                    </div>
                   </div>
-                ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    No recent documents found
-                  </div>
-                )}
               </div>
-            )}
+            </div>
 
-            {/* By Project Tab */}
-            {tab === "by-project" && (
-              <div className="pm-card p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Documents by Project
-                </h2>
+            {/* Documents by Project */}
+            <div className="pm-card p-6">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                Documents by Project
+              </h2>
+              {Array.from(new Set(filteredDocuments.map(d => d.project))).length > 0 ? (
                 <div className="space-y-6">
-                  {Array.from(new Set(mockDocuments.map(d => d.project))).map((project) => {
-                    const projectDocs = mockDocuments.filter(d => d.project === project);
+                  {Array.from(new Set(filteredDocuments.map(d => d.project))).map((project) => {
+                    const projectDocs = filteredDocuments.filter(d => d.project === project);
+                    const isExpanded = expandedProjects.has(project);
+                    const hasMoreThanThree = projectDocs.length > 3;
+                    const displayDocs = hasMoreThanThree && !isExpanded ? projectDocs.slice(0, 3) : projectDocs;
+                    const remainingCount = projectDocs.length - 3;
+
                     return (
                       <div key={project} className="border border-gray-200 rounded-lg p-4">
-                        <h3 className="font-semibold text-gray-900 mb-3">{project}</h3>
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-semibold text-gray-900">{project}</h3>
+                          {hasMoreThanThree && (
+                            <button
+                              onClick={() => toggleProject(project)}
+                              className="flex items-center gap-1 text-sm text-gray-600 hover:text-orange-600 transition-colors px-2 py-1 rounded hover:bg-orange-50"
+                            >
+                              <span>{isExpanded ? "Show less" : `Show ${remainingCount} more`}</span>
+                              {isExpanded ? (
+                                <ChevronUp className="h-4 w-4" />
+                              ) : (
+                                <ChevronDown className="h-4 w-4" />
+                              )}
+                            </button>
+                          )}
+                        </div>
                         <div className="space-y-2">
-                          {projectDocs.map((doc) => (
+                          {displayDocs.map((doc) => (
                             <div
                               key={doc.id}
-                              className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
+                              className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:bg-gray-50 hover:border-gray-200 hover:shadow-sm transition-all duration-200 cursor-pointer group"
                             >
                               <div className="flex items-center gap-3 flex-1">
-                                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                <div className={`w-10 h-10 rounded-lg ${getFileIconBg(doc.type)} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
                                   {getFileIcon(doc.type)}
                                 </div>
-                                <div className="flex-1">
-                                  <p className="font-medium text-gray-900 text-sm">{doc.name}</p>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-gray-900 text-sm group-hover:text-orange-600 transition-colors truncate">{doc.name}</p>
                                   <p className="text-xs text-gray-500">{doc.size} • {doc.uploadedAt}</p>
                                 </div>
                               </div>
-                              <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                                <Download className="h-4 w-4 text-gray-600" />
+                              <button className="p-2 rounded-lg hover:bg-orange-100 hover:text-orange-600 transition-colors opacity-0 group-hover:opacity-100">
+                                <Download className="h-4 w-4 text-gray-600 group-hover:text-orange-600 transition-colors" />
                               </button>
                             </div>
                           ))}
@@ -313,31 +205,42 @@ const DocumentsPage = () => {
                     );
                   })}
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="text-center py-16">
+                  <div className="relative mx-auto mb-6">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-100 to-orange-50 flex items-center justify-center mx-auto mb-4 shadow-sm">
+                      <FileText className="h-12 w-12 text-orange-400" />
+                    </div>
+                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-orange-200 flex items-center justify-center">
+                      <Plus className="h-4 w-4 text-orange-600" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {searchQuery ? "No documents found" : "No documents yet"}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-8 max-w-sm mx-auto">
+                    {searchQuery 
+                      ? "Try adjusting your search query or clear filters to see more results" 
+                      : "Get started by uploading your first document. Organize project files, share requirements, and collaborate with your team."}
+                  </p>
+                  {!searchQuery && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <button className="pm-button-primary inline-flex items-center gap-2 shadow-lg hover:shadow-xl transition-all">
+                          <Upload className="h-4 w-4" />
+                          Upload Document
+                        </button>
+                      </DialogTrigger>
+                      <UploadDocumentComponent />
+                    </Dialog>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Documents Details */}
-            <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900 mb-4">Documents Details</h3>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1.5">Total Documents</p>
-                  <p className="text-sm font-medium text-gray-900">{mockDocuments.length}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1.5">Projects</p>
-                  <p className="text-sm font-medium text-gray-900">{new Set(mockDocuments.map(d => d.project)).size}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1.5">File Types</p>
-                  <p className="text-sm font-medium text-gray-900">{new Set(mockDocuments.map(d => d.type)).size}</p>
-                </div>
-              </div>
-            </div>
-
             {/* Recent Activity */}
             <div className="pm-card p-5">
               <h3 className="font-semibold text-gray-900 mb-4">Recent Activity</h3>
