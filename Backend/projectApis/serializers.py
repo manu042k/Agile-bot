@@ -1,7 +1,7 @@
 from users.models import User
 from users.serializers import TeamSerializer, UserSerializer
 from rest_framework import serializers
-from .models import FileUpload, Project, Task, Comment
+from .models import FileUpload, Project, Task, Comment, Activity
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
@@ -102,3 +102,30 @@ class UpdateTaskSerializer(serializers.ModelSerializer):
             "created_by",
             "task_number",
         ]
+
+
+class ActivitySerializer(serializers.ModelSerializer):
+    """Serializer for Activity model"""
+    
+    user = UserSerializer(read_only=True)
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    project_name = serializers.CharField(source='project.name', read_only=True, allow_null=True)
+    task_number = serializers.CharField(source='task.task_number', read_only=True, allow_null=True)
+    
+    class Meta:
+        model = Activity
+        fields = [
+            "id",
+            "activity_type",
+            "user",
+            "user_email",
+            "project",
+            "project_name",
+            "task",
+            "task_number",
+            "description",
+            "target_name",
+            "metadata",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]

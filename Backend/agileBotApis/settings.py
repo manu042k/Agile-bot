@@ -85,6 +85,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Activity tracking middleware (should be after auth middleware)
+    "projectApis.activity_middleware.ActivityTrackingMiddleware",
 ]
 
 # Disable CSRF for API endpoints (handled by DRF)

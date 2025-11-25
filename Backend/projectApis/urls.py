@@ -10,6 +10,9 @@ from .views import (
     CommentListCreateView,
     TaskPatchView,
     TriggerTaskGeneration,
+    ActivityListView,
+    RecentActivitiesView,
+    ProjectActivitiesView,
 )
 from rest_framework.routers import DefaultRouter
 from .views import FileUploadView
@@ -41,4 +44,12 @@ urlpatterns = [
         name="assign-team-to-project",
     ),
     path("trigger/", TriggerTaskGeneration.as_view(), name="trigger-task-generation"),
+    # Activity endpoints
+    path("activities/", ActivityListView.as_view(), name="activity-list"),
+    path("activities/recent/", RecentActivitiesView.as_view(), name="recent-activities"),
+    path(
+        "projects/<int:project_id>/activities/",
+        ProjectActivitiesView.as_view(),
+        name="project-activities",
+    ),
 ] + router.urls

@@ -1,96 +1,114 @@
 "use client";
-import { useState } from "react";
-import { Bell, CheckCircle, X, MessageSquare, UserPlus, FileText, AlertCircle } from "lucide-react";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState, useMemo } from "react";
+import {
+  Bell,
+  CheckCircle,
+  X,
+  MessageSquare,
+  UserPlus,
+  FileText,
+  AlertCircle,
+  Folder,
+  Upload,
+  User as UserIcon,
+  Loader2,
+} from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-
-// Mock notifications data
-const mockNotifications = [
-  {
-    id: 1,
-    type: "task_assigned",
-    title: "New task assigned",
-    message: "You've been assigned to 'Implement user authentication'",
-    project: "E-Commerce Platform",
-    taskId: 1,
-    projectId: 1,
-    timestamp: "2 minutes ago",
-    read: false,
-    icon: CheckCircle,
-  },
-  {
-    id: 2,
-    type: "comment",
-    title: "New comment",
-    message: "John Doe commented on 'Design dashboard UI'",
-    project: "AI Analytics Dashboard",
-    taskId: 2,
-    projectId: 3,
-    timestamp: "15 minutes ago",
-    read: false,
-    icon: MessageSquare,
-  },
-  {
-    id: 3,
-    type: "team_added",
-    title: "Added to team",
-    message: "You've been added to 'Frontend Team'",
-    teamId: 1,
-    timestamp: "1 hour ago",
-    read: false,
-    icon: UserPlus,
-  },
-  {
-    id: 4,
-    type: "document_uploaded",
-    title: "Document uploaded",
-    message: "New document 'Project Requirements.pdf' uploaded",
-    project: "E-Commerce Platform",
-    projectId: 1,
-    timestamp: "2 hours ago",
-    read: true,
-    icon: FileText,
-  },
-  {
-    id: 5,
-    type: "task_status",
-    title: "Task status changed",
-    message: "'Write API documentation' marked as Done",
-    project: "Mobile Banking App",
-    taskId: 3,
-    projectId: 2,
-    timestamp: "3 hours ago",
-    read: true,
-    icon: AlertCircle,
-  },
-];
+import useActivities from "@/hooks/useActivities";
 
 export default function NotificationCenter() {
-  const [notifications, setNotifications] = useState(mockNotifications);
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const { activities, loading } = useActivities({ limit: 20 });
+  const [readIds, setReadIds] = useState<Set<number>>(new Set());
+
+  // Get unread count (activities not in readIds)
+  const unreadCount = activities.filter((a) => !readIds.has(a.id)).length;
 
   const markAsRead = (id: number) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setReadIds((prev) => new Set(Array.from(prev).concat(id)));
   };
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setReadIds(new Set(activities.map((a) => a.id)));
   };
 
-  const getNotificationLink = (notification: typeof mockNotifications[0]) => {
-    if (notification.taskId && notification.projectId) {
-      return `/projects/${notification.projectId}/task/${notification.taskId}`;
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case "task_completed":
+        return CheckCircle;
+      case "comment_added":
+        return MessageSquare;
+      case "task_created":
+      case "task_updated":
+        return FileText;
+      case "member_added":
+      case "member_removed":
+        return UserPlus;
+      case "task_assigned":
+        return UserIcon;
+      case "document_uploaded":
+        return Upload;
+      case "project_created":
+      case "project_updated":
+        return Folder;
+      default:
+        return Bell;
     }
-    if (notification.projectId) {
-      return `/projects/${notification.projectId}`;
+  };
+
+  const getActivityTitle = (type: string) => {
+    switch (type) {
+      case "task_completed":
+        return "Task completed";
+      case "comment_added":
+        return "New comment";
+      case "task_created":
+        return "Task created";
+      case "task_updated":
+        return "Task updated";
+      case "task_assigned":
+        return "Task assigned";
+      case "member_added":
+        return "Member added";
+      case "member_removed":
+        return "Member removed";
+      case "document_uploaded":
+        return "Document uploaded";
+      case "project_created":
+        return "Project created";
+      case "project_updated":
+        return "Project updated";
+      default:
+        return "Activity";
     }
-    if (notification.teamId) {
-      return `/teams/${notification.teamId}`;
+  };
+
+  const getNotificationLink = (activity: (typeof activities)[0]) => {
+    if (activity.task && activity.project) {
+      return `/projects/${activity.project}/task/${activity.task}`;
     }
-    return "#";
+    if (activity.project) {
+      return `/projects/${activity.project}`;
+    }
+    return "/activity";
+  };
+
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return "just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+
+    return date.toLocaleDateString();
   };
 
   return (
@@ -116,46 +134,63 @@ export default function NotificationCenter() {
           )}
         </div>
         <div className="max-h-96 overflow-y-auto">
-          {notifications.length === 0 ? (
+          {loading ? (
+            <div className="p-8 text-center">
+              <Loader2 className="h-8 w-8 mx-auto mb-3 text-gray-400 animate-spin" />
+              <p className="text-sm text-gray-500">Loading...</p>
+            </div>
+          ) : activities.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
               <Bell className="h-12 w-12 mx-auto mb-3 text-gray-300" />
               <p>No notifications</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
-              {notifications.map((notification) => {
-                const Icon = notification.icon;
+              {activities.map((activity) => {
+                const Icon = getActivityIcon(activity.activity_type);
+                const isUnread = !readIds.has(activity.id);
                 return (
                   <Link
-                    key={notification.id}
-                    href={getNotificationLink(notification)}
-                    onClick={() => markAsRead(notification.id)}
+                    key={activity.id}
+                    href={getNotificationLink(activity)}
+                    onClick={() => markAsRead(activity.id)}
                     className={`block p-4 hover:bg-gray-50 transition-colors ${
-                      !notification.read ? "bg-blue-50/50" : ""
+                      isUnread ? "bg-blue-50/50" : ""
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${
-                        !notification.read ? "bg-blue-100" : "bg-gray-100"
-                      }`}>
-                        <Icon className={`h-4 w-4 ${
-                          !notification.read ? "text-blue-600" : "text-gray-600"
-                        }`} />
+                      <div
+                        className={`p-2 rounded-lg ${
+                          isUnread ? "bg-blue-100" : "bg-gray-100"
+                        }`}
+                      >
+                        <Icon
+                          className={`h-4 w-4 ${
+                            isUnread ? "text-blue-600" : "text-gray-600"
+                          }`}
+                        />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-medium ${
-                          !notification.read ? "text-gray-900" : "text-gray-700"
-                        }`}>
-                          {notification.title}
+                        <p
+                          className={`text-sm font-medium ${
+                            isUnread ? "text-gray-900" : "text-gray-700"
+                          }`}
+                        >
+                          {getActivityTitle(activity.activity_type)}
                         </p>
                         <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                          {notification.message}
+                          {activity.description}
                         </p>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {notification.timestamp}
+                        {activity.project_name && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            {activity.project_name}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formatTimeAgo(activity.created_at)}
                         </p>
                       </div>
-                      {!notification.read && (
+                      {isUnread && (
                         <div className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-2" />
                       )}
                     </div>
@@ -165,7 +200,7 @@ export default function NotificationCenter() {
             </div>
           )}
         </div>
-        {notifications.length > 0 && (
+        {activities.length > 0 && (
           <div className="p-3 border-t border-gray-200 text-center">
             <Link
               href="/activity"
@@ -179,4 +214,3 @@ export default function NotificationCenter() {
     </Popover>
   );
 }
-

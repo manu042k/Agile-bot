@@ -18,6 +18,7 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import PageHeader from "@/components/common/PageHeader";
 import UploadDocumentComponent from "@/components/projects/UploadDocumentComponent";
 import { Separator } from "@/components/ui/separator";
+import ActivityFeed from "@/components/common/ActivityFeed";
 
 // Mock documents
 const mockDocuments = [
@@ -154,25 +155,12 @@ const DocumentsPage = () => {
         description="Manage project documents and files across all your projects"
         icon={FileText}
         showTabs={false}
+        searchPlaceholder="Search documents..."
+        searchValue={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
       />
 
       <div className="px-6 py-8">
-        {/* Search */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
-              <input
-                type="text"
-                placeholder="Search documents..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pm-input !pl-10 pr-3 w-full"
-              />
-            </div>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
@@ -349,28 +337,7 @@ const DocumentsPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Recent Activity */}
-            <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900">Recent Activity</h3>
-              <Separator className="my-4" />
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                      <FileText className="h-3 w-3 text-gray-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-900">Document uploaded</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {i} hour{i > 1 ? "s" : ""} ago
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActivityFeed limit={5} />
           </div>
         </div>
       </div>

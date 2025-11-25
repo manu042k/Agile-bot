@@ -68,9 +68,8 @@ const DashboardPage = () => {
         {/* Overview Tab */}
         {tab === "overview" && (
           <>
-
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mb-6">
           <div className="pm-card p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="p-2 rounded-lg bg-gray-100">
@@ -337,7 +336,7 @@ const DashboardPage = () => {
 
         {/* My Tasks Tab */}
         {tab === "my-tasks" && (
-          <div className="space-y-6">
+          <div className="space-y-6 mt-6">
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900">My Tasks</h2>
               <Separator className="my-4" />
@@ -376,7 +375,7 @@ const DashboardPage = () => {
 
         {/* Recent Projects Tab */}
         {tab === "projects" && (
-          <div className="space-y-6">
+          <div className="space-y-6 mt-6">
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
               <Separator className="my-4" />

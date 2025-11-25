@@ -5,12 +5,13 @@ from users.models import Team
 from .permissions import IsProjectOwnerOrTeamMember
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .models import Project, Task, Comment
+from .models import Project, Task, Comment, Activity
 from .serializers import (
     CommentSerializer,
     ProjectDetailSerializer,
     TaskSerializer,
     UpdateTaskSerializer,
+    ActivitySerializer,
 )
 from django.db.models import Q
 from rest_framework import generics, status
@@ -20,6 +21,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from .serializers import FileUploadSerializer
 from .models import FileUpload
+from rest_framework.pagination import PageNumberPagination
 
 
 # Create your views here.
@@ -245,3 +247,100 @@ class TriggerTaskGeneration(APIView):
             )
 
         return Response({"message": "not webscoket."}, status=status.HTTP_200_OK)
+
+
+class ActivityPagination(PageNumberPagination):
+    """Custom pagination for activities"""
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class ActivityListView(APIView):
+    """
+    List all activities or filter by project, user, or activity type
+    GET /api/activities/
+    GET /api/activities/?project=1
+    GET /api/activities/?user=1
+    GET /api/activities/?activity_type=task_created
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        # Base queryset - filter by projects user has access to
+        user = request.user
+        activities = Activity.objects.filter(
+            Q(project__created_by=user) | 
+            Q(project__team__members=user) |
+            Q(project__isnull=True)
+        ).distinct()
+        
+        # Filter by project
+        project_id = request.query_params.get('project')
+        if project_id:
+            activities = activities.filter(project_id=project_id)
+        
+        # Filter by user
+        user_id = request.query_params.get('user')
+        if user_id:
+            activities = activities.filter(user_id=user_id)
+        
+        # Filter by activity type
+        activity_type = request.query_params.get('activity_type')
+        if activity_type:
+            activities = activities.filter(activity_type=activity_type)
+        
+        # Order by most recent
+        activities = activities.order_by('-created_at')
+        
+        # Paginate
+        paginator = ActivityPagination()
+        paginated_activities = paginator.paginate_queryset(activities, request)
+        
+        # Serialize
+        serializer = ActivitySerializer(paginated_activities, many=True)
+        
+        return paginator.get_paginated_response(serializer.data)
+
+
+class RecentActivitiesView(APIView):
+    """
+    Get recent activities (last 10)
+    GET /api/activities/recent/
+    """
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        
+        # Get recent activities for projects user has access to
+        activities = Activity.objects.filter(
+            Q(project__created_by=user) | 
+            Q(project__team__members=user) |
+            Q(project__isnull=True)
+        ).distinct().order_by('-created_at')[:10]
+        
+        serializer = ActivitySerializer(activities, many=True)
+        return Response(serializer.data)
+
+
+class ProjectActivitiesView(generics.ListAPIView):
+    """
+    Get activities for a specific project
+    GET /api/project-management/projects/{project_id}/activities/
+    """
+    serializer_class = ActivitySerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = ActivityPagination
+
+    def get_queryset(self):
+        project_id = self.kwargs["project_id"]
+        user = self.request.user
+        
+        # Ensure user has access to the project
+        if not Project.objects.filter(
+            Q(id=project_id), Q(team__members=user) | Q(created_by=user)
+        ).exists():
+            raise NotFound("Project not found or user does not have access.")
+        
+        return Activity.objects.filter(project_id=project_id).order_by("-created_at")

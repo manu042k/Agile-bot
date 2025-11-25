@@ -1,5 +1,5 @@
 "use client";
-import { useParams, usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
   Users,
@@ -22,6 +22,7 @@ import teamService from "@/services/teamService";
 import { Team } from "@/types/project";
 import toast from "react-hot-toast";
 import { useUser } from "@/hooks/useUser";
+import PageHeader from "@/components/common/PageHeader";
 
 const getRoleIcon = (role: string) => {
   switch (role) {
@@ -47,7 +48,6 @@ const getRoleColor = (role: string) => {
 
 const TeamMembersPage = () => {
   const params = useParams();
-  const pathname = usePathname();
   const teamId = params.teamId as string;
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,15 +77,6 @@ const TeamMembersPage = () => {
     }
   }, [teamId]);
 
-  // Generate team avatar initials
-  const getTeamAvatar = (name: string) => {
-    const words = name.split(" ");
-    if (words.length >= 2) {
-      return (words[0][0] + words[1][0]).toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -113,22 +104,6 @@ const TeamMembersPage = () => {
     );
   }
 
-  const navItems = [
-    { icon: Users, label: "Overview", href: `/teams/${teamId}` },
-    { icon: Users, label: "Members", href: `/teams/${teamId}/members` },
-    {
-      icon: FolderKanban,
-      label: "Projects",
-      href: `/teams/${teamId}/projects`,
-    },
-    { icon: Settings, label: "Settings", href: `/teams/${teamId}/settings` },
-  ].map((item) => ({
-    ...item,
-    active:
-      pathname === item.href ||
-      (item.href === `/teams/${teamId}` && pathname === `/teams/${teamId}`),
-  }));
-
   // Check if current user is admin or owner
   const currentUserMembership = team?.members.find(
     (member) => member.user?.id === currentUser?.id
@@ -139,47 +114,25 @@ const TeamMembersPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Team Header with Tabs */}
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
-        <div className="px-6 py-6">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-              <div className="w-10 h-10 rounded-lg bg-gray-900 flex items-center justify-center text-white font-bold text-lg">
-                {getTeamAvatar(team.name)}
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                {team.name}
-              </h1>
-              <p className="text-gray-600 leading-relaxed">
-                {team.description || "No description"}
-              </p>
-            </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
-                    item.active
-                      ? "bg-gray-900 text-white shadow-sm"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                  }`}
-                >
-                  <Icon className="h-4 w-4 flex-shrink-0" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={team.name}
+        description={team.description || "No description"}
+        icon={Users}
+        tabs={[
+          { icon: Users, label: "Overview", href: `/teams/${teamId}` },
+          { icon: Users, label: "Members", href: `/teams/${teamId}/members` },
+          {
+            icon: FolderKanban,
+            label: "Projects",
+            href: `/teams/${teamId}/projects`,
+          },
+          {
+            icon: Settings,
+            label: "Settings",
+            href: `/teams/${teamId}/settings`,
+          },
+        ]}
+      />
 
       {/* Main Content */}
       <div className="px-6 py-8">

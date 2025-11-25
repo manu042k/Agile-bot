@@ -8,6 +8,7 @@ import PageHeader from "@/components/common/PageHeader";
 import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
 import { getPriorityClass } from "@/lib/colorUtils";
 import { Separator } from "@/components/ui/separator";
+import ActivityFeed from "@/components/common/ActivityFeed";
 
 // Mock tasks data
 const mockTasks = [
@@ -72,62 +73,41 @@ const TasksPage = () => {
           { icon: UserCheck, label: "Assigned", href: "/tasks?tab=assigned" },
           { icon: CheckCircle2, label: "Completed", href: "/tasks?tab=completed" },
         ]}
+        searchPlaceholder="Search tasks..."
+        searchValue={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+        viewModeButtons={
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                title="List view"
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("board")}
+                className={`p-2 rounded transition-colors ${viewMode === "board" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+                title="Board view"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+            <Dialog>
+              <DialogTrigger asChild>
+                <button className="pm-button-primary inline-flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  New Task
+                </button>
+              </DialogTrigger>
+              <TaskCreateComponent projectId={defaultProjectId} />
+            </Dialog>
+          </div>
+        }
       />
 
       <div className="px-6 py-8">
-        {/* Filters and Actions */}
-        <div className="mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none z-10" />
-                <input
-                  type="text"
-                  placeholder="Search tasks..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pm-input !pl-10 pr-3 w-full"
-                />
-              </div>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="pm-input min-w-[140px] flex-shrink-0"
-              >
-                <option value="all">All Status</option>
-                <option value="todo">To Do</option>
-                <option value="in_progress">In Progress</option>
-                <option value="done">Done</option>
-              </select>
-              <button className="pm-button-secondary whitespace-nowrap flex-shrink-0 inline-flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                More Filters
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:text-gray-900"}`}
-                  title="List view"
-                >
-                  <List className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode("board")}
-                  className={`p-2 rounded transition-colors ${viewMode === "board" ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:text-gray-900"}`}
-                  title="Board view"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </button>
-              </div>
-              <button className="pm-button-primary inline-flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                New Task
-              </button>
-            </div>
-          </div>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
@@ -360,25 +340,7 @@ const TasksPage = () => {
             </div>
 
             {/* Recent Activity */}
-            <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900">Recent Activity</h3>
-              <Separator className="my-4" />
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                      <User className="h-3 w-3 text-gray-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-gray-900">
-                        Task updated
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">{i} hour{i > 1 ? 's' : ''} ago</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActivityFeed limit={5} />
           </div>
         </div>
       </div>

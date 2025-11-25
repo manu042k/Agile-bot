@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import { Separator } from "@/components/ui/separator";
+import ActivityFeed from "@/components/common/ActivityFeed";
 
 // Mock project data
 const getMockProject = (id: string) => ({
@@ -36,7 +37,7 @@ const ProjectDetailPage = () => {
 
       {/* Main Content */}
       <div className="px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
@@ -102,25 +103,7 @@ const ProjectDetailPage = () => {
             </div>
 
             {/* Recent Activity */}
-            <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-              <Separator className="my-4" />
-              <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                      <Users className="h-4 w-4 text-gray-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-900">
-                        <span className="font-medium">John Doe</span> completed task "Implement user authentication"
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">2 hours ago</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ActivityFeed projectId={parseInt(projectId)} limit={5} />
           </div>
 
           {/* Sidebar */}

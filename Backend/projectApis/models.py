@@ -116,3 +116,69 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.task.name}"
+
+
+# Activity Type choices
+ACTIVITY_TYPE_CHOICES = [
+    ("task_created", "Task Created"),
+    ("task_updated", "Task Updated"),
+    ("task_completed", "Task Completed"),
+    ("task_assigned", "Task Assigned"),
+    ("task_deleted", "Task Deleted"),
+    ("comment_added", "Comment Added"),
+    ("project_created", "Project Created"),
+    ("project_updated", "Project Updated"),
+    ("project_deleted", "Project Deleted"),
+    ("document_uploaded", "Document Uploaded"),
+    ("member_added", "Member Added"),
+    ("member_removed", "Member Removed"),
+    ("team_created", "Team Created"),
+    ("team_updated", "Team Updated"),
+]
+
+
+class Activity(models.Model):
+    """Model to track all activities across the application"""
+    
+    id = models.AutoField(primary_key=True)
+    activity_type = models.CharField(
+        max_length=50, choices=ACTIVITY_TYPE_CHOICES, db_index=True
+    )
+    
+    # User who performed the action
+    user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name="activities"
+    )
+    
+    # Related objects (optional, depending on activity type)
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, null=True, blank=True, related_name="activities"
+    )
+    task = models.ForeignKey(
+        Task, on_delete=models.CASCADE, null=True, blank=True, related_name="activities"
+    )
+    
+    # Activity details
+    description = models.TextField(help_text="Human-readable description of the activity")
+    target_name = models.CharField(max_length=255, help_text="Name of the target object")
+    
+    # Metadata
+    metadata = models.JSONField(
+        null=True, blank=True, help_text="Additional data about the activity"
+    )
+    
+    # Timestamp
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name_plural = "Activities"
+        indexes = [
+            models.Index(fields=["-created_at"]),
+            models.Index(fields=["activity_type", "-created_at"]),
+            models.Index(fields=["user", "-created_at"]),
+            models.Index(fields=["project", "-created_at"]),
+        ]
+    
+    def __str__(self):
+        return f"{self.user} - {self.activity_type} - {self.target_name}"
