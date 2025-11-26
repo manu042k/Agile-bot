@@ -17,7 +17,11 @@ import projectService from "@/services/projectService";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
-const CreateProjectComponent = () => {
+interface CreateProjectComponentProps {
+  onSuccess?: () => void;
+}
+
+const CreateProjectComponent = ({ onSuccess }: CreateProjectComponentProps = {}) => {
   const [name, setName] = useState<string>("");
   const [description, setDescription] = useState<string>("");
   const [visibility, setVisibility] = useState<ProjectVisibility>(
@@ -43,8 +47,12 @@ const CreateProjectComponent = () => {
       setName("");
       setDescription("");
       setVisibility(ProjectVisibility.Public);
-      router.refresh();
       toast.success("Project created successfully!");
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.refresh();
+      }
     } catch (error: any) {
       setError("Failed to create project. Please try again.");
     }

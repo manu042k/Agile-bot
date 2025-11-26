@@ -1,25 +1,16 @@
 "use client";
 import { useParams } from "next/navigation";
-import { UserPlus, MoreVertical, Mail, User, Shield, Crown, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { UserPlus, MoreVertical, Mail, User, Shield, Crown, Settings, Loader2, Users } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import InviteMemberComponent from "@/components/team/InviteMemberComponent";
 import { Separator } from "@/components/ui/separator";
-
-// Mock team data
-const getMockTeam = (projectId: string) => ({
-  members: [
-    { id: 1, name: "John Doe", email: "john@example.com", role: "owner", avatar: null, tasks: 8, completed: 5 },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", role: "admin", avatar: null, tasks: 6, completed: 4 },
-    { id: 3, name: "Mike Johnson", email: "mike@example.com", role: "member", avatar: null, tasks: 5, completed: 2 },
-    { id: 4, name: "Sarah Wilson", email: "sarah@example.com", role: "member", avatar: null, tasks: 4, completed: 3 },
-    { id: 5, name: "Alex Brown", email: "alex@example.com", role: "member", avatar: null, tasks: 3, completed: 2 },
-  ],
-  pendingInvites: [
-    { id: 1, email: "newmember@example.com", role: "member", invitedBy: "John Doe", invitedAt: "2024-02-10" },
-  ],
-});
+import projectService from "@/services/projectService";
+import taskService from "@/services/taskService";
+import { Project, Task, TaskStatus, TeamMember } from "@/types/project";
+import toast from "react-hot-toast";
 
 const getRoleIcon = (role: string) => {
   switch (role) {
@@ -43,10 +34,92 @@ const getRoleColor = (role: string) => {
   }
 };
 
+interface MemberWithStats extends TeamMember {
+  tasks: number;
+  completed: number;
+}
+
 const ProjectTeamPage = () => {
   const params = useParams();
   const projectId = params.projectId as string;
-  const team = getMockTeam(projectId);
+  const [project, setProject] = useState<Project | null>(null);
+  const [membersWithStats, setMembersWithStats] = useState<MemberWithStats[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTeamData = async () => {
+      try {
+        setLoading(true);
+        const projectData = await projectService.getProject(projectId);
+        setProject(projectData);
+
+        // Check if project has a team
+        if (!projectData.team || !projectData.team.members) {
+          setMembersWithStats([]);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch all tasks for the project
+        const tasks = await taskService.getTasks(projectId);
+
+        // Calculate task stats for each member
+        const membersWithTaskStats: MemberWithStats[] = projectData.team.members.map((member) => {
+          const memberTasks = tasks.filter((task: Task) => 
+            Array.isArray(task.assigned_to) && 
+            task.assigned_to.some((assignee: any) => assignee?.id === member.user?.id)
+          );
+          const completedTasks = memberTasks.filter((task: Task) => task.status === TaskStatus.Completed);
+
+          return {
+            ...member,
+            tasks: memberTasks.length,
+            completed: completedTasks.length,
+          };
+        });
+
+        setMembersWithStats(membersWithTaskStats);
+        setError(null);
+      } catch (err: any) {
+        console.error("Error fetching team data:", err);
+        setError(err.message || "Failed to fetch team data");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTeamData();
+  }, [projectId]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <ProjectHeader />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">Loading team...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !project) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <ProjectHeader />
+        <div className="px-6 py-8">
+          <div className="pm-card p-8 text-center border-red-200 bg-red-50">
+            <p className="text-red-600 font-medium mb-2">Failed to load team</p>
+            <p className="text-sm text-red-500">{error || "Project not found"}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -59,149 +132,144 @@ const ProjectTeamPage = () => {
               <h1 className="text-3xl font-semibold text-gray-900 mb-2">Team</h1>
               <p className="text-gray-600">Manage team members and their roles</p>
             </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="pm-button-primary inline-flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" />
-                  Invite Member
-                </button>
-              </DialogTrigger>
-              <InviteMemberComponent teamId="1" />
-            </Dialog>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">{team.members.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Team Members</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {team.members.reduce((sum, m) => sum + m.tasks, 0)}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {team.members.reduce((sum, m) => sum + m.completed, 0)}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Completed Tasks</p>
-          </div>
-        </div>
-
-        {/* Team Members */}
-        <div className="pm-card p-6 mb-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Active Members</h2>
-            <span className="text-sm text-gray-500">{team.members.length} members</span>
-          </div>
-          <Separator className="my-4" />
-          <div className="space-y-3">
-            {team.members.map((member) => {
-              const RoleIcon = getRoleIcon(member.role);
-              return (
-                <div key={member.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={member.avatar || undefined} alt={member.name} />
-                    <AvatarFallback className="bg-gray-900 text-white font-medium">
-                      {member.name.split(" ").map(n => n[0]).join("")}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-900">{member.name}</h3>
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium border flex items-center gap-1 ${getRoleColor(member.role)}`}>
-                        <RoleIcon className="h-3 w-3" />
-                        {member.role}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-500 flex items-center gap-1">
-                      <Mail className="h-3 w-3" />
-                      {member.email}
-                    </p>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                      <span>{member.tasks} tasks assigned</span>
-                      <span>{member.completed} completed</span>
-                    </div>
-                  </div>
-                  <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <MoreVertical className="h-4 w-4 text-gray-500" />
+            {project.team && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="pm-button-primary inline-flex items-center gap-2">
+                    <UserPlus className="h-4 w-4" />
+                    Invite Member
                   </button>
-                </div>
-              );
-            })}
+                </DialogTrigger>
+                <InviteMemberComponent teamId={project.team.id.toString()} />
+              </Dialog>
+            )}
           </div>
         </div>
 
-        {/* Pending Invites */}
-        {team.pendingInvites.length > 0 && (
-          <div className="pm-card p-6">
-            <h2 className="text-lg font-semibold text-gray-900">Pending Invitations</h2>
-            <Separator className="my-4" />
-            <div className="space-y-3">
-              {team.pendingInvites.map((invite) => (
-                <div key={invite.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-                      <Mail className="h-5 w-5 text-gray-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{invite.email}</p>
-                      <p className="text-xs text-gray-500">
-                        Invited by {invite.invitedBy} on {invite.invitedAt}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-1 rounded text-xs bg-gray-200 text-gray-700 border border-gray-300">
-                      {invite.role}
-                    </span>
-                    <button className="p-2 rounded-lg hover:bg-gray-200 transition-colors">
-                      <MoreVertical className="h-4 w-4 text-gray-500" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+        {!project.team ? (
+          /* No Team Assigned */
+          <div className="pm-card p-12 text-center">
+            <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600 font-medium mb-2">No team assigned</p>
+            <p className="text-sm text-gray-500">This project doesn't have a team associated with it yet</p>
+          </div>
+        ) : (
+          <>
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="pm-card p-5">
+                <p className="text-2xl font-semibold text-gray-900">{membersWithStats.length}</p>
+                <p className="text-xs text-gray-500 mt-1">Team Members</p>
+              </div>
+              <div className="pm-card p-5">
+                <p className="text-2xl font-semibold text-gray-900">
+                  {membersWithStats.reduce((sum, m) => sum + m.tasks, 0)}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
+              </div>
+              <div className="pm-card p-5">
+                <p className="text-2xl font-semibold text-gray-900">
+                  {membersWithStats.reduce((sum, m) => sum + m.completed, 0)}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Completed Tasks</p>
+              </div>
             </div>
-          </div>
-        )}
 
-        {/* Workload View */}
-        <div className="pm-card p-6 mt-6">
-          <h2 className="text-lg font-semibold text-gray-900">Workload Distribution</h2>
-          <Separator className="my-4" />
-          <div className="space-y-4">
-            {team.members.map((member) => {
-              const completionRate = member.tasks > 0 ? (member.completed / member.tasks) * 100 : 0;
-              return (
-                <div key={member.id} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gray-900 text-white text-xs">
-                          {member.name.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{member.name}</p>
-                        <p className="text-xs text-gray-500">{member.tasks} tasks</p>
+            {/* Team Members */}
+            <div className="pm-card p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">Active Members</h2>
+                <span className="text-sm text-gray-500">{membersWithStats.length} members</span>
+              </div>
+              <Separator className="my-4" />
+              <div className="space-y-3">
+                {membersWithStats.length > 0 ? (
+                  membersWithStats.map((member) => {
+                    const RoleIcon = getRoleIcon(member.role);
+                    const userName = member.user?.email?.split('@')[0] || "Unknown";
+                    return (
+                      <div key={member.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                        <Avatar className="h-12 w-12">
+                          <AvatarFallback className="bg-gray-900 text-white font-medium">
+                            {member.user?.email?.charAt(0).toUpperCase() || "?"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-gray-900">{userName}</h3>
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium border flex items-center gap-1 ${getRoleColor(member.role)}`}>
+                              <RoleIcon className="h-3 w-3" />
+                              {member.role}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500 flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            {member.user?.email || "No email"}
+                          </p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                            <span>{member.tasks} tasks assigned</span>
+                            <span>{member.completed} completed</span>
+                          </div>
+                        </div>
+                        <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                          <MoreVertical className="h-4 w-4 text-gray-500" />
+                        </button>
                       </div>
-                    </div>
-                    <span className="text-sm font-medium text-gray-700">{Math.round(completionRate)}%</span>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No team members found</p>
                   </div>
-                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-orange-600 rounded-full transition-all"
-                      style={{ width: `${completionRate}%` }}
-                    />
+                )}
+              </div>
+            </div>
+
+            {/* Pending Invites - TODO: Add API endpoint for team invitations */}
+
+            {/* Workload View */}
+            <div className="pm-card p-6 mt-6">
+              <h2 className="text-lg font-semibold text-gray-900">Workload Distribution</h2>
+              <Separator className="my-4" />
+              <div className="space-y-4">
+                {membersWithStats.length > 0 ? (
+                  membersWithStats.map((member) => {
+                    const completionRate = member.tasks > 0 ? (member.completed / member.tasks) * 100 : 0;
+                    const userName = member.user?.email?.split('@')[0] || "Unknown";
+                    return (
+                      <div key={member.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-gray-900 text-white text-xs">
+                                {member.user?.email?.charAt(0).toUpperCase() || "?"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{userName}</p>
+                              <p className="text-xs text-gray-500">{member.tasks} tasks</p>
+                            </div>
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">{Math.round(completionRate)}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-orange-600 rounded-full transition-all"
+                            style={{ width: `${completionRate}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No workload data available</p>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

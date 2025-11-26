@@ -1,5 +1,6 @@
 "use client";
 import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useMemo } from "react";
 import { 
   FolderKanban, 
   CheckSquare, 
@@ -12,44 +13,112 @@ import {
   Plus,
   LayoutDashboard,
   ListTodo,
-  FolderOpen
+  FolderOpen,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import PageHeader from "@/components/common/PageHeader";
 import { Separator } from "@/components/ui/separator";
-
-// Mock data
-const mockStats = {
-  totalProjects: 12,
-  activeProjects: 8,
-  totalTasks: 156,
-  completedTasks: 98,
-  teamMembers: 24,
-  overdueTasks: 5,
-};
-
-const mockMyTasks = [
-  { id: 1, title: "Implement user authentication", project: "E-Commerce Platform", dueDate: "2024-02-15", priority: "high", status: "in_progress" },
-  { id: 2, title: "Design dashboard UI", project: "Analytics Dashboard", dueDate: "2024-02-18", priority: "medium", status: "todo" },
-  { id: 3, title: "Write API documentation", project: "Mobile Banking App", dueDate: "2024-02-20", priority: "low", status: "todo" },
-  { id: 4, title: "Review pull request #234", project: "E-Commerce Platform", dueDate: "2024-02-14", priority: "high", status: "todo" },
-];
-
-const mockRecentProjects = [
-  { id: 1, name: "E-Commerce Platform", progress: 65, tasks: 24, completed: 16 },
-  { id: 2, name: "Mobile Banking App", progress: 42, tasks: 18, completed: 8 },
-  { id: 3, name: "AI Analytics Dashboard", progress: 78, tasks: 45, completed: 35 },
-];
-
-const mockUpcomingDeadlines = [
-  { id: 1, title: "Sprint Planning", date: "2024-02-15", project: "E-Commerce Platform" },
-  { id: 2, title: "Code Review", date: "2024-02-16", project: "Mobile Banking App" },
-  { id: 3, title: "Release v2.0", date: "2024-02-20", project: "AI Analytics Dashboard" },
-];
+import { useProjects } from "@/hooks/useProjects";
+import { useActivities } from "@/hooks/useActivities";
+import ActivityFeed from "@/components/common/ActivityFeed";
+import { TaskStatus } from "@/types/project";
+import taskService from "@/services/taskService";
 
 const DashboardPage = () => {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") || "overview";
+  
+  const { 
+    projects = [], 
+    loading: projectsLoading, 
+    stats = { total: 0, active: 0, completed: 0, planning: 0 }, 
+    overallProgress = 0, 
+    totalTasks = 0, 
+    completedTasks = 0 
+  } = useProjects();
+  const { activities = [], loading: activitiesLoading } = useActivities({ limit: 10 });
+  
+  const [allTasks, setAllTasks] = useState<any[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(true);
+
+  // Fetch all tasks across all projects
+  useEffect(() => {
+    const fetchAllTasks = async () => {
+      try {
+        setTasksLoading(true);
+        const tasksPromises = projects.map(project => 
+          taskService.getTasks(project.id.toString()).catch(() => [])
+        );
+        const tasksArrays = await Promise.all(tasksPromises);
+        const tasks = tasksArrays.flat();
+        setAllTasks(tasks);
+      } catch (err) {
+        console.error("Error fetching tasks:", err);
+      } finally {
+        setTasksLoading(false);
+      }
+    };
+
+    if (projects.length > 0) {
+      fetchAllTasks();
+    } else {
+      setTasksLoading(false);
+    }
+  }, [projects]);
+
+  // Calculate my tasks (show recent tasks - ideally we'd filter by current user from backend)
+  const myTasks = useMemo(() => {
+    // For now, show the most recently created tasks
+    // TODO: Add backend endpoint to fetch current user's tasks
+    return allTasks
+      .filter(task => task.status !== TaskStatus.Completed)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 4);
+  }, [allTasks]);
+
+  // Calculate team members count
+  const totalTeamMembers = useMemo(() => {
+    const uniqueMembers = new Set();
+    projects.forEach(project => {
+      project.team?.members?.forEach((member: any) => {
+        uniqueMembers.add(member.user?.id || member.id);
+      });
+    });
+    return uniqueMembers.size;
+  }, [projects]);
+
+  // Get recent projects (top 3 by updated date)
+  const recentProjects = useMemo(() => {
+    return [...projects]
+      .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime())
+      .slice(0, 3);
+  }, [projects]);
+
+  const loading = projectsLoading || tasksLoading;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <PageHeader
+          title="Dashboard"
+          description="Welcome back! Here's what's happening with your projects."
+          icon={LayoutDashboard}
+          tabs={[
+            { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
+            { icon: ListTodo, label: "My Tasks", href: "/dashboard?tab=my-tasks" },
+            { icon: FolderOpen, label: "Recent Projects", href: "/dashboard?tab=projects" },
+          ]}
+        />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600">Loading dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -77,7 +146,7 @@ const DashboardPage = () => {
               </div>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-gray-900">{mockStats.totalProjects}</p>
+              <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
               <p className="text-sm text-gray-600 mt-1">Total Projects</p>
             </div>
           </div>
@@ -89,7 +158,7 @@ const DashboardPage = () => {
               </div>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-gray-900">{mockStats.totalTasks}</p>
+              <p className="text-2xl font-semibold text-gray-900">{totalTasks}</p>
               <p className="text-sm text-gray-600 mt-1">Total Tasks</p>
             </div>
           </div>
@@ -101,7 +170,7 @@ const DashboardPage = () => {
               </div>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-gray-900">{mockStats.teamMembers}</p>
+              <p className="text-2xl font-semibold text-gray-900">{totalTeamMembers}</p>
               <p className="text-sm text-gray-600 mt-1">Team Members</p>
             </div>
           </div>
@@ -113,9 +182,7 @@ const DashboardPage = () => {
               </div>
             </div>
             <div>
-              <p className="text-2xl font-semibold text-gray-900">
-                {Math.round((mockStats.completedTasks / mockStats.totalTasks) * 100)}%
-              </p>
+              <p className="text-2xl font-semibold text-gray-900">{overallProgress}%</p>
               <p className="text-sm text-gray-600 mt-1">Completion Rate</p>
             </div>
           </div>
@@ -159,29 +226,27 @@ const DashboardPage = () => {
                 <div>
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-gray-600">Overall Progress</span>
-                    <span className="font-medium text-gray-900">
-                      {Math.round((mockStats.completedTasks / mockStats.totalTasks) * 100)}%
-                    </span>
+                    <span className="font-medium text-gray-900">{overallProgress}%</span>
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-orange-600 rounded-full transition-all"
-                      style={{ width: `${Math.round((mockStats.completedTasks / mockStats.totalTasks) * 100)}%` }}
+                      style={{ width: `${overallProgress}%` }}
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
                   <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockStats.totalProjects}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
                     <p className="text-xs text-gray-500 mt-1">Total Projects</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockStats.completedTasks}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{completedTasks}</p>
                     <p className="text-xs text-gray-500 mt-1">Completed Tasks</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockStats.teamMembers}</p>
+                    <p className="text-2xl font-semibold text-gray-900">{totalTeamMembers}</p>
                     <p className="text-xs text-gray-500 mt-1">Team Members</p>
                   </div>
                 </div>
@@ -198,45 +263,55 @@ const DashboardPage = () => {
                 </Link>
               </div>
               <Separator className="my-4" />
-              <div className="space-y-3">
-                {mockMyTasks.map((task) => {
-                  const projectId = task.id % 3 + 1; // Mock: derive from task ID
-                  return (
-                    <Link key={task.id} href={`/projects/${projectId}/task/${task.id}`}>
-                      <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900 mb-1">{task.title}</h3>
-                            <p className="text-sm text-gray-500">{task.project}</p>
+              {myTasks.length > 0 ? (
+                <div className="space-y-3">
+                  {myTasks.map((task) => {
+                    const projectInfo = projects.find(p => p.id.toString() === task.Project);
+                    return (
+                      <Link key={task.taskid} href={`/projects/${task.Project}`}>
+                        <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <h3 className="font-medium text-gray-900 mb-1">{task.name}</h3>
+                              <p className="text-sm text-gray-500">{projectInfo?.name || "Unknown Project"}</p>
+                            </div>
+                            {task.priority && (
+                              <span className={`pm-badge ${
+                                task.priority === "high" ? "pm-priority-high" :
+                                task.priority === "medium" ? "pm-priority-medium" :
+                                "pm-priority-low"
+                              }`}>
+                                {task.priority}
+                              </span>
+                            )}
                           </div>
-                      <span className={`pm-badge ${
-                        task.priority === "high" ? "pm-priority-high" :
-                        task.priority === "medium" ? "pm-priority-medium" :
-                        "pm-priority-low"
-                      }`}>
-                        {task.priority}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                      <div className="flex items-center gap-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {task.dueDate}
-                        </span>
-                        <span className={`pm-status-dot ${
-                          task.status === "done" ? "pm-status-done" :
-                          task.status === "in_progress" ? "pm-status-progress" :
-                          task.status === "todo" ? "pm-status-todo" :
-                          "pm-status-backlog"
-                        }`} />
-                        <span className="capitalize">{task.status.replace("_", " ")}</span>
-                      </div>
-                    </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
+                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3.5 w-3.5" />
+                                {new Date(task.created_at).toLocaleDateString()}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded text-xs font-medium border ${
+                                task.status === TaskStatus.Completed ? "bg-gray-800 text-white border-gray-800" :
+                                task.status === TaskStatus.Active ? "bg-orange-100 text-orange-800 border-orange-300" :
+                                task.status === TaskStatus.Created ? "bg-blue-100 text-blue-800 border-blue-300" :
+                                "bg-gray-100 text-gray-800 border-gray-300"
+                              }`}>
+                                {task.status}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <CheckSquare className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p>No tasks assigned to you</p>
+                </div>
+              )}
             </div>
 
             {/* Recent Projects */}
@@ -249,27 +324,34 @@ const DashboardPage = () => {
                 </Link>
               </div>
               <Separator className="my-4" />
-              <div className="space-y-4">
-                {mockRecentProjects.map((project) => (
-                  <Link key={project.id} href={`/projects/${project.id}`}>
-                    <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
-                      <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-medium text-gray-900">{project.name}</h3>
-                        <span className="text-sm font-medium text-gray-700">{project.progress}%</span>
+              {recentProjects.length > 0 ? (
+                <div className="space-y-4">
+                  {recentProjects.map((project) => (
+                    <Link key={project.id} href={`/projects/${project.id}`}>
+                      <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="font-medium text-gray-900">{project.name}</h3>
+                          <span className="text-sm font-medium text-gray-700">{project.progress}%</span>
+                        </div>
+                        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+                          <div
+                            className="h-full bg-orange-600 rounded-full transition-all"
+                            style={{ width: `${project.progress}%` }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>{project.completedTasks}/{project.tasks} tasks completed</span>
+                        </div>
                       </div>
-                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
-                        <div
-                          className="h-full bg-orange-600 rounded-full transition-all"
-                          style={{ width: `${project.progress}%` }}
-                        />
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
-                        <span>{project.completed}/{project.tasks} tasks completed</span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <FolderKanban className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p>No recent projects</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -282,50 +364,47 @@ const DashboardPage = () => {
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Active Projects</p>
-                  <p className="text-sm font-medium text-gray-900">{mockStats.activeProjects}</p>
+                  <p className="text-sm font-medium text-gray-900">{stats.active}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 mb-1.5">Completed Projects</p>
+                  <p className="text-sm font-medium text-gray-900">{stats.completed}</p>
                 </div>
                 <div>
                   <p className="text-xs text-gray-500 mb-1.5">Total Tasks</p>
-                  <p className="text-sm font-medium text-gray-900">{mockStats.totalTasks}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1.5">Overdue Tasks</p>
-                  <p className="text-sm font-medium text-gray-900">{mockStats.overdueTasks}</p>
+                  <p className="text-sm font-medium text-gray-900">{totalTasks}</p>
                 </div>
               </div>
             </div>
 
-            {/* Upcoming Deadlines */}
+            {/* Recent Activity */}
             <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900">Upcoming Deadlines</h3>
+              <h3 className="font-semibold text-gray-900">Recent Activity</h3>
               <Separator className="my-4" />
-              <div className="space-y-3">
-                {mockUpcomingDeadlines.map((item) => (
-                  <div key={item.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="p-1.5 rounded bg-gray-100 flex-shrink-0">
-                      <Calendar className="h-4 w-4 text-gray-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">{item.project}</p>
-                      <p className="text-xs text-gray-400 mt-1">{item.date}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {!activitiesLoading && activities.length > 0 ? (
+                <ActivityFeed activities={activities.slice(0, 5)} compact />
+              ) : activitiesLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500 text-sm">
+                  <p>No recent activity</p>
+                </div>
+              )}
             </div>
 
-            {/* Overdue Tasks */}
-            {mockStats.overdueTasks > 0 && (
+            {/* Recent Tasks Summary */}
+            {myTasks.length > 0 && (
               <div className="pm-card p-5 border-2 border-gray-300">
                 <div className="flex items-center gap-2 mb-3">
-                  <AlertCircle className="h-5 w-5 text-gray-700" />
-                  <h3 className="font-semibold text-gray-900">Overdue Tasks</h3>
+                  <CheckSquare className="h-5 w-5 text-gray-700" />
+                  <h3 className="font-semibold text-gray-900">Recent Tasks</h3>
                 </div>
-                <p className="text-2xl font-semibold text-gray-900 mb-1">{mockStats.overdueTasks}</p>
-                <p className="text-sm text-gray-600">Tasks need attention</p>
-                <Link href="/tasks?filter=overdue" className="text-sm text-gray-700 hover:text-gray-900 font-medium mt-3 inline-block">
-                  View overdue →
+                <p className="text-2xl font-semibold text-gray-900 mb-1">{myTasks.length}</p>
+                <p className="text-sm text-gray-600">Active incomplete tasks</p>
+                <Link href="/dashboard?tab=my-tasks" className="text-sm text-gray-700 hover:text-gray-900 font-medium mt-3 inline-block">
+                  View all →
                 </Link>
               </div>
             )}
@@ -340,35 +419,53 @@ const DashboardPage = () => {
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900">My Tasks</h2>
               <Separator className="my-4" />
-              <div className="space-y-3">
-                {mockMyTasks.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 mb-1">{task.title}</h3>
-                      <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span>{task.project}</span>
-                        <span>•</span>
-                        <span>Due: {task.dueDate}</span>
-                        <span>•</span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          task.priority === "high" ? "pm-priority-high" :
-                          task.priority === "medium" ? "pm-priority-medium" :
-                          "pm-priority-low"
-                        }`}>
-                          {task.priority}
-                        </span>
-                      </div>
-                    </div>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${
-                      task.status === "done" ? "pm-status-badge-done" :
-                      task.status === "in_progress" ? "pm-status-badge-progress" :
-                      "pm-status-badge-todo"
-                    }`}>
-                      {task.status.replace("_", " ")}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              {myTasks.length > 0 ? (
+                <div className="space-y-3">
+                  {myTasks.map((task) => {
+                    const projectInfo = projects.find(p => p.id.toString() === task.Project);
+                    return (
+                      <Link key={task.taskid} href={`/projects/${task.Project}`}>
+                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900 mb-1">{task.name}</h3>
+                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                              <span>{projectInfo?.name || "Unknown Project"}</span>
+                              <span>•</span>
+                              <span>Created: {new Date(task.created_at).toLocaleDateString()}</span>
+                              {task.priority && (
+                                <>
+                                  <span>•</span>
+                                  <span className={`px-2 py-1 rounded text-xs ${
+                                    task.priority === "high" ? "pm-priority-high" :
+                                    task.priority === "medium" ? "pm-priority-medium" :
+                                    "pm-priority-low"
+                                  }`}>
+                                    {task.priority}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`px-2.5 py-1 rounded text-xs font-medium border ${
+                            task.status === TaskStatus.Completed ? "bg-gray-800 text-white border-gray-800" :
+                            task.status === TaskStatus.Active ? "bg-orange-100 text-orange-800 border-orange-300" :
+                            task.status === TaskStatus.Created ? "bg-blue-100 text-blue-800 border-blue-300" :
+                            "bg-gray-100 text-gray-800 border-gray-300"
+                          }`}>
+                            {task.status}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <CheckSquare className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium mb-2">No tasks assigned to you</p>
+                  <p className="text-sm text-gray-500">Tasks assigned to you will appear here</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -379,29 +476,45 @@ const DashboardPage = () => {
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
               <Separator className="my-4" />
-              <div className="space-y-3">
-                {mockRecentProjects.map((project) => (
-                  <Link key={project.id} href={`/projects/${project.id}`}>
-                    <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{project.name}</h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
-                          <span>{project.completed}/{project.tasks} tasks completed</span>
+              {recentProjects.length > 0 ? (
+                <div className="space-y-3">
+                  {recentProjects.map((project) => (
+                    <Link key={project.id} href={`/projects/${project.id}`}>
+                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 mb-1">{project.name}</h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                            <span>{project.completedTasks}/{project.tasks} tasks completed</span>
+                            <span>•</span>
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium border ${
+                              project.status === "completed" ? "bg-gray-800 text-white border-gray-800" :
+                              project.status === "active" ? "bg-orange-100 text-orange-800 border-orange-300" :
+                              "bg-gray-100 text-gray-800 border-gray-300"
+                            }`}>
+                              {project.status}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-orange-600 rounded-full transition-all"
+                              style={{ width: `${project.progress}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-orange-600 rounded-full transition-all"
-                            style={{ width: `${project.progress}%` }}
-                          />
+                        <div className="text-right ml-4">
+                          <p className="text-xl font-bold text-gray-900">{project.progress}%</p>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-gray-900">{project.progress}%</p>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <FolderKanban className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 font-medium mb-2">No recent projects</p>
+                  <p className="text-sm text-gray-500">Projects you work on will appear here</p>
+                </div>
+              )}
             </div>
           </div>
         )}

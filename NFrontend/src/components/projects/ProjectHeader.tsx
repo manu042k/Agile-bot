@@ -1,5 +1,6 @@
 "use client";
 import { useParams, usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 import { 
   LayoutDashboard, 
   FileText, 
@@ -8,18 +9,13 @@ import {
   Settings,
   BarChart3,
   Sparkles,
-  Calendar
+  Calendar,
+  Loader2
 } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-
-// Mock project data
-const getMockProject = (id: string) => ({
-  id: parseInt(id),
-  name: "E-Commerce Platform",
-  description: "Build a modern e-commerce platform with React and Node.js. Includes user authentication, product catalog, shopping cart, and payment integration.",
-  status: "active",
-});
+import projectService from "@/services/projectService";
+import { Project } from "@/types/project";
 
 interface ProjectHeaderProps {
   showActions?: boolean;
@@ -29,7 +25,26 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
   const params = useParams();
   const pathname = usePathname();
   const projectId = params.projectId as string;
-  const project = getMockProject(projectId);
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        setLoading(true);
+        const projectData = await projectService.getProject(projectId);
+        setProject(projectData);
+      } catch (err) {
+        console.error("Error fetching project:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (projectId) {
+      fetchProject();
+    }
+  }, [projectId]);
 
   const navItems = [
     { icon: LayoutDashboard, label: "Overview", href: `/projects/${projectId}` },
@@ -44,6 +59,26 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
     ...item,
     active: pathname === item.href || (item.href === `/projects/${projectId}` && pathname === `/projects/${projectId}`)
   }));
+
+  if (loading) {
+    return (
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-6 flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+        <div className="px-6 py-6">
+          <p className="text-red-600">Project not found</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">

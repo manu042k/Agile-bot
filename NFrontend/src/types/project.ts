@@ -17,6 +17,8 @@ export interface Project {
   visibility: ProjectVisibility;
   team: Team;
   created_by?: User;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TeamMember {
