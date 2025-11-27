@@ -247,11 +247,17 @@ class TeamListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """Override to filter teams visible to the user."""
-        return Team.objects.filter(members=self.request.user)
+        """Override to filter teams visible to the user (exclude archived teams)."""
+        return Team.objects.filter(members=self.request.user, is_archived=False)
 
     def perform_create(self, serializer):
         """Create a new team and add the creator as an admin."""
+        # Check if a team with the same name already exists (non-archived)
+        name = serializer.validated_data.get('name')
+        if Team.objects.filter(name=name, is_archived=False).exists():
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError({"name": "A team with this name already exists."})
+        
         team = serializer.save()
         # Automatically add the creator as an admin
         TeamMembership.objects.create(user=self.request.user, team=team, role="admin")
@@ -264,6 +270,14 @@ class AddTeamMemberView(APIView):
 
     def post(self, request, team_id):
         team = get_object_or_404(Team, id=team_id)
+        
+        # Prevent adding members to archived teams
+        if team.is_archived:
+            return Response(
+                {"detail": "Cannot add members to an archived team."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
         serializer = AddTeamMemberSerializer(data=request.data)
         if serializer.is_valid():
             user_email = serializer.validated_data["user_email"]
@@ -299,6 +313,13 @@ class InviteTeamMemberView(APIView):
     def post(self, request, team_id):
         try:
             team = get_object_or_404(Team, id=team_id)
+            
+            # Prevent inviting members to archived teams
+            if team.is_archived:
+                return Response(
+                    {"detail": "Cannot invite members to an archived team."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             
             # Check if user has permission to invite (must be team member)
             if not TeamMembership.objects.filter(user=request.user, team=team).exists():
@@ -542,11 +563,21 @@ class TeamDetailView(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
     
     def get_queryset(self):
-        """Filter teams visible to the user"""
-        return Team.objects.filter(members=self.request.user)
+        """Filter teams visible to the user (exclude archived teams)"""
+        return Team.objects.filter(members=self.request.user, is_archived=False)
+    
+    def perform_update(self, serializer):
+        """Update team with name uniqueness check"""
+        name = serializer.validated_data.get('name')
+        if name and name != serializer.instance.name:
+            # Check if another active team with this name exists
+            if Team.objects.filter(name=name, is_archived=False).exclude(id=serializer.instance.id).exists():
+                from rest_framework.exceptions import ValidationError
+                raise ValidationError({"name": "A team with this name already exists."})
+        serializer.save()
     
     def perform_destroy(self, instance):
-        """Only team owners/admins can delete teams"""
+        """Only team owners/admins can archive teams (teams cannot be deleted)"""
         # Check if user is admin or owner
         membership = TeamMembership.objects.filter(
             user=self.request.user,
@@ -554,10 +585,12 @@ class TeamDetailView(generics.RetrieveUpdateDestroyAPIView):
         ).first()
         
         if membership and membership.role in ['admin', 'owner']:
-            instance.delete()
+            # Archive the team instead of deleting
+            instance.is_archived = True
+            instance.save()
         else:
             from rest_framework.exceptions import PermissionDenied
-            raise PermissionDenied("Only team admins or owners can delete teams.")
+            raise PermissionDenied("Only team admins or owners can archive teams.")
 
 
 class UpdateTeamMemberRoleView(APIView):

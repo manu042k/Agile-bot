@@ -150,6 +150,21 @@ const ProjectSettingsPage = () => {
                   className="pm-input w-full bg-gray-50 text-gray-500"
                 />
               </div>
+              
+              {/* Save Button */}
+              <div className="flex items-center justify-end gap-3 pt-4">
+                <button className="pm-button-secondary">
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="pm-button-primary"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {isSaving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -201,20 +216,39 @@ const ProjectSettingsPage = () => {
             <Separator className="my-4" />
             <div className="space-y-3">
               {project.team ? (
-                <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <Users className="h-5 w-5 text-gray-600" />
-                    <div>
-                      <p className="font-medium text-gray-900">{project.team.name}</p>
+                <div className={`flex items-center justify-between p-4 border rounded-lg ${
+                  project.team.is_archived 
+                    ? 'border-orange-200 bg-orange-50' 
+                    : 'border-gray-200'
+                }`}>
+                  <div className="flex items-center gap-3 flex-1">
+                    <Users className={`h-5 w-5 ${project.team.is_archived ? 'text-orange-600' : 'text-gray-600'}`} />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium text-gray-900">{project.team.name}</p>
+                        {project.team.is_archived && (
+                          <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-700 border border-orange-300 flex items-center gap-1">
+                            <Archive className="h-3 w-3" />
+                            Archived
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500">{project.team.members?.length || 0} members</p>
+                      {project.team.is_archived && (
+                        <p className="text-xs text-orange-600 mt-1">
+                          This team has been archived. Team management is disabled.
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <button 
-                    onClick={() => router.push(`/projects/${projectId}/team`)}
-                    className="pm-button-secondary text-sm"
-                  >
-                    Manage Team
-                  </button>
+                  {!project.team.is_archived && (
+                    <button 
+                      onClick={() => router.push(`/projects/${projectId}/team`)}
+                      className="pm-button-secondary text-sm"
+                    >
+                      Manage Team
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="p-4 border border-gray-200 rounded-lg bg-gray-50 text-center">
@@ -256,21 +290,6 @@ const ProjectSettingsPage = () => {
                 </button>
               </div>
             </div>
-          </div>
-
-          {/* Save Button */}
-          <div className="flex items-center justify-end gap-3">
-            <button className="pm-button-secondary">
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="pm-button-primary"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? "Saving..." : "Save Changes"}
-            </button>
           </div>
         </div>
       </div>

@@ -99,7 +99,7 @@ class TeamSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Team
-        fields = ["id", "name", "description", "members", "created_at", "updated_at"]
+        fields = ["id", "name", "description", "is_archived", "members", "created_at", "updated_at"]
 
 
 class AddTeamMemberSerializer(serializers.Serializer):

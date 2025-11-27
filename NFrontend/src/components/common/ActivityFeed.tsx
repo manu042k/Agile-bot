@@ -21,6 +21,10 @@ interface ActivityFeedProps {
   limit?: number;
   showHeader?: boolean;
   className?: string;
+  activities?: Activity[];
+  loading?: boolean;
+  error?: string | null;
+  compact?: boolean;
 }
 
 const ActivityFeed: React.FC<ActivityFeedProps> = ({
@@ -28,8 +32,23 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   limit = 10,
   showHeader = true,
   className = "",
+  activities: providedActivities,
+  loading: providedLoading,
+  error: providedError,
+  compact = false,
 }) => {
-  const { activities, loading, error } = useActivities({ projectId, limit });
+  // Only use hook if activities are not provided
+  const hookResult = useActivities({ 
+    projectId, 
+    limit, 
+    autoConnect: providedActivities === undefined,
+    skipInitialFetch: providedActivities !== undefined
+  });
+  
+  // Use provided values if available, otherwise use hook results
+  const activities = providedActivities ?? hookResult.activities;
+  const loading = providedLoading !== undefined ? providedLoading : hookResult.loading;
+  const error = providedError !== undefined ? providedError : hookResult.error;
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -94,9 +113,11 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
     return date.toLocaleDateString();
   };
 
+  const paddingClass = compact ? "p-5" : "p-5";
+
   if (loading) {
     return (
-      <div className={`pm-card p-5 ${className}`}>
+      <div className={`pm-card ${paddingClass} ${className}`}>
         {showHeader && (
           <>
             <h3 className="font-semibold text-gray-900">Recent Activity</h3>
@@ -112,7 +133,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
   if (error) {
     return (
-      <div className={`pm-card p-5 ${className}`}>
+      <div className={`pm-card ${paddingClass} ${className}`}>
         {showHeader && (
           <>
             <h3 className="font-semibold text-gray-900">Recent Activity</h3>
@@ -128,7 +149,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 
   if (activities.length === 0) {
     return (
-      <div className={`pm-card p-5 ${className}`}>
+      <div className={`pm-card ${paddingClass} ${className}`}>
         {showHeader && (
           <>
             <h3 className="font-semibold text-gray-900">Recent Activity</h3>
@@ -146,7 +167,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
   }
 
   return (
-    <div className={`pm-card p-5 ${className}`}>
+    <div className={`pm-card ${paddingClass} ${className}`}>
       {showHeader && (
         <>
           <h3 className="font-semibold text-gray-900">Recent Activity</h3>

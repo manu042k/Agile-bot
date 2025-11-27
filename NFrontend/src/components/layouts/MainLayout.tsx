@@ -139,13 +139,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen">
       {/* Sidebar */}
-      <aside className={`fixed left-0 top-0 z-40 h-screen bg-white border-r border-gray-200 transition-all duration-300 ${
+      <aside className={`fixed left-0 top-0 z-40 h-screen glass-sidebar transition-all duration-300 ${
         sidebarCollapsed ? "w-16" : "w-64"
       }`}>
         {/* Logo */}
-        <div className="h-16 border-b border-gray-200 flex items-center px-4">
+        <div className="h-16 border-b border-white/20 flex items-center px-4">
           {!sidebarCollapsed ? (
             <Link href="/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8">
@@ -185,8 +185,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   active
-                    ? "bg-gray-900 text-white"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-orange-600 text-white shadow-lg"
+                    : "text-gray-700 hover:bg-white/50 hover:text-gray-900"
                 }`}
                 title={sidebarCollapsed ? item.name : undefined}
               >
@@ -196,13 +196,13 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
             );
           })}
 
-          <div className="pt-4 mt-4 border-t border-gray-200">
+          <div className="pt-4 mt-4 border-t border-white/20">
             <Link
               href="/settings"
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                 pathname.startsWith("/settings")
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-orange-600 text-white shadow-lg"
+                  : "text-gray-700 hover:bg-white/50 hover:text-gray-900"
               }`}
               title={sidebarCollapsed ? "Settings" : undefined}
             >
@@ -216,7 +216,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="absolute bottom-4 left-0 right-0 px-3">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-100 transition-all"
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-700 hover:bg-white/50 transition-all"
           >
             <div className="w-5 h-5 flex items-center justify-center">
               <div className={`w-4 h-0.5 bg-gray-600 transition-all ${sidebarCollapsed ? "rotate-0" : "rotate-180"}`} />
@@ -229,7 +229,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? "ml-16" : "ml-64"}`}>
         {/* Top Header */}
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center gap-4 px-6 sticky top-0 z-30">
+        <header className="h-16 glass-navbar flex items-center gap-4 px-6 sticky top-0 z-30">
           {/* Breadcrumb Navigation */}
           <div className="flex-1 min-w-0">
             <EnhancedBreadcrumb />

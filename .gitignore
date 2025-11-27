@@ -8,6 +8,7 @@ staticfiles/
 *.log
 .env
 project_files/
+project_documents/
 
 # Next.js
 .next/

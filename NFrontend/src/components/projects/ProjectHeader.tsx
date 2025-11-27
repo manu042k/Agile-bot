@@ -62,7 +62,7 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
 
   if (loading) {
     return (
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-20 glass-navbar">
         <div className="px-6 py-6 flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
         </div>
@@ -72,7 +72,7 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
 
   if (!project) {
     return (
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+      <div className="sticky top-0 z-20 glass-navbar">
         <div className="px-6 py-6">
           <p className="text-red-600">Project not found</p>
         </div>
@@ -81,11 +81,11 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
   }
 
   return (
-    <div className="sticky top-0 z-20 bg-white border-b border-gray-200 shadow-sm">
+    <div className="sticky top-0 z-20 glass-navbar">
       <div className="px-6 py-6 space-y-6">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-            <FileText className="h-6 w-6 text-gray-700" />
+          <div className="w-12 h-12 rounded-lg bg-white/60 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+            <FileText className="h-6 w-6 text-orange-600" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.name}</h1>
@@ -93,7 +93,7 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
           </div>
         </div>
 
-        <Separator className="bg-gray-200" />
+        <Separator className="bg-white/30" />
 
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
@@ -105,8 +105,8 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
                 href={item.href}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                   item.active
-                    ? "bg-gray-900 text-white shadow-sm"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-orange-600 text-white shadow-lg"
+                    : "text-gray-700 hover:bg-white/50 hover:text-gray-900"
                 }`}
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />

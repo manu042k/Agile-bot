@@ -1,7 +1,7 @@
 from users.models import User
 from users.serializers import TeamSerializer, UserSerializer
 from rest_framework import serializers
-from .models import FileUpload, Project, Task, Comment, Activity
+from .models import FileUpload, Project, Task, Comment, Activity, Document
 
 
 class ProjectDetailSerializer(serializers.ModelSerializer):
@@ -41,6 +41,52 @@ class FileUploadSerializer(serializers.ModelSerializer):
             "sprintsize": {"required": False},
             "file": {"required": True},
         }
+
+
+class DocumentSerializer(serializers.ModelSerializer):
+    uploaded_by = UserSerializer(read_only=True)
+    uploaded_by_email = serializers.EmailField(source='uploaded_by.email', read_only=True)
+    project_name = serializers.CharField(source='project.name', read_only=True)
+    file_size = serializers.SerializerMethodField()
+    file_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Document
+        fields = [
+            "id",
+            "project",
+            "project_name",
+            "file",
+            "file_url",
+            "name",
+            "category",
+            "uploaded_by",
+            "uploaded_by_email",
+            "file_size",
+            "created_at",
+            "updated_at",
+        ]
+        read_only_fields = ["id", "uploaded_by", "created_at", "updated_at"]
+        extra_kwargs = {
+            "name": {"required": False},
+            "category": {"required": False},
+        }
+
+    def get_file_size(self, obj):
+        if obj.file:
+            try:
+                return obj.file.size
+            except:
+                return None
+        return None
+
+    def get_file_url(self, obj):
+        if obj.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.file.url)
+            return obj.file.url
+        return None
 
 
 class CommentSerializer(serializers.ModelSerializer):

@@ -5,13 +5,14 @@ from users.models import Team
 from .permissions import IsProjectOwnerOrTeamMember
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .models import Project, Task, Comment, Activity
+from .models import Project, Task, Comment, Activity, Document
 from .serializers import (
     CommentSerializer,
     ProjectDetailSerializer,
     TaskSerializer,
     UpdateTaskSerializer,
     ActivitySerializer,
+    DocumentSerializer,
 )
 from django.db.models import Q
 from rest_framework import generics, status
@@ -65,6 +66,13 @@ class AssigenTeamToProject(APIView):
         except Team.DoesNotExist:
             return Response(
                 {"error": "Team not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Prevent assigning archived teams to projects
+        if team.is_archived:
+            return Response(
+                {"error": "Cannot assign an archived team to a project. Please select an active team."},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         project.team = team
@@ -131,6 +139,196 @@ class FileUploadShow(APIView):
             )
 
         serializer = FileUploadSerializer(file_upload)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class DocumentListCreateView(APIView):
+    """List all documents for a project or create new documents"""
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        """Get all documents for a project"""
+        try:
+            project = Project.objects.get(id=project_id)
+            # Check if user has access to the project
+            if not (project.created_by == request.user or 
+                    (project.team and request.user in project.team.members.all())):
+                return Response(
+                    {"error": "You don't have permission to view documents for this project."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            documents = Document.objects.filter(project_id=project_id)
+            serializer = DocumentSerializer(documents, many=True, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    def post(self, request, project_id):
+        """Upload one or multiple documents"""
+        try:
+            project = Project.objects.get(id=project_id)
+            # Check if user has access to the project
+            if not (project.created_by == request.user or 
+                    (project.team and request.user in project.team.members.all())):
+                return Response(
+                    {"error": "You don't have permission to upload documents to this project."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Handle multiple files
+            files = request.FILES.getlist('files') or [request.FILES.get('file')]
+            files = [f for f in files if f]  # Remove None values
+            
+            if not files:
+                return Response(
+                    {"error": "No files provided."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            uploaded_documents = []
+            errors = []
+            
+            for file in files:
+                document_data = {
+                    'project': project.id,
+                    'file': file,
+                    'name': request.data.get('name') or file.name,
+                    'category': request.data.get('category', ''),
+                }
+                
+                serializer = DocumentSerializer(data=document_data, context={'request': request})
+                if serializer.is_valid():
+                    document = serializer.save(uploaded_by=request.user)
+                    uploaded_documents.append(serializer.data)
+                else:
+                    errors.append({file.name: serializer.errors})
+            
+            if uploaded_documents:
+                return Response(
+                    {
+                        "message": f"Successfully uploaded {len(uploaded_documents)} document(s).",
+                        "documents": uploaded_documents,
+                        "errors": errors if errors else None
+                    },
+                    status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    {"error": "Failed to upload documents.", "errors": errors},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class DocumentDetailView(APIView):
+    """Retrieve, update, or delete a document"""
+    parser_classes = (MultiPartParser, FormParser)
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id, document_id):
+        """Get a specific document"""
+        try:
+            document = Document.objects.get(id=document_id, project_id=project_id)
+            # Check if user has access
+            project = document.project
+            if not (project.created_by == request.user or 
+                    (project.team and request.user in project.team.members.all())):
+                return Response(
+                    {"error": "You don't have permission to view this document."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            serializer = DocumentSerializer(document, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Document.DoesNotExist:
+            return Response(
+                {"error": "Document not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    def patch(self, request, project_id, document_id):
+        """Update a document (e.g., category, name)"""
+        try:
+            document = Document.objects.get(id=document_id, project_id=project_id)
+            # Check if user has access
+            project = document.project
+            if not (project.created_by == request.user or 
+                    (project.team and request.user in project.team.members.all())):
+                return Response(
+                    {"error": "You don't have permission to update this document."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            serializer = DocumentSerializer(
+                document, 
+                data=request.data, 
+                partial=True,
+                context={'request': request}
+            )
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Document.DoesNotExist:
+            return Response(
+                {"error": "Document not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    def delete(self, request, project_id, document_id):
+        """Delete a document"""
+        try:
+            document = Document.objects.get(id=document_id, project_id=project_id)
+            # Check if user has access
+            project = document.project
+            if not (project.created_by == request.user or 
+                    (project.team and request.user in project.team.members.all())):
+                return Response(
+                    {"error": "You don't have permission to delete this document."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            document.delete()
+            return Response(
+                {"message": "Document deleted successfully."},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Document.DoesNotExist:
+            return Response(
+                {"error": "Document not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class AllDocumentsView(APIView):
+    """Get all documents from projects the user has access to"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Get all documents from user's projects"""
+        user = request.user
+        
+        # Get all projects the user has access to
+        user_projects = Project.objects.filter(
+            Q(created_by=user) | Q(team__members=user)
+        ).distinct()
+        
+        # Get all documents from these projects
+        documents = Document.objects.filter(
+            project__in=user_projects
+        ).select_related('project', 'uploaded_by').order_by('-created_at')
+        
+        serializer = DocumentSerializer(documents, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

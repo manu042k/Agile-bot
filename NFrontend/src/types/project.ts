@@ -32,6 +32,7 @@ export interface Team {
   id: number;
   name: string;
   description: string;
+  is_archived?: boolean;
   members: TeamMember[];
   created_at: string;
   updated_at: string;

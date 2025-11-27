@@ -7,12 +7,13 @@ interface UseActivitiesOptions {
   projectId?: number;
   autoConnect?: boolean;
   limit?: number;
+  skipInitialFetch?: boolean;
 }
 
 export const useActivities = (options: UseActivitiesOptions = {}) => {
-  const { projectId, autoConnect = true, limit = 10 } = options;
+  const { projectId, autoConnect = true, limit = 10, skipInitialFetch = false } = options;
   const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!skipInitialFetch);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch initial activities
@@ -87,8 +88,10 @@ export const useActivities = (options: UseActivitiesOptions = {}) => {
 
   // Fetch initial activities on mount
   useEffect(() => {
-    fetchActivities();
-  }, [fetchActivities]);
+    if (!skipInitialFetch) {
+      fetchActivities();
+    }
+  }, [fetchActivities, skipInitialFetch]);
 
   return {
     activities,

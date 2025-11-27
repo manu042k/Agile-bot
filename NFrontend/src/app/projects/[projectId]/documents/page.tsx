@@ -1,35 +1,48 @@
 "use client";
 import { useParams } from "next/navigation";
-import { Upload, FileText, Download, Trash2, Eye, MoreVertical, Search, Filter, Calendar, User } from "lucide-react";
-import { useState } from "react";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { FileText, Download, Trash2, Eye, MoreVertical, Search, Calendar, User, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
-import UploadDocumentComponent from "@/components/projects/UploadDocumentComponent";
+import UploadDocumentButton from "@/components/projects/UploadDocumentButton";
+import DocumentPreviewDialog from "@/components/projects/DocumentPreviewDialog";
+import documentService, { Document } from "@/services/documentService";
+import toast from "react-hot-toast";
+import DeleteConfirmationDialog from "@/components/common/DeleteConfirmationDialog";
 
-// Mock documents data
-const getMockDocuments = (projectId: string) => [
-  { id: 1, name: "Requirements_Specification.pdf", type: "pdf", size: "2.4 MB", uploadedBy: "John Doe", uploadedAt: "2024-01-20", category: "Requirements" },
-  { id: 2, name: "System_Architecture.docx", type: "docx", size: "1.8 MB", uploadedBy: "Jane Smith", uploadedAt: "2024-01-22", category: "Design" },
-  { id: 3, name: "API_Documentation.md", type: "md", size: "456 KB", uploadedBy: "Mike Johnson", uploadedAt: "2024-02-01", category: "Documentation" },
-  { id: 4, name: "Database_Schema.png", type: "image", size: "892 KB", uploadedBy: "Sarah Wilson", uploadedAt: "2024-02-05", category: "Design" },
-  { id: 5, name: "User_Stories.xlsx", type: "xlsx", size: "1.2 MB", uploadedBy: "Alex Brown", uploadedAt: "2024-02-08", category: "Requirements" },
-];
-
-const getFileIcon = (type: string) => {
-  switch (type) {
+const getFileIcon = (fileName: string) => {
+  const extension = fileName.split('.').pop()?.toLowerCase();
+  switch (extension) {
     case "pdf":
       return "📄";
+    case "doc":
     case "docx":
       return "📝";
     case "md":
+    case "txt":
       return "📋";
-    case "image":
+    case "png":
+    case "jpg":
+    case "jpeg":
+    case "gif":
+    case "svg":
       return "🖼️";
+    case "xls":
     case "xlsx":
+      return "📊";
+    case "ppt":
+    case "pptx":
       return "📊";
     default:
       return "📄";
   }
+};
+
+const formatFileSize = (bytes?: number): string => {
+  if (bytes === undefined || bytes === null) return "Unknown";
+  if (bytes === 0) return "0 B";
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
 };
 
 const ProjectDocumentsPage = () => {
@@ -37,13 +50,61 @@ const ProjectDocumentsPage = () => {
   const projectId = params.projectId as string;
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [documentToPreview, setDocumentToPreview] = useState<Document | null>(null);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [projectId]);
+
+  const fetchDocuments = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await documentService.getDocuments(projectId);
+      setDocuments(data);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch documents");
+      toast.error("Failed to load documents");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteClick = (documentId: number, documentName: string) => {
+    setDocumentToDelete({ id: documentId, name: documentName });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleViewClick = (document: Document) => {
+    setDocumentToPreview(document);
+    setPreviewDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!documentToDelete) return;
+
+    try {
+      await documentService.deleteDocument(projectId, documentToDelete.id);
+      toast.success("Document deleted successfully");
+      setDeleteDialogOpen(false);
+      setDocumentToDelete(null);
+      fetchDocuments();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete document");
+    }
+  };
+
+  const categories = ["all", ...Array.from(new Set(documents.map(d => d.category).filter(Boolean)))];
   
-  const mockDocuments = getMockDocuments(projectId);
-  const categories = ["all", ...Array.from(new Set(mockDocuments.map(d => d.category)))];
-  
-  const filteredDocuments = mockDocuments.filter(doc => {
+  const filteredDocuments = documents.filter(doc => {
     const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doc.uploadedBy.toLowerCase().includes(searchQuery.toLowerCase());
+                         (doc.uploaded_by_email && doc.uploaded_by_email.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesCategory = filterCategory === "all" || doc.category === filterCategory;
     return matchesSearch && matchesCategory;
   });
@@ -55,46 +116,32 @@ const ProjectDocumentsPage = () => {
         {/* Upload Document Card and Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           {/* Upload Document Card */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
-                    <Upload className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Upload Document</h3>
-                    <p className="text-xs text-gray-500">Add new file</p>
-                  </div>
-                </div>
-              </button>
-            </DialogTrigger>
-            <UploadDocumentComponent projectId={projectId} />
-          </Dialog>
+          <UploadDocumentButton
+            projectId={projectId}
+            description="Add new files"
+            onSuccess={fetchDocuments}
+          />
 
           <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">{mockDocuments.length}</p>
+            <p className="text-2xl font-semibold text-gray-900">{documents.length}</p>
             <p className="text-xs text-gray-500 mt-1">Total Documents</p>
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {mockDocuments.reduce((sum, d) => {
-                const size = parseFloat(d.size);
-                return sum + (d.size.includes("MB") ? size : size / 1000);
-              }, 0).toFixed(1)} MB
+              {formatFileSize(documents.reduce((sum, d) => sum + (d.file_size || 0), 0))}
             </p>
             <p className="text-xs text-gray-500 mt-1">Total Size</p>
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {new Set(mockDocuments.map(d => d.category)).size}
+              {new Set(documents.map(d => d.category).filter(Boolean)).size}
             </p>
             <p className="text-xs text-gray-500 mt-1">Categories</p>
           </div>
           <div className="pm-card p-5">
             <p className="text-2xl font-semibold text-gray-900">
-              {mockDocuments.filter(d => {
-                const uploadDate = new Date(d.uploadedAt);
+              {documents.filter(d => {
+                const uploadDate = new Date(d.created_at);
                 const weekAgo = new Date();
                 weekAgo.setDate(weekAgo.getDate() - 7);
                 return uploadDate > weekAgo;
@@ -113,13 +160,13 @@ const ProjectDocumentsPage = () => {
               placeholder="Search documents..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pm-input !pl-10 pr-3 w-full"
+              className="w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
             />
           </div>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="pm-input min-w-[160px] flex-shrink-0"
+            className="px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent min-w-[160px] flex-shrink-0 transition-all"
           >
             {categories.map(cat => (
               <option key={cat} value={cat}>
@@ -127,25 +174,38 @@ const ProjectDocumentsPage = () => {
               </option>
             ))}
           </select>
-          <button className="pm-button-secondary whitespace-nowrap flex-shrink-0">
-            <Filter className="h-4 w-4 mr-2" />
-            More Filters
-          </button>
         </div>
 
         {/* Documents Grid */}
-        {filteredDocuments.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <Loader2 className="h-12 w-12 animate-spin text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Loading documents...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="pm-card p-16 text-center">
+            <div className="max-w-sm mx-auto">
+              <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
+                <FileText className="h-8 w-8 text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Error loading documents</h3>
+              <p className="text-sm text-gray-500">{error}</p>
+            </div>
+          </div>
+        ) : filteredDocuments.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredDocuments.map((doc) => (
               <div key={doc.id} className="pm-card p-5 hover:shadow-md transition-all group">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="text-3xl flex-shrink-0">{getFileIcon(doc.type)}</div>
+                    <div className="text-3xl flex-shrink-0">{getFileIcon(doc.name)}</div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-sm mb-1 truncate" title={doc.name}>
                         {doc.name}
                       </h3>
-                      <p className="text-xs text-gray-500">{doc.size}</p>
+                      <p className="text-xs text-gray-500">{formatFileSize(doc.file_size)}</p>
                     </div>
                   </div>
                   <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100">
@@ -153,33 +213,49 @@ const ProjectDocumentsPage = () => {
                   </button>
                 </div>
                 
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 border border-gray-200">
-                    {doc.category}
-                  </span>
-                </div>
+                {doc.category && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 border border-gray-200">
+                      {doc.category}
+                    </span>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pb-4 border-b border-gray-100">
                   <span className="flex items-center gap-1">
                     <User className="h-3 w-3" />
-                    {doc.uploadedBy}
+                    {doc.uploaded_by_email || "Unknown"}
                   </span>
                   <span className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
-                    {doc.uploadedAt}
+                    {new Date(doc.created_at).toLocaleDateString()}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <button className="flex-1 pm-button-secondary text-xs py-2">
-                    <Eye className="h-3 w-3 mr-1" />
-                    View
-                  </button>
-                  <button className="flex-1 pm-button-secondary text-xs py-2">
-                    <Download className="h-3 w-3 mr-1" />
-                    Download
-                  </button>
-                  <button className="p-2 pm-button-secondary text-xs">
+                  {doc.file_url && (
+                    <button
+                      onClick={() => handleViewClick(doc)}
+                      className="flex-1 pm-button-secondary text-xs py-2"
+                    >
+                      <Eye className="h-3 w-3 mr-1" />
+                      View
+                    </button>
+                  )}
+                  {doc.file_url && (
+                    <a
+                      href={doc.file_url}
+                      download
+                      className="flex-1 pm-button-secondary text-xs py-2"
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      Download
+                    </a>
+                  )}
+                  <button
+                    onClick={() => handleDeleteClick(doc.id, doc.name)}
+                    className="p-2 pm-button-secondary text-xs hover:bg-red-50 hover:text-red-600 transition-colors"
+                  >
                     <Trash2 className="h-3 w-3" />
                   </button>
                 </div>
@@ -198,15 +274,27 @@ const ProjectDocumentsPage = () => {
                   ? "Try adjusting your filters"
                   : "Upload your first document to get started"}
               </p>
-              {!searchQuery && filterCategory === "all" && (
-                <button className="pm-button-primary">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload Document
-                </button>
-              )}
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <DeleteConfirmationDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          title="Delete Document"
+          description={`Are you sure you want to delete "{name}"? This action cannot be undone and the document will be permanently removed.`}
+          itemName={documentToDelete?.name}
+          onConfirm={handleDeleteConfirm}
+          onCancel={() => setDocumentToDelete(null)}
+        />
+
+        {/* Document Preview Dialog */}
+        <DocumentPreviewDialog
+          document={documentToPreview}
+          open={previewDialogOpen}
+          onOpenChange={setPreviewDialogOpen}
+        />
       </div>
     </div>
   );

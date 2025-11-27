@@ -48,7 +48,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     # Add your production frontend URL here
 ]
-X_FRAME_OPTIONS = "SAMEORIGIN"
+# Allow embedding in iframes from frontend origin (for development)
+# In production, you may want to restrict this or use Content-Security-Policy
+X_FRAME_OPTIONS = ""  # Empty string allows embedding from any origin (for development only)
 
 AUTH_USER_MODEL = "users.User"
 # Application definition
@@ -84,7 +86,8 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Temporarily disabled to allow PDF preview in iframes from frontend (localhost:3000)
+    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Activity tracking middleware (should be after auth middleware)
     "projectApis.activity_middleware.ActivityTrackingMiddleware",
 ]

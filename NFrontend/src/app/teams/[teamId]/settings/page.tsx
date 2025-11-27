@@ -6,7 +6,7 @@ import {
   FolderKanban,
   Settings,
   Save,
-  Trash2,
+  Archive,
   AlertTriangle,
   Loader2,
 } from "lucide-react";
@@ -36,7 +36,7 @@ const TeamSettingsPage = () => {
   const [team, setTeam] = useState<Team | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -88,18 +88,18 @@ const TeamSettingsPage = () => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleArchive = async () => {
     if (!team) return;
 
     try {
-      setIsDeleting(true);
-      await teamService.deleteTeam(teamId);
-      toast.success("Team deleted successfully!");
+      setIsArchiving(true);
+      await teamService.deleteTeam(teamId); // Backend archives instead of deleting
+      toast.success("Team archived successfully!");
       router.push("/teams");
     } catch (err: any) {
-      console.error("Failed to delete team:", err);
-      toast.error(err.message || "Failed to delete team. Please try again.");
-      setIsDeleting(false);
+      console.error("Failed to archive team:", err);
+      toast.error(err.message || "Failed to archive team. Please try again.");
+      setIsArchiving(false);
     }
   };
 
@@ -204,54 +204,53 @@ const TeamSettingsPage = () => {
           </div>
 
 
-          {/* Danger Zone */}
-          <div className="pm-card p-6 border-2 border-gray-300">
+          {/* Archive Zone */}
+          <div className="pm-card p-6 border-2 border-orange-300">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-gray-700" />
-              Danger Zone
+              <AlertTriangle className="h-5 w-5 text-orange-700" />
+              Archive Team
             </h3>
             <Separator className="my-4" />
-            <div className="flex items-center justify-between p-4 border border-red-200 rounded-lg bg-red-50">
+            <div className="flex items-center justify-between p-4 border border-orange-200 rounded-lg bg-orange-50">
               <div>
-                <p className="font-medium text-gray-900">Delete Team</p>
+                <p className="font-medium text-gray-900">Archive Team</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Permanently delete this team and all its data. This action
-                  cannot be undone.
+                  Archive this team. It will be hidden from active teams but can be restored later.
+                  Team members will lose access to this team and its projects.
                 </p>
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <button
-                    disabled={isDeleting}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={isArchiving}
+                    className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
+                    <Archive className="h-4 w-4" />
+                    Archive
                   </button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>Archive Team?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete the team
-                      &quot;{team.name}&quot; and remove all associated data from our servers.
-                      All team members will lose access to this team and its projects.
+                      This will archive the team &quot;{team.name}&quot;. The team will be hidden from active teams
+                      but can be restored later. All team members will lose access to this team and its projects.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isArchiving}>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                      className="bg-red-600 hover:bg-red-700 text-white inline-flex items-center gap-2"
+                      onClick={handleArchive}
+                      disabled={isArchiving}
+                      className="bg-orange-600 hover:bg-orange-700 text-white inline-flex items-center gap-2"
                     >
-                      {isDeleting ? (
+                      {isArchiving ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
-                          Deleting...
+                          Archiving...
                         </>
                       ) : (
-                        "Delete Team"
+                        "Archive Team"
                       )}
                     </AlertDialogAction>
                   </AlertDialogFooter>

@@ -378,21 +378,11 @@ const DashboardPage = () => {
             </div>
 
             {/* Recent Activity */}
-            <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900">Recent Activity</h3>
-              <Separator className="my-4" />
-              {!activitiesLoading && activities.length > 0 ? (
-                <ActivityFeed activities={activities.slice(0, 5)} compact />
-              ) : activitiesLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-500 text-sm">
-                  <p>No recent activity</p>
-                </div>
-              )}
-            </div>
+            <ActivityFeed 
+              activities={activities.slice(0, 5)} 
+              loading={activitiesLoading}
+              compact 
+            />
 
             {/* Recent Tasks Summary */}
             {myTasks.length > 0 && (

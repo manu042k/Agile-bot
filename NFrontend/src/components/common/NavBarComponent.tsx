@@ -20,7 +20,7 @@ const NavBarComponent = () => {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-sm border-b border-border/50 z-50 shadow-sm">
+    <header className="fixed top-0 left-0 right-0 h-16 z-50 glass-navbar">
       <div className="container mx-auto h-full px-6 flex items-center gap-6">
         {/* Logo Section */}
         <button

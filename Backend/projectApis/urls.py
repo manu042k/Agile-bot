@@ -13,6 +13,9 @@ from .views import (
     ActivityListView,
     RecentActivitiesView,
     ProjectActivitiesView,
+    DocumentListCreateView,
+    DocumentDetailView,
+    AllDocumentsView,
 )
 from rest_framework.routers import DefaultRouter
 from .views import FileUploadView
@@ -51,5 +54,21 @@ urlpatterns = [
         "projects/<int:project_id>/activities/",
         ProjectActivitiesView.as_view(),
         name="project-activities",
+    ),
+    # Document endpoints
+    path(
+        "documents/",
+        AllDocumentsView.as_view(),
+        name="all-documents",
+    ),
+    path(
+        "projects/<int:project_id>/documents/",
+        DocumentListCreateView.as_view(),
+        name="project-documents-list-create",
+    ),
+    path(
+        "projects/<int:project_id>/documents/<int:document_id>/",
+        DocumentDetailView.as_view(),
+        name="project-document-detail",
     ),
 ] + router.urls

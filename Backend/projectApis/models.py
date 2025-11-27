@@ -1,5 +1,7 @@
 from django.db import models, transaction
 import uuid
+import os
+import re
 
 from users.models import User
 
@@ -26,6 +28,32 @@ class Project(models.Model):
         return self.name
 
 
+def document_upload_path(instance, filename):
+    """
+    Generate upload path for documents: project_documents/<project_name>/<filename>
+    Sanitizes project name to be filesystem-safe.
+    """
+    # Get project name - project should always be set when saving
+    if instance.project and hasattr(instance.project, 'name'):
+        project_name = instance.project.name
+    else:
+        # Fallback if project is not available (shouldn't happen in normal flow)
+        project_name = "unknown"
+    
+    # Sanitize project name for filesystem
+    # Remove special characters, replace spaces and multiple dashes/underscores with single underscore
+    sanitized_name = re.sub(r'[^\w\s-]', '', project_name)
+    sanitized_name = re.sub(r'[-\s]+', '_', sanitized_name)
+    sanitized_name = sanitized_name.strip('_')
+    
+    # If sanitized name is empty, use a default
+    if not sanitized_name:
+        sanitized_name = "project"
+    
+    # Return the path: project_documents/<sanitized_project_name>/<filename>
+    return os.path.join('project_documents', sanitized_name, filename)
+
+
 class FileUpload(models.Model):
     project = models.ForeignKey("Project", on_delete=models.CASCADE, blank=False)
     timeline = models.CharField(max_length=50, blank=True, null=True)
@@ -33,6 +61,31 @@ class FileUpload(models.Model):
     file = models.FileField(upload_to="project_files/", blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class Document(models.Model):
+    """Model for storing multiple documents per project"""
+    project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="documents")
+    file = models.FileField(upload_to=document_upload_path, blank=False)
+    name = models.CharField(max_length=255, blank=True)  # Original filename
+    category = models.CharField(max_length=100, blank=True, null=True)
+    uploaded_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True, related_name="uploaded_documents")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["project", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.name} - {self.project.name}"
+
+    def save(self, *args, **kwargs):
+        if not self.name and self.file:
+            self.name = self.file.name
+        super().save(*args, **kwargs)
 
 
 # Task Status choices

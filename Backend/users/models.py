@@ -66,8 +66,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Team(models.Model):
     """Model for creating teams"""
 
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
+    is_archived = models.BooleanField(default=False)
     members = models.ManyToManyField(
         User, related_name="teams", through="TeamMembership"
     )
