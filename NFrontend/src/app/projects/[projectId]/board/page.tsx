@@ -1,15 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, closestCorners, useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import ProjectHeader from "@/components/projects/ProjectHeader";
-import { Plus, User, Flag, Calendar, MoreVertical, GripVertical, Loader2 } from "lucide-react";
+import { Plus, User, Flag, Calendar, MoreVertical, GripVertical, Loader2, ArrowLeft, X } from "lucide-react";
 import Link from "next/link";
 import { getStatusColumnColor, getPriorityClass } from "@/lib/colorUtils";
 import taskService from "@/services/taskService";
-import { Task as APITask, TaskStatus, TaskPriority } from "@/types/project";
+import sprintService from "@/services/sprintService";
+import { Task as APITask, TaskStatus, TaskPriority, Sprint } from "@/types/project";
 import toast from "react-hot-toast";
 
 interface Task {
@@ -146,8 +147,13 @@ function DroppableColumn({ column, tasks, projectId }: { column: Column; tasks: 
 
 const BoardPage = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const projectId = params.projectId as string;
+  const sprintId = searchParams.get("sprint");
+  
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [sprint, setSprint] = useState<Sprint | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -187,7 +193,16 @@ const BoardPage = () => {
     try {
       setLoading(true);
       const fetchedTasks = await taskService.getTasks(projectId);
-      const convertedTasks = fetchedTasks.map(convertAPITaskToTask);
+      
+      // Filter by sprint if sprintId is provided
+      let filteredTasks = fetchedTasks;
+      if (sprintId) {
+        filteredTasks = fetchedTasks.filter((task: APITask) => 
+          task.sprint && task.sprint.toString() === sprintId
+        );
+      }
+      
+      const convertedTasks = filteredTasks.map(convertAPITaskToTask);
       setTasks(convertedTasks);
       setError(null);
     } catch (err: any) {
@@ -198,9 +213,23 @@ const BoardPage = () => {
     }
   };
 
+  const fetchSprint = async () => {
+    if (!sprintId) return;
+    
+    try {
+      const sprintData = await sprintService.getSprint(projectId, sprintId);
+      setSprint(sprintData);
+    } catch (err: any) {
+      console.error("Error fetching sprint:", err);
+    }
+  };
+
   useEffect(() => {
     fetchTasks();
-  }, [projectId]);
+    if (sprintId) {
+      fetchSprint();
+    }
+  }, [projectId, sprintId]);
 
   const handleDragStart = (event: DragStartEvent) => {
     const taskId = event.active.id as string;
@@ -297,6 +326,109 @@ const BoardPage = () => {
     <div className="min-h-screen bg-gray-50">
       <ProjectHeader />
       <div className="px-6 py-8">
+        {/* Sprint Header */}
+        {sprint && (
+          <div className="mb-6 pm-card p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => router.push(`/projects/${projectId}/timeline`)}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  title="Back to Timeline"
+                >
+                  <ArrowLeft className="h-5 w-5 text-gray-600" />
+                </button>
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-semibold text-gray-900">{sprint.name}</h2>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      sprint.status === 'active' ? 'bg-orange-100 text-orange-800' :
+                      sprint.status === 'completed' ? 'bg-gray-100 text-gray-800' :
+                      sprint.status === 'planning' ? 'bg-blue-100 text-blue-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {sprint.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {new Date(sprint.start_date).toLocaleDateString()} - {new Date(sprint.end_date).toLocaleDateString()}
+                    {sprint.goal && ` • ${sprint.goal}`}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">
+                    {sprint.completed_task_count || 0} / {sprint.task_count || 0} tasks completed
+                  </p>
+                  <div className="w-32 h-2 bg-gray-100 rounded-full mt-1">
+                    <div
+                      className="h-full bg-orange-600 rounded-full"
+                      style={{
+                        width: `${sprint.task_count && sprint.task_count > 0
+                          ? Math.round((sprint.completed_task_count || 0) / sprint.task_count * 100)
+                          : 0}%`
+                      }}
+                    />
+                  </div>
+                </div>
+                {/* Sprint Actions */}
+                {sprint.status === 'planning' && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        await sprintService.startSprint(projectId, sprint.id.toString());
+                        toast.success('Sprint started successfully');
+                        fetchSprint();
+                        fetchTasks();
+                      } catch (err: any) {
+                        toast.error(err.response?.data?.error || 'Failed to start sprint');
+                      }
+                    }}
+                    className="pm-button-primary"
+                  >
+                    Start Sprint
+                  </button>
+                )}
+                {sprint.status === 'active' && (
+                  <button
+                    onClick={async () => {
+                      if (confirm('Are you sure you want to complete this sprint?')) {
+                        try {
+                          await sprintService.completeSprint(projectId, sprint.id.toString());
+                          toast.success('Sprint completed successfully');
+                          fetchSprint();
+                          fetchTasks();
+                        } catch (err: any) {
+                          toast.error(err.response?.data?.error || 'Failed to complete sprint');
+                        }
+                      }
+                    }}
+                    className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition-colors"
+                  >
+                    Complete Sprint
+                  </button>
+                )}
+                <button
+                  onClick={() => router.push(`/projects/${projectId}/timeline`)}
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  title="Close Sprint View"
+                >
+                  <X className="h-5 w-5 text-gray-600" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!sprint && sprintId && (
+          <div className="mb-6 pm-card p-4 border-orange-200 bg-orange-50">
+            <p className="text-sm text-orange-800">
+              Sprint not found. <Link href={`/projects/${projectId}/timeline`} className="underline">Back to Timeline</Link>
+            </p>
+          </div>
+        )}
+
         <DndContext collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
             {columns.map((column) => (

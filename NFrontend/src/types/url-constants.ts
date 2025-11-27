@@ -26,4 +26,5 @@ export enum URLS {
   TASKS_BY_PROJECT = "api/project-management/projects/",
   TASKS_PATCH = "api/project-management/tasks-patch/",
   TASK_TRIGGER = "api/project-management/trigger/",
+  PROJECT_TIMELINE = "api/project-management/projects/", // Append project_id/timeline/
 }

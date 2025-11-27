@@ -5,7 +5,7 @@ from users.models import Team
 from .permissions import IsProjectOwnerOrTeamMember
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-from .models import Project, Task, Comment, Activity, Document
+from .models import Project, Task, Comment, Activity, Document, Sprint
 from .serializers import (
     CommentSerializer,
     ProjectDetailSerializer,
@@ -13,6 +13,7 @@ from .serializers import (
     UpdateTaskSerializer,
     ActivitySerializer,
     DocumentSerializer,
+    SprintSerializer,
 )
 from django.db.models import Q
 from rest_framework import generics, status
@@ -394,7 +395,7 @@ class TaskByProjectView(APIView):
         """
         try:
             # Fetch tasks that belong to the given project
-            tasks = Task.objects.filter(Project_id=project_id)
+            tasks = Task.objects.filter(Project_id=project_id).select_related('Project').prefetch_related('related_work', 'assigned_to', 'comments')
 
             # Serialize the data
             serializer = TaskSerializer(tasks, many=True)
@@ -404,6 +405,168 @@ class TaskByProjectView(APIView):
         except Task.DoesNotExist:
             return Response(
                 {"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+
+class ProjectTimelineView(APIView):
+    """API endpoint for timeline data with calculated positions and durations"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        """
+        Get timeline data for a project with calculated positions and durations
+        """
+        try:
+            from django.utils import timezone
+            from datetime import timedelta
+            
+            # Get project
+            try:
+                project = Project.objects.get(id=project_id)
+            except Project.DoesNotExist:
+                return Response(
+                    {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Check permissions
+            if not (project.created_by == request.user or 
+                    (project.team and request.user in project.team.members.all())):
+                return Response(
+                    {"error": "You don't have permission to view this project."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Fetch tasks with related data
+            tasks = Task.objects.filter(Project_id=project_id).select_related('Project').prefetch_related('related_work', 'assigned_to', 'comments').order_by('created_at')
+            
+            if not tasks.exists():
+                return Response({
+                    "project": {
+                        "id": project.id,
+                        "name": project.name,
+                        "created_at": project.created_at,
+                    },
+                    "timeline": {
+                        "start_date": project.created_at.isoformat(),
+                        "end_date": timezone.now().isoformat(),
+                        "total_days": 0,
+                    },
+                    "tasks": [],
+                })
+            
+            # Calculate timeline bounds using industry-standard approach:
+            # Priority: Project end_date > Latest completed task > Latest task updated > Current date
+            
+            project_start = project.created_at
+            now = timezone.now()
+            
+            # Get earliest task date
+            earliest_task = tasks.order_by('created_at').first()
+            timeline_start = min(project_start, earliest_task.created_at) if earliest_task else project_start
+            
+            # Calculate timeline end date using priority:
+            # 1. If project has end_date, use it (future enhancement)
+            # 2. Latest completed task date (most reliable indicator)
+            # 3. Latest task updated_at (shows recent activity)
+            # 4. Current date (for active projects)
+            
+            completed_tasks = tasks.filter(status='completed')
+            latest_completed = completed_tasks.order_by('-updated_at').first() if completed_tasks.exists() else None
+            latest_task = tasks.order_by('-updated_at').first()
+            
+            # Priority order for end date
+            if latest_completed and latest_completed.updated_at:
+                # Use latest completed task as primary indicator
+                timeline_end = max(now, latest_completed.updated_at)
+            elif latest_task and latest_task.updated_at:
+                # Fallback to latest task update
+                timeline_end = max(now, latest_task.updated_at)
+            else:
+                # Default to current date
+                timeline_end = now
+            
+            # Add buffer: extend timeline by 10% or minimum 7 days for better visualization
+            timeline_buffer = max(
+                timedelta(days=7),
+                (timeline_end - timeline_start) * 0.1
+            )
+            timeline_end = timeline_end + timeline_buffer
+            
+            total_days = max(1, (timeline_end - timeline_start).days)
+            
+            # Serialize tasks with timeline calculations
+            serialized_tasks = []
+            for task in tasks:
+                task_created = task.created_at
+                task_updated = task.updated_at if task.updated_at else task_created
+                
+                # For active/created tasks, use now as end date
+                if task.status in ['active', 'created', 'backlog']:
+                    task_end = now
+                else:
+                    task_end = task_updated
+                
+                # Calculate position (percentage from start)
+                days_from_start = (task_created - timeline_start).days
+                position = max(0, min(100, (days_from_start / total_days) * 100)) if total_days > 0 else 0
+                
+                # Calculate duration in days
+                duration_days = max(1, (task_end - task_created).days)
+                
+                # Calculate width (percentage of timeline)
+                width = max(2, min(100, (duration_days / total_days) * 100)) if total_days > 0 else 2
+                
+                # Get related work IDs
+                related_work_ids = [str(rel.taskid) for rel in task.related_work.all()]
+                
+                task_data = {
+                    "taskid": str(task.taskid),
+                    "name": task.name,
+                    "description": task.description,
+                    "details": task.details,
+                    "status": task.status,
+                    "priority": task.priority,
+                    "size": task.size,
+                    "task_number": task.task_number,
+                    "created_at": task_created.isoformat(),
+                    "updated_at": task_updated.isoformat(),
+                    "assigned_to": [
+                        {
+                            "id": user.id,
+                            "email": user.email,
+                            "username": user.email.split('@')[0] if user.email else "Unknown",
+                        }
+                        for user in task.assigned_to.all()
+                    ],
+                    "related_work_ids": related_work_ids,
+                    "timeline": {
+                        "start_date": task_created.isoformat(),
+                        "end_date": task_end.isoformat(),
+                        "duration_days": duration_days,
+                        "position": round(position, 2),
+                        "width": round(width, 2),
+                    },
+                }
+                serialized_tasks.append(task_data)
+            
+            return Response({
+                "project": {
+                    "id": project.id,
+                    "name": project.name,
+                    "created_at": project.created_at.isoformat(),
+                },
+                "timeline": {
+                    "start_date": timeline_start.isoformat(),
+                    "end_date": timeline_end.isoformat(),
+                    "total_days": total_days,
+                },
+                "tasks": serialized_tasks,
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {"error": f"Error generating timeline: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 
@@ -542,3 +705,211 @@ class ProjectActivitiesView(generics.ListAPIView):
             raise NotFound("Project not found or user does not have access.")
         
         return Activity.objects.filter(project_id=project_id).order_by("-created_at")
+
+
+class SprintListView(APIView):
+    """List and create sprints for a project"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id):
+        """Get all sprints for a project"""
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check permissions
+        if not (project.created_by == request.user or 
+                (project.team and request.user in project.team.members.all())):
+            return Response(
+                {"error": "You don't have permission to view this project."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        sprints = Sprint.objects.filter(project_id=project_id).order_by('-start_date')
+        
+        # Auto-update status for all sprints based on current date
+        for sprint in sprints:
+            if sprint.status != 'cancelled':
+                auto_status = sprint.get_auto_status()
+                if sprint.status != auto_status:
+                    sprint.status = auto_status
+                    sprint.save(update_fields=['status'])
+        
+        serializer = SprintSerializer(sprints, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, project_id):
+        """Create a new sprint"""
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check permissions
+        if not (project.created_by == request.user or 
+                (project.team and request.user in project.team.members.all())):
+            return Response(
+                {"error": "You don't have permission to create sprints for this project."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Don't include project in serializer data, we'll set it in save()
+        data = request.data.copy()
+        if 'project' in data:
+            del data['project']
+        
+        # Remove status from data if provided - we'll auto-detect it
+        # Only allow manual status if it's "cancelled"
+        if 'status' in data and data['status'] != 'cancelled':
+            del data['status']
+        
+        # Pass project to serializer context for overlap validation
+        serializer = SprintSerializer(data=data, context={'project': project})
+        if serializer.is_valid():
+            try:
+                sprint = serializer.save(project=project, created_by=request.user)
+                
+                # Auto-update status based on dates
+                auto_status = sprint.get_auto_status()
+                if sprint.status != auto_status:
+                    sprint.status = auto_status
+                    sprint.save()
+                
+                # Auto-migrate incomplete tasks from previous sprint
+                self._migrate_incomplete_tasks(project, sprint)
+                
+                return Response(SprintSerializer(sprint).data, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
+                return Response(
+                    {"error": f"Failed to create sprint: {str(e)}", "details": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        # Return detailed validation errors
+        error_response = {"error": "Validation failed", "details": serializer.errors}
+        return Response(error_response, status=status.HTTP_400_BAD_REQUEST)
+    
+    def _migrate_incomplete_tasks(self, project, new_sprint):
+        """Move incomplete tasks from previous sprint to new sprint's backlog"""
+        from django.utils import timezone
+        
+        # Find the most recent completed or active sprint before this one
+        previous_sprint = Sprint.objects.filter(
+            project=project,
+            start_date__lt=new_sprint.start_date
+        ).order_by('-start_date').first()
+        
+        if previous_sprint:
+            # Get incomplete tasks from previous sprint
+            incomplete_tasks = Task.objects.filter(
+                sprint=previous_sprint,
+                status__in=['created', 'active', 'backlog']
+            )
+            
+            # Move them to new sprint and set status to backlog
+            incomplete_tasks.update(sprint=new_sprint, status='backlog')
+
+
+class SprintDetailView(APIView):
+    """Retrieve, update, or delete a sprint"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, project_id, sprint_id):
+        """Get sprint details"""
+        try:
+            sprint = Sprint.objects.get(id=sprint_id, project_id=project_id)
+        except Sprint.DoesNotExist:
+            return Response(
+                {"error": "Sprint not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check permissions
+        project = sprint.project
+        if not (project.created_by == request.user or 
+                (project.team and request.user in project.team.members.all())):
+            return Response(
+                {"error": "You don't have permission to view this sprint."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Auto-update status if not cancelled
+        if sprint.status != 'cancelled':
+            auto_status = sprint.get_auto_status()
+            if sprint.status != auto_status:
+                sprint.status = auto_status
+                sprint.save(update_fields=['status'])
+        
+        serializer = SprintSerializer(sprint)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request, project_id, sprint_id):
+        """Update sprint"""
+        try:
+            sprint = Sprint.objects.get(id=sprint_id, project_id=project_id)
+        except Sprint.DoesNotExist:
+            return Response(
+                {"error": "Sprint not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check permissions
+        project = sprint.project
+        if not (project.created_by == request.user or 
+                (project.team and request.user in project.team.members.all())):
+            return Response(
+                {"error": "You don't have permission to update this sprint."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Prepare data - only allow manual status if it's "cancelled"
+        data = request.data.copy()
+        if 'status' in data and data['status'] != 'cancelled':
+            # Remove status - will be auto-detected
+            del data['status']
+        
+        # Pass project to serializer context for overlap validation
+        serializer = SprintSerializer(sprint, data=data, partial=True, context={'project': project})
+        if serializer.is_valid():
+            sprint = serializer.save()
+            
+            # Auto-update status based on dates (unless manually set to cancelled)
+            if sprint.status != 'cancelled':
+                auto_status = sprint.get_auto_status()
+                if sprint.status != auto_status:
+                    sprint.status = auto_status
+                    sprint.save()
+            
+            return Response(SprintSerializer(sprint).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, project_id, sprint_id):
+        """Delete sprint"""
+        try:
+            sprint = Sprint.objects.get(id=sprint_id, project_id=project_id)
+        except Sprint.DoesNotExist:
+            return Response(
+                {"error": "Sprint not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check permissions
+        project = sprint.project
+        if not (project.created_by == request.user or 
+                (project.team and request.user in project.team.members.all())):
+            return Response(
+                {"error": "You don't have permission to delete this sprint."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Move tasks back to project (no sprint)
+        Task.objects.filter(sprint=sprint).update(sprint=None)
+        
+        sprint.delete()
+        return Response(
+            {"message": "Sprint deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )

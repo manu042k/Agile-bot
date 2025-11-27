@@ -109,7 +109,41 @@ export interface Task {
   related_work: Task[];
   Project: string;
   created_by: CreatedBy;
+  sprint?: number | null;
   created_at: string;
   updated_at: string;
   task_number: string;
+}
+
+export enum SprintStatus {
+  Planning = "planning",
+  Active = "active",
+  Completed = "completed",
+  Cancelled = "cancelled",
+}
+
+export interface Sprint {
+  id: number;
+  project: number;
+  name: string;
+  description: string;
+  start_date: string;
+  end_date: string;
+  status: SprintStatus;
+  auto_status?: SprintStatus; // Auto-detected status based on dates
+  goal: string;
+  created_by: User;
+  created_at: string;
+  updated_at: string;
+  task_count?: number;
+  completed_task_count?: number;
+}
+
+export interface SprintDTO {
+  name: string;
+  description?: string;
+  start_date: string;
+  end_date: string;
+  status?: SprintStatus;
+  goal?: string;
 }

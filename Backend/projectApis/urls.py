@@ -16,6 +16,9 @@ from .views import (
     DocumentListCreateView,
     DocumentDetailView,
     AllDocumentsView,
+    ProjectTimelineView,
+    SprintListView,
+    SprintDetailView,
 )
 from rest_framework.routers import DefaultRouter
 from .views import FileUploadView
@@ -40,6 +43,11 @@ urlpatterns = [
         "projects/<int:project_id>/tasks/",
         TaskByProjectView.as_view(),
         name="get-tasks-by-project",
+    ),
+    path(
+        "projects/<int:project_id>/timeline/",
+        ProjectTimelineView.as_view(),
+        name="project-timeline",
     ),
     path(
         "projects/assign-team/",
@@ -70,5 +78,16 @@ urlpatterns = [
         "projects/<int:project_id>/documents/<int:document_id>/",
         DocumentDetailView.as_view(),
         name="project-document-detail",
+    ),
+    # Sprint endpoints
+    path(
+        "projects/<int:project_id>/sprints/",
+        SprintListView.as_view(),
+        name="sprint-list-create",
+    ),
+    path(
+        "projects/<int:project_id>/sprints/<int:sprint_id>/",
+        SprintDetailView.as_view(),
+        name="sprint-detail",
     ),
 ] + router.urls

@@ -26,6 +26,10 @@ const taskService = {
     const response = await api.delete(`${URLS.TASK}${id}/`);
     return response.data;
   },
+  async getTimeline(projectId: string): Promise<any> {
+    const response = await api.get(`${URLS.PROJECT_TIMELINE}${projectId}/timeline/`);
+    return response.data;
+  },
 };
 
 export default taskService;

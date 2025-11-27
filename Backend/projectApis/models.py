@@ -28,6 +28,87 @@ class Project(models.Model):
         return self.name
 
 
+class Sprint(models.Model):
+    """Sprint model for Agile project management"""
+    SPRINT_STATUS_CHOICES = [
+        ("planning", "Planning"),
+        ("active", "Active"),
+        ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+    
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="sprints")
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=SPRINT_STATUS_CHOICES, default="planning")
+    goal = models.TextField(blank=True)  # Sprint goal
+    created_by = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ["-start_date"]
+        unique_together = [["project", "name"]]  # Unique sprint name per project
+    
+    def __str__(self):
+        return f"{self.project.name} - {self.name}"
+    
+    def is_active(self):
+        """Check if sprint is currently active"""
+        from django.utils import timezone
+        now = timezone.now()
+        return self.status == "active" and self.start_date <= now <= self.end_date
+    
+    def get_duration_days(self):
+        """Get sprint duration in days"""
+        return (self.end_date - self.start_date).days + 1
+    
+    def get_auto_status(self):
+        """Automatically determine sprint status based on current date"""
+        from django.utils import timezone
+        now = timezone.now()
+        
+        # If manually set to cancelled, keep it cancelled
+        if self.status == "cancelled":
+            return "cancelled"
+        
+        # If end date has passed, mark as completed
+        if now > self.end_date:
+            # Only check task completion if sprint has a primary key (already saved)
+            if self.pk:
+                completed_tasks = self.tasks.filter(status='completed').count()
+                total_tasks = self.tasks.count()
+                # If all tasks are completed or no tasks exist, mark as completed
+                if total_tasks == 0 or completed_tasks == total_tasks:
+                    return "completed"
+            # Otherwise, still mark as completed (sprint ended)
+            return "completed"
+        
+        # If current date is between start and end, it's active
+        if self.start_date <= now <= self.end_date:
+            return "active"
+        
+        # If start date hasn't been reached yet, it's planning
+        if now < self.start_date:
+            return "planning"
+        
+        # Default fallback
+        return "planning"
+    
+    def save(self, *args, **kwargs):
+        """Override save to auto-update status based on dates"""
+        # Auto-detect status if not explicitly set to cancelled
+        if self.status != "cancelled":
+            auto_status = self.get_auto_status()
+            # Only update if status is not manually set to a specific value
+            # or if it's different from auto-detected
+            if self.status != auto_status:
+                self.status = auto_status
+        super().save(*args, **kwargs)
+
+
 def document_upload_path(instance, filename):
     """
     Generate upload path for documents: project_documents/<project_name>/<filename>
@@ -144,6 +225,14 @@ class Task(models.Model):
         max_length=10, choices=CREATED_BY_CHOICES, default="ai"
     )
     task_number = models.CharField(max_length=255, editable=False)
+    sprint = models.ForeignKey(
+        "Sprint", on_delete=models.SET_NULL, blank=True, null=True, related_name="tasks"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
 
     def __str__(self):
         return self.task_number

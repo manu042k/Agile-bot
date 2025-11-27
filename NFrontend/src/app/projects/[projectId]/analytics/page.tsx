@@ -1,19 +1,25 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import { TrendingUp, CheckCircle2, Clock, Users, Calendar, ArrowUp, ArrowDown, Loader2, BarChart3 } from "lucide-react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
+import SprintBurndownChart from "@/components/projects/SprintBurndownChart";
 import { Separator } from "@/components/ui/separator";
 import projectService from "@/services/projectService";
 import taskService from "@/services/taskService";
-import { Project, Task, TaskStatus } from "@/types/project";
+import sprintService from "@/services/sprintService";
+import { Project, Task, TaskStatus, Sprint, SprintStatus } from "@/types/project";
 import toast from "react-hot-toast";
 
 const ProjectAnalyticsPage = () => {
   const params = useParams();
+  const searchParams = useSearchParams();
   const projectId = params.projectId as string;
+  const sprintId = searchParams.get("sprint");
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [sprints, setSprints] = useState<Sprint[]>([]);
+  const [selectedSprint, setSelectedSprint] = useState<Sprint | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,12 +27,28 @@ const ProjectAnalyticsPage = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [projectData, tasksData] = await Promise.all([
+        const [projectData, tasksData, sprintsData] = await Promise.all([
           projectService.getProject(projectId),
           taskService.getTasks(projectId),
+          sprintService.getSprints(projectId),
         ]);
         setProject(projectData);
         setTasks(tasksData);
+        setSprints(sprintsData);
+        
+        // Set selected sprint if sprintId is provided
+        if (sprintId) {
+          const sprint = sprintsData.find(s => s.id.toString() === sprintId);
+          setSelectedSprint(sprint || null);
+        } else {
+          // Default to active sprint if available
+          const activeSprint = sprintsData.find(s => 
+            s.status === SprintStatus.Active || 
+            (s.auto_status && s.auto_status === SprintStatus.Active)
+          );
+          setSelectedSprint(activeSprint || null);
+        }
+        
         setError(null);
       } catch (err: any) {
         console.error("Error fetching analytics data:", err);
@@ -38,7 +60,7 @@ const ProjectAnalyticsPage = () => {
     };
 
     fetchData();
-  }, [projectId]);
+  }, [projectId, sprintId]);
 
   // Calculate analytics from tasks
   const analytics = useMemo(() => {
@@ -198,6 +220,42 @@ const ProjectAnalyticsPage = () => {
           <p className="text-gray-600">Track project progress and team performance</p>
         </div>
 
+        {/* Sprint Burndown Chart */}
+        {sprints.length > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Sprint Burndown</h2>
+              <select
+                value={selectedSprint?.id.toString() || ""}
+                onChange={(e) => {
+                  const sprint = sprints.find(s => s.id.toString() === e.target.value);
+                  setSelectedSprint(sprint || null);
+                }}
+                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              >
+                <option value="">Select a sprint...</option>
+                {sprints.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.status})
+                  </option>
+                ))}
+              </select>
+            </div>
+            {selectedSprint ? (
+              <SprintBurndownChart 
+                sprint={selectedSprint} 
+                tasks={tasks.filter(t => t.sprint && t.sprint.toString() === selectedSprint.id.toString())}
+              />
+            ) : (
+              <div className="pm-card p-12 text-center">
+                <BarChart3 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-600 font-medium mb-2">No sprint selected</p>
+                <p className="text-sm text-gray-500">Select a sprint to view its burndown chart</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="pm-card p-5">
@@ -238,30 +296,30 @@ const ProjectAnalyticsPage = () => {
             </div>
             <p className="text-2xl font-semibold text-gray-900">{project?.team?.members?.length || 0}</p>
             <p className="text-xs text-gray-500 mt-1">Team Members</p>
+            </div>
           </div>
-        </div>
 
-        {/* Task Completion Trend */}
+          {/* Task Completion Trend */}
         <div className="pm-card p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900">Task Completion Trend (Last 5 Weeks)</h2>
-          <Separator className="my-4" />
-          <div className="h-64 flex items-end justify-between gap-2">
-            {analytics.taskCompletion.map((week, idx) => {
+            <Separator className="my-4" />
+            <div className="h-64 flex items-end justify-between gap-2">
+              {analytics.taskCompletion.map((week, idx) => {
               const maxCompleted = Math.max(...analytics.taskCompletion.map(w => w.completed), 1);
-              const height = (week.completed / maxCompleted) * 100;
-              return (
-                <div key={idx} className="flex-1 flex flex-col items-center">
-                  <div className="w-full flex flex-col items-center justify-end h-full">
-                    <div
+                const height = (week.completed / maxCompleted) * 100;
+                return (
+                  <div key={idx} className="flex-1 flex flex-col items-center">
+                    <div className="w-full flex flex-col items-center justify-end h-full">
+                      <div
                       className="w-full bg-orange-600 rounded-t transition-all"
                       style={{ height: height > 0 ? `${height}%` : '8px' }}
-                    />
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">{week.week}</p>
+                    <p className="text-xs font-medium text-gray-700 mt-1">{week.completed}</p>
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">{week.week}</p>
-                  <p className="text-xs font-medium text-gray-700 mt-1">{week.completed}</p>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
         </div>
 
@@ -294,32 +352,32 @@ const ProjectAnalyticsPage = () => {
           <h2 className="text-lg font-semibold text-gray-900">Team Performance</h2>
           <Separator className="my-4" />
           {analytics.teamPerformance.length > 0 ? (
-            <div className="space-y-4">
-              {analytics.teamPerformance.map((member, idx) => (
-                <div key={idx} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
-                  <div className="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white font-medium flex-shrink-0">
+          <div className="space-y-4">
+            {analytics.teamPerformance.map((member, idx) => (
+              <div key={idx} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
+                <div className="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white font-medium flex-shrink-0">
                     {member.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-gray-900">{member.name}</h3>
-                    <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                      <span>{member.tasksCompleted} tasks completed</span>
-                      <span>Avg: {member.avgTime}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-semibold text-gray-900">{member.efficiency}%</p>
-                    <p className="text-xs text-gray-500">Efficiency</p>
-                  </div>
-                  <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-orange-600 rounded-full"
-                      style={{ width: `${member.efficiency}%` }}
-                    />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900">{member.name}</h3>
+                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                    <span>{member.tasksCompleted} tasks completed</span>
+                    <span>Avg: {member.avgTime}</span>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="text-right">
+                  <p className="text-lg font-semibold text-gray-900">{member.efficiency}%</p>
+                  <p className="text-xs text-gray-500">Efficiency</p>
+                </div>
+                <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                      className="h-full bg-orange-600 rounded-full"
+                    style={{ width: `${member.efficiency}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
           ) : (
             <div className="text-center py-8 text-gray-500">
               <p>No team performance data available yet</p>
