@@ -14,6 +14,8 @@ import {
 import PageHeader from "@/components/common/PageHeader";
 import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
+import StatCard from "@/components/common/StatCard";
+import CreateCard from "@/components/common/CreateCard";
 
 // Mock analytics data
 const mockMetrics = {
@@ -68,33 +70,20 @@ const AnalyticsPage = () => {
               <>
                 {/* Quick Actions */}
                 <div className="grid grid-cols-2 gap-4">
-                  <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                        <TrendingUp className="h-5 w-5 text-gray-700" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                          Export Report
-                        </h3>
-                        <p className="text-xs text-gray-500">Download data</p>
-                      </div>
-                    </div>
-                  </button>
-
-                  <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                        <Calendar className="h-5 w-5 text-gray-700" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                          Date Range
-                        </h3>
-                        <p className="text-xs text-gray-500">Select period</p>
-                      </div>
-                    </div>
-                  </button>
+                  <CreateCard
+                    title="Export Report"
+                    description="Download data"
+                    icon={TrendingUp}
+                    iconBgColor="bg-gray-100 group-hover:bg-gray-200"
+                    iconColor="text-gray-700"
+                  />
+                  <CreateCard
+                    title="Date Range"
+                    description="Select period"
+                    icon={Calendar}
+                    iconBgColor="bg-gray-100 group-hover:bg-gray-200"
+                    iconColor="text-gray-700"
+                  />
                 </div>
 
                 {/* Analytics Overview */}
@@ -122,110 +111,64 @@ const AnalyticsPage = () => {
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                      <div>
-                        <p className="text-2xl font-semibold text-gray-900">
-                          {mockMetrics.completedTasks}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">Completed</p>
-                      </div>
-                      <div>
-                        <p className="text-2xl font-semibold text-gray-900">
-                          {mockMetrics.inProgressTasks}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          In Progress
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-2xl font-semibold text-gray-900">
-                          {mockMetrics.teamMembers}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          Team Members
-                        </p>
-                      </div>
+                      <StatCard
+                        icon={CheckCircle2}
+                        value={mockMetrics.completedTasks}
+                        label="Completed"
+                        className="p-0 border-0 shadow-none bg-transparent"
+                        iconBgColor="bg-green-100"
+                        iconColor="text-green-600"
+                      />
+                      <StatCard
+                        icon={Clock}
+                        value={mockMetrics.inProgressTasks}
+                        label="In Progress"
+                        className="p-0 border-0 shadow-none bg-transparent"
+                        iconBgColor="bg-orange-100"
+                        iconColor="text-orange-600"
+                      />
+                      <StatCard
+                        icon={Users}
+                        value={mockMetrics.teamMembers}
+                        label="Team Members"
+                        className="p-0 border-0 shadow-none bg-transparent"
+                        iconBgColor="bg-purple-100"
+                        iconColor="text-purple-600"
+                      />
                     </div>
                   </div>
                 </div>
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="pm-card p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 rounded-lg bg-gray-100">
-                        <CheckCircle2 className="h-5 w-5 text-gray-700" />
-                      </div>
-                      <TrendingUp className="h-4 w-4 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">
-                        {mockMetrics.completedTasks}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Tasks Completed
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        +12% from last month
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pm-card p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 rounded-lg bg-gray-100">
-                        <Clock className="h-5 w-5 text-gray-700" />
-                      </div>
-                      <TrendingDown className="h-4 w-4 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">
-                        {mockMetrics.averageCompletionTime}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Avg. Completion Time
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        -0.3 days from last month
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pm-card p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 rounded-lg bg-gray-100">
-                        <Users className="h-5 w-5 text-gray-700" />
-                      </div>
-                      <TrendingUp className="h-4 w-4 text-gray-500" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">
-                        {mockMetrics.teamMembers}
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">Team Members</p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        +2 this month
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pm-card p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="p-2 rounded-lg bg-gray-100">
-                        <TrendingUp className="h-5 w-5 text-gray-700" />
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">
-                        {mockMetrics.productivityScore}%
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Productivity Score
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        +5% from last month
-                      </p>
-                    </div>
-                  </div>
+                  <StatCard
+                    icon={CheckCircle2}
+                    value={mockMetrics.completedTasks}
+                    label="Tasks Completed"
+                    iconBgColor="bg-green-100"
+                    iconColor="text-green-600"
+                  />
+                  <StatCard
+                    icon={Clock}
+                    value={mockMetrics.averageCompletionTime}
+                    label="Avg. Completion Time"
+                    iconBgColor="bg-orange-100"
+                    iconColor="text-orange-600"
+                  />
+                  <StatCard
+                    icon={Users}
+                    value={mockMetrics.teamMembers}
+                    label="Team Members"
+                    iconBgColor="bg-purple-100"
+                    iconColor="text-purple-600"
+                  />
+                  <StatCard
+                    icon={TrendingUp}
+                    value={`${mockMetrics.productivityScore}%`}
+                    label="Productivity Score"
+                    iconBgColor="bg-blue-100"
+                    iconColor="text-blue-600"
+                  />
                 </div>
 
                 {/* Charts Section */}
@@ -456,16 +399,20 @@ const AnalyticsPage = () => {
                 <Separator className="my-4" />
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="pm-card p-5">
-                      <p className="text-sm text-gray-600 mb-2">Velocity</p>
-                      <p className="text-3xl font-bold text-gray-900">42</p>
-                      <p className="text-xs text-gray-500 mt-1">Tasks/week</p>
-                    </div>
-                    <div className="pm-card p-5">
-                      <p className="text-sm text-gray-600 mb-2">Burn Rate</p>
-                      <p className="text-3xl font-bold text-gray-900">68%</p>
-                      <p className="text-xs text-gray-500 mt-1">On track</p>
-                    </div>
+                    <StatCard
+                      icon={TrendingUp}
+                      value="42"
+                      label="Velocity (Tasks/week)"
+                      iconBgColor="bg-blue-100"
+                      iconColor="text-blue-600"
+                    />
+                    <StatCard
+                      icon={Activity}
+                      value="68%"
+                      label="Burn Rate (On track)"
+                      iconBgColor="bg-green-100"
+                      iconColor="text-green-600"
+                    />
                   </div>
                   <div className="pm-card p-6">
                     <h3 className="font-semibold text-gray-900">

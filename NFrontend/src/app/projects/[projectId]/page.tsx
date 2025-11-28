@@ -8,11 +8,15 @@ import {
   Loader2,
   Archive,
   AlertTriangle,
+  ListTodo,
+  CheckCircle2,
 } from "lucide-react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
 import UploadDocumentButton from "@/components/projects/UploadDocumentButton";
+import StatCard from "@/components/common/StatCard";
+import CreateCard from "@/components/common/CreateCard";
 import projectService from "@/services/projectService";
 import taskService from "@/services/taskService";
 import { Project, TaskStatus } from "@/types/project";
@@ -124,19 +128,13 @@ const ProjectDetailPage = () => {
                 description="Requirements & specs"
               />
 
-              <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
-                    <Sparkles className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                      Generate Tasks
-                    </h3>
-                    <p className="text-xs text-gray-500">AI-powered</p>
-                  </div>
-                </div>
-              </button>
+              <CreateCard
+                title="Generate Tasks"
+                description="AI-powered"
+                icon={Sparkles}
+                iconBgColor="bg-orange-100 group-hover:bg-orange-200"
+                iconColor="text-orange-600"
+              />
             </div>
 
             {/* Project Overview */}
@@ -162,24 +160,30 @@ const ProjectDetailPage = () => {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {taskStats.total}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {taskStats.completed}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">Completed</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">
-                      {project.team?.members?.length || 0}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">Team Members</p>
-                  </div>
+                  <StatCard
+                    icon={ListTodo}
+                    value={taskStats.total}
+                    label="Total Tasks"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                    iconBgColor="bg-blue-100"
+                    iconColor="text-blue-600"
+                  />
+                  <StatCard
+                    icon={CheckCircle2}
+                    value={taskStats.completed}
+                    label="Completed"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                    iconBgColor="bg-green-100"
+                    iconColor="text-green-600"
+                  />
+                  <StatCard
+                    icon={Users}
+                    value={project.team?.members?.length || 0}
+                    label="Team Members"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                    iconBgColor="bg-purple-100"
+                    iconColor="text-purple-600"
+                  />
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client";
 import { useParams } from "next/navigation";
-import { FileText, Download, Trash2, Eye, MoreVertical, Search, Calendar, User, Loader2 } from "lucide-react";
+import { FileText, Download, Trash2, Eye, MoreVertical, Search, Calendar, User, Loader2, FolderOpen, HardDrive, Tag, Upload } from "lucide-react";
 import { useState, useEffect } from "react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import UploadDocumentButton from "@/components/projects/UploadDocumentButton";
@@ -8,6 +8,7 @@ import DocumentPreviewDialog from "@/components/projects/DocumentPreviewDialog";
 import documentService, { Document } from "@/services/documentService";
 import toast from "react-hot-toast";
 import DeleteConfirmationDialog from "@/components/common/DeleteConfirmationDialog";
+import StatCard from "@/components/common/StatCard";
 
 const getFileIcon = (fileName: string) => {
   const extension = fileName.split('.').pop()?.toLowerCase();
@@ -122,33 +123,39 @@ const ProjectDocumentsPage = () => {
             onSuccess={fetchDocuments}
           />
 
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">{documents.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Total Documents</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {formatFileSize(documents.reduce((sum, d) => sum + (d.file_size || 0), 0))}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Total Size</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {new Set(documents.map(d => d.category).filter(Boolean)).size}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Categories</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {documents.filter(d => {
+          <StatCard
+            icon={FileText}
+            value={documents.length}
+            label="Total Documents"
+            iconBgColor="bg-blue-100"
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            icon={HardDrive}
+            value={formatFileSize(documents.reduce((sum, d) => sum + (d.file_size || 0), 0))}
+            label="Total Size"
+            iconBgColor="bg-gray-100"
+            iconColor="text-gray-700"
+          />
+          <StatCard
+            icon={Tag}
+            value={new Set(documents.map(d => d.category).filter(Boolean)).size}
+            label="Categories"
+            iconBgColor="bg-purple-100"
+            iconColor="text-purple-600"
+          />
+          <StatCard
+            icon={Upload}
+            value={documents.filter(d => {
                 const uploadDate = new Date(d.created_at);
                 const weekAgo = new Date();
                 weekAgo.setDate(weekAgo.getDate() - 7);
                 return uploadDate > weekAgo;
               }).length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Uploaded This Week</p>
-          </div>
+            label="Uploaded This Week"
+            iconBgColor="bg-orange-100"
+            iconColor="text-orange-600"
+          />
         </div>
 
         {/* Filters */}
@@ -262,6 +269,25 @@ const ProjectDocumentsPage = () => {
               </div>
             ))}
           </div>
+        ) : documents.length === 0 ? (
+          <div className="pm-card p-16 text-center">
+            <div className="max-w-sm mx-auto">
+              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <FileText className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No documents yet</h3>
+              <p className="text-sm text-gray-500 mb-6">
+                Upload your first document to get started
+              </p>
+              <div className="flex justify-center">
+                <UploadDocumentButton
+                  projectId={projectId}
+                  description="Add new files"
+                  onSuccess={fetchDocuments}
+                />
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="pm-card p-16 text-center">
             <div className="max-w-sm mx-auto">
@@ -269,10 +295,8 @@ const ProjectDocumentsPage = () => {
                 <FileText className="h-8 w-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No documents found</h3>
-              <p className="text-sm text-gray-500 mb-6">
-                {searchQuery || filterCategory !== "all"
-                  ? "Try adjusting your filters"
-                  : "Upload your first document to get started"}
+              <p className="text-sm text-gray-500">
+                Try adjusting your filters
               </p>
             </div>
           </div>

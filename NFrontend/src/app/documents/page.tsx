@@ -11,6 +11,8 @@ import {
   ChevronDown,
   ChevronUp,
   Loader2,
+  FolderKanban,
+  FileCode2,
 } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import { Separator } from "@/components/ui/separator";
@@ -19,6 +21,7 @@ import DocumentPreviewDialog from "@/components/projects/DocumentPreviewDialog";
 import documentService, { Document } from "@/services/documentService";
 import toast from "react-hot-toast";
 import Link from "next/link";
+import StatCard from "@/components/common/StatCard";
 
 const formatFileSize = (bytes?: number): string => {
   if (bytes === undefined || bytes === null) return "Unknown";
@@ -162,26 +165,30 @@ const DocumentsPage = () => {
               </h2>
               <Separator className="my-4" />
               <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {documents.length}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Total Documents
-                  </p>
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {new Set(documents.map((d) => d.project_name).filter(Boolean)).size}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">Projects</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {new Set(documents.map((d) => getFileExtension(d.name)).filter(Boolean)).size}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">File Types</p>
-                </div>
+                <StatCard
+                  icon={FileText}
+                  value={documents.length}
+                  label="Total Documents"
+                  className="p-0 border-0 shadow-none bg-transparent"
+                  iconBgColor="bg-blue-100"
+                  iconColor="text-blue-600"
+                />
+                <StatCard
+                  icon={FolderKanban}
+                  value={new Set(documents.map((d) => d.project_name).filter(Boolean)).size}
+                  label="Projects"
+                  className="p-0 border-0 shadow-none bg-transparent"
+                  iconBgColor="bg-purple-100"
+                  iconColor="text-purple-600"
+                />
+                <StatCard
+                  icon={FileCode2}
+                  value={new Set(documents.map((d) => getFileExtension(d.name)).filter(Boolean)).size}
+                  label="File Types"
+                  className="p-0 border-0 shadow-none bg-transparent"
+                  iconBgColor="bg-orange-100"
+                  iconColor="text-orange-600"
+                />
               </div>
             </div>
 

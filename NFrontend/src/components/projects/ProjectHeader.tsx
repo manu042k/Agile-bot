@@ -88,7 +88,7 @@ export default function ProjectHeader({
 
   if (loading) {
     return (
-      <div className="sticky top-0 z-20 glass-navbar">
+      <div className="sticky top-0 z-50 glass-navbar">
         <div className="px-6 py-6 flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
         </div>
@@ -98,7 +98,7 @@ export default function ProjectHeader({
 
   if (!project) {
     return (
-      <div className="sticky top-0 z-20 glass-navbar">
+      <div className="sticky top-0 z-50 glass-navbar">
         <div className="px-6 py-6">
           <p className="text-red-600">Project not found</p>
         </div>
@@ -107,7 +107,7 @@ export default function ProjectHeader({
   }
 
   return (
-    <div className="sticky top-0 z-20 glass-navbar">
+    <div className="sticky top-0 z-50 glass-navbar">
       <div className="px-6 py-6 space-y-6">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-lg bg-white/60 backdrop-blur-sm flex items-center justify-center flex-shrink-0">

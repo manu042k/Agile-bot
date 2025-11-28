@@ -22,7 +22,7 @@ import { getStatusColumnColor } from "@/lib/colorUtils";
 import { getStatusLabel } from "@/lib/statusUtils";
 import taskService from "@/services/taskService";
 import sprintService from "@/services/sprintService";
-import { Task, TaskStatus, TaskPriority, Sprint } from "@/types/project";
+import { Task, TaskStatus, TaskPriority, Sprint, SprintStatus } from "@/types/project";
 import toast from "react-hot-toast";
 
 interface Column {
@@ -139,16 +139,50 @@ const BoardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchTasks = async () => {
+  const fetchSprint = async () => {
+    // If sprintId is provided in URL, use that
+    if (sprintId) {
+      try {
+        const sprintData = await sprintService.getSprint(projectId, sprintId);
+        setSprint(sprintData);
+        return sprintData;
+      } catch (err: any) {
+        console.error("Error fetching sprint:", err);
+        return null;
+      }
+    }
+
+    // Otherwise, find the current active sprint
+    try {
+      const sprints = await sprintService.getSprints(projectId);
+      const activeSprint = sprints.find(
+        (s: Sprint) => s.status === SprintStatus.Active || s.auto_status === SprintStatus.Active
+      );
+      if (activeSprint) {
+        setSprint(activeSprint);
+        return activeSprint;
+      } else {
+        setSprint(null);
+        return null;
+      }
+    } catch (err: any) {
+      console.error("Error fetching sprints:", err);
+      return null;
+    }
+  };
+
+  const fetchTasks = async (currentSprint: Sprint | null = null) => {
     try {
       setLoading(true);
       const fetchedTasks = await taskService.getTasks(projectId);
 
-      // Filter by sprint if sprintId is provided
+      // Filter by sprint if sprintId is provided or if we have a current sprint
       let filteredTasks = fetchedTasks;
-      if (sprintId) {
+      const sprintToUse = currentSprint || sprint;
+      const currentSprintId = sprintId || sprintToUse?.id?.toString();
+      if (currentSprintId) {
         filteredTasks = fetchedTasks.filter(
-          (task: Task) => task.sprint && task.sprint.toString() === sprintId
+          (task: Task) => task.sprint && task.sprint.toString() === currentSprintId
         );
       }
 
@@ -162,22 +196,12 @@ const BoardPage = () => {
     }
   };
 
-  const fetchSprint = async () => {
-    if (!sprintId) return;
-
-    try {
-      const sprintData = await sprintService.getSprint(projectId, sprintId);
-      setSprint(sprintData);
-    } catch (err: any) {
-      console.error("Error fetching sprint:", err);
-    }
-  };
-
   useEffect(() => {
-    fetchTasks();
-    if (sprintId) {
-      fetchSprint();
-    }
+    const loadData = async () => {
+      const currentSprint = await fetchSprint();
+      await fetchTasks(currentSprint);
+    };
+    loadData();
   }, [projectId, sprintId]);
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -226,7 +250,7 @@ const BoardPage = () => {
       console.error("Error updating task status:", err);
       toast.error("Failed to update task status");
       // Revert the optimistic update on error
-      fetchTasks();
+      fetchTasks(sprint);
     }
   };
 
@@ -248,14 +272,14 @@ const BoardPage = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <ProjectHeader />
-        <div className="px-6 py-8">
+        <div className="px-6 py-8 overflow-x-hidden">
           <div className="pm-card p-8 text-center border-red-200 bg-red-50">
             <p className="text-red-600 font-medium mb-2">
               Failed to load board
             </p>
             <p className="text-sm text-red-500 mb-4">{error}</p>
             <button
-              onClick={fetchTasks}
+              onClick={() => fetchTasks()}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               Retry
@@ -267,9 +291,9 @@ const BoardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50">
       <ProjectHeader />
-      <div className="px-6 py-8 max-w-full">
+      <div className="px-6 py-8 max-w-full overflow-x-hidden">
         {/* Sprint Header */}
         {sprint && (
           <div className="mb-6 pm-card p-4">
@@ -341,8 +365,8 @@ const BoardPage = () => {
                           sprint.id.toString()
                         );
                         toast.success("Sprint started successfully");
-                        fetchSprint();
-                        fetchTasks();
+                        const updatedSprint = await fetchSprint();
+                        await fetchTasks(updatedSprint);
                       } catch (err: any) {
                         toast.error(
                           err.response?.data?.error || "Failed to start sprint"
@@ -368,8 +392,8 @@ const BoardPage = () => {
                             sprint.id.toString()
                           );
                           toast.success("Sprint completed successfully");
-                          fetchSprint();
-                          fetchTasks();
+                          const updatedSprint = await fetchSprint();
+                          await fetchTasks(updatedSprint);
                         } catch (err: any) {
                           toast.error(
                             err.response?.data?.error ||

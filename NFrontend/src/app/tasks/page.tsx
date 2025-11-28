@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Plus, Search, Filter, Calendar, User, Flag, MoreVertical, List, LayoutGrid, CheckSquare, ListTodo, UserCheck, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Filter, Calendar, User, Flag, MoreVertical, List, LayoutGrid, CheckSquare, ListTodo, UserCheck, CheckCircle2, FileText, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { useParams, useSearchParams } from "next/navigation";
@@ -9,6 +9,8 @@ import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
 import { getPriorityClass } from "@/lib/colorUtils";
 import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
+import StatCard from "@/components/common/StatCard";
+import CreateCard from "@/components/common/CreateCard";
 
 // Mock tasks data
 const mockTasks = [
@@ -114,29 +116,24 @@ const TasksPage = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-4">
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Plus className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Create Task</h3>
-                    <p className="text-xs text-gray-500">New task</p>
-                  </div>
-                </div>
-              </button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <CreateCard
+                    title="Create Task"
+                    description="New task"
+                    icon={Plus}
+                  />
+                </DialogTrigger>
+                <TaskCreateComponent projectId={defaultProjectId} />
+              </Dialog>
 
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Filter className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Filter Tasks</h3>
-                    <p className="text-xs text-gray-500">Advanced filters</p>
-                  </div>
-                </div>
-              </button>
+              <CreateCard
+                title="Filter Tasks"
+                description="Advanced filters"
+                icon={Filter}
+                iconBgColor="bg-gray-100 group-hover:bg-gray-200"
+                iconColor="text-gray-700"
+              />
             </div>
 
             {/* Tasks Overview */}
@@ -160,18 +157,30 @@ const TasksPage = () => {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockTasks.length}</p>
-                    <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockTasks.filter(t => t.status === "done").length}</p>
-                    <p className="text-xs text-gray-500 mt-1">Completed</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{mockTasks.filter(t => t.status === "in_progress").length}</p>
-                    <p className="text-xs text-gray-500 mt-1">In Progress</p>
-                  </div>
+                  <StatCard
+                    icon={FileText}
+                    value={mockTasks.length}
+                    label="Total Tasks"
+                    iconBgColor="bg-blue-100"
+                    iconColor="text-blue-600"
+                    className="p-0"
+                  />
+                  <StatCard
+                    icon={CheckCircle2}
+                    value={mockTasks.filter(t => t.status === "done").length}
+                    label="Completed"
+                    iconBgColor="bg-green-100"
+                    iconColor="text-green-600"
+                    className="p-0"
+                  />
+                  <StatCard
+                    icon={PlayCircle}
+                    value={mockTasks.filter(t => t.status === "in_progress").length}
+                    label="In Progress"
+                    iconBgColor="bg-orange-100"
+                    iconColor="text-orange-600"
+                    className="p-0"
+                  />
                 </div>
               </div>
             </div>
@@ -257,10 +266,16 @@ const TasksPage = () => {
                         : "Get started by creating your first task"}
                     </p>
                     {!searchQuery && filterStatus === "all" && (
-                      <button className="pm-button-primary inline-flex items-center gap-2">
-                        <Plus className="h-4 w-4" />
-                        Create Task
-                      </button>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <CreateCard
+                            title="Create Task"
+                            description="New task"
+                            icon={Plus}
+                          />
+                        </DialogTrigger>
+                        <TaskCreateComponent projectId={defaultProjectId} />
+                      </Dialog>
                     )}
                   </div>
                 )

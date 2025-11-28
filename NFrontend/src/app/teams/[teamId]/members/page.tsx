@@ -23,6 +23,8 @@ import { Team } from "@/types/project";
 import toast from "react-hot-toast";
 import { useUser } from "@/hooks/useUser";
 import PageHeader from "@/components/common/PageHeader";
+import StatCard from "@/components/common/StatCard";
+import CreateCard from "@/components/common/CreateCard";
 
 const getRoleIcon = (role: string) => {
   switch (role) {
@@ -146,19 +148,11 @@ const TeamMembersPage = () => {
           {isAdmin && (
             <Dialog>
               <DialogTrigger asChild>
-                <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
-                      <UserPlus className="h-6 w-6 text-orange-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                        Invite Member
-                      </h3>
-                      <p className="text-xs text-gray-500">Add to team</p>
-                    </div>
-                  </div>
-                </button>
+                <CreateCard
+                  title="Invite Member"
+                  description="Add to team"
+                  icon={UserPlus}
+                />
               </DialogTrigger>
               <InviteMemberComponent
                 teamId={teamId}
@@ -168,28 +162,31 @@ const TeamMembersPage = () => {
           )}
 
           {/* Stats */}
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {team.members.length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Active Members</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {
+          <StatCard
+            icon={Users}
+            value={team.members.length}
+            label="Active Members"
+            iconBgColor="bg-purple-100"
+            iconColor="text-purple-600"
+          />
+          <StatCard
+            icon={Shield}
+            value={
                 team.members.filter(
                   (m) => m.role === "owner" || m.role === "admin"
                 ).length
               }
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Admins</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {team.members.filter((m) => m.role === "member").length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Members</p>
-          </div>
+            label="Admins"
+            iconBgColor="bg-orange-100"
+            iconColor="text-orange-600"
+          />
+          <StatCard
+            icon={User}
+            value={team.members.filter((m) => m.role === "member").length}
+            label="Members"
+            iconBgColor="bg-blue-100"
+            iconColor="text-blue-600"
+          />
         </div>
 
         {/* Team Members */}

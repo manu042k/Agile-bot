@@ -9,6 +9,7 @@ import {
   Shield,
   User,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +20,7 @@ import toast from "react-hot-toast";
 import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
 import PageHeader from "@/components/common/PageHeader";
+import StatCard from "@/components/common/StatCard";
 
 const getRoleIcon = (role: string) => {
   switch (role) {
@@ -130,24 +132,27 @@ const TeamDetailPage = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Stats */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="pm-card p-5">
-                <p className="text-2xl font-semibold text-gray-900">
-                  {team.members.length}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Members</p>
-              </div>
-              <div className="pm-card p-5">
-                <p className="text-2xl font-semibold text-gray-900">
-                  {projects.length}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Projects</p>
-              </div>
-              <div className="pm-card p-5">
-                <p className="text-2xl font-semibold text-gray-900">
-                  {projects.length}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">Active Projects</p>
-              </div>
+              <StatCard
+                icon={Users}
+                value={team.members.length}
+                label="Members"
+                iconBgColor="bg-purple-100"
+                iconColor="text-purple-600"
+              />
+              <StatCard
+                icon={FolderKanban}
+                value={projects.length}
+                label="Projects"
+                iconBgColor="bg-blue-100"
+                iconColor="text-blue-600"
+              />
+              <StatCard
+                icon={CheckCircle2}
+                value={projects.length}
+                label="Active Projects"
+                iconBgColor="bg-green-100"
+                iconColor="text-green-600"
+              />
             </div>
 
             {/* Recent Activity */}

@@ -5,6 +5,7 @@ import { TrendingUp, CheckCircle2, Clock, Users, Calendar, ArrowUp, ArrowDown, L
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import SprintBurndownChart from "@/components/projects/SprintBurndownChart";
 import { Separator } from "@/components/ui/separator";
+import StatCard from "@/components/common/StatCard";
 import projectService from "@/services/projectService";
 import taskService from "@/services/taskService";
 import sprintService from "@/services/sprintService";
@@ -258,45 +259,34 @@ const ProjectAnalyticsPage = () => {
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="pm-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <CheckCircle2 className="h-5 w-5 text-gray-700" />
-              </div>
-            </div>
-            <p className="text-2xl font-semibold text-gray-900">{analytics.overview.completionRate}%</p>
-            <p className="text-xs text-gray-500 mt-1">Completion Rate</p>
-          </div>
-
-          <div className="pm-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <TrendingUp className="h-5 w-5 text-gray-700" />
-              </div>
-            </div>
-            <p className="text-2xl font-semibold text-gray-900">{analytics.overview.totalTasks}</p>
-            <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
-          </div>
-
-          <div className="pm-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <Clock className="h-5 w-5 text-gray-700" />
-              </div>
-            </div>
-            <p className="text-2xl font-semibold text-gray-900">{analytics.overview.avgTaskCompletion.toFixed(1)}</p>
-            <p className="text-xs text-gray-500 mt-1">Avg Days/Task</p>
-          </div>
-
-          <div className="pm-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <Users className="h-5 w-5 text-gray-700" />
-              </div>
-            </div>
-            <p className="text-2xl font-semibold text-gray-900">{project?.team?.members?.length || 0}</p>
-            <p className="text-xs text-gray-500 mt-1">Team Members</p>
-            </div>
+          <StatCard
+            icon={CheckCircle2}
+            value={`${analytics.overview.completionRate}%`}
+            label="Completion Rate"
+            iconBgColor="bg-green-100"
+            iconColor="text-green-600"
+          />
+          <StatCard
+            icon={TrendingUp}
+            value={analytics.overview.totalTasks}
+            label="Total Tasks"
+            iconBgColor="bg-blue-100"
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            icon={Clock}
+            value={analytics.overview.avgTaskCompletion.toFixed(1)}
+            label="Avg Days/Task"
+            iconBgColor="bg-orange-100"
+            iconColor="text-orange-600"
+          />
+          <StatCard
+            icon={Users}
+            value={project?.team?.members?.length || 0}
+            label="Team Members"
+            iconBgColor="bg-purple-100"
+            iconColor="text-purple-600"
+          />
           </div>
 
           {/* Task Completion Trend */}

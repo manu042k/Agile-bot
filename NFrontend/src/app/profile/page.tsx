@@ -3,13 +3,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Activity, Bell, Shield, UserCircle, ExternalLink, Lock, KeyRound } from "lucide-react";
+import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Activity, Bell, Shield, UserCircle, ExternalLink, Lock, KeyRound, FolderKanban, CheckCircle2, Users } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/common/PageHeader";
 import { useUser } from "@/hooks/useUser";
 import { useMemo, useState, useEffect } from "react";
+import StatCard from "@/components/common/StatCard";
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -408,18 +409,30 @@ const ProfilePage = () => {
                 <Separator className="my-4" />
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">12</p>
-                  <p className="text-sm text-gray-500">Projects</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">48</p>
-                  <p className="text-sm text-gray-500">Tasks Completed</p>
-                </div>
-                <div>
-                  <p className="text-2xl font-semibold text-gray-900">5</p>
-                  <p className="text-sm text-gray-500">Teams</p>
-                </div>
+                <StatCard
+                  icon={FolderKanban}
+                  value={12}
+                  label="Projects"
+                  className="p-0 border-0 shadow-none bg-transparent"
+                  iconBgColor="bg-blue-100"
+                  iconColor="text-blue-600"
+                />
+                <StatCard
+                  icon={CheckCircle2}
+                  value={48}
+                  label="Tasks Completed"
+                  className="p-0 border-0 shadow-none bg-transparent"
+                  iconBgColor="bg-green-100"
+                  iconColor="text-green-600"
+                />
+                <StatCard
+                  icon={Users}
+                  value={5}
+                  label="Teams"
+                  className="p-0 border-0 shadow-none bg-transparent"
+                  iconBgColor="bg-purple-100"
+                  iconColor="text-purple-600"
+                />
               </CardContent>
             </Card>
           </div>

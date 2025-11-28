@@ -10,6 +10,7 @@ import sprintService from "@/services/sprintService";
 import { Sprint, SprintStatus } from "@/types/project";
 import toast from "react-hot-toast";
 import DeleteConfirmationDialog from "@/components/common/DeleteConfirmationDialog";
+import CreateCard from "@/components/common/CreateCard";
 
 const SprintsPage = () => {
   const params = useParams();
@@ -148,13 +149,13 @@ const SprintsPage = () => {
               <h1 className="text-3xl font-semibold text-gray-900 mb-2">Sprints</h1>
               <p className="text-gray-600">Manage sprints and track iterations</p>
             </div>
-            <button
+            <CreateCard
+              title="New Sprint"
+              description="Create sprint"
+              icon={Plus}
               onClick={() => setIsCreateDialogOpen(true)}
-              className="pm-button-primary"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Sprint
-            </button>
+              className="w-auto"
+            />
           </div>
         </div>
 
@@ -249,13 +250,14 @@ const SprintsPage = () => {
             <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 font-medium mb-2">No sprints yet</p>
             <p className="text-sm text-gray-500 mb-6">Create your first sprint to get started</p>
-            <button
+            <div className="flex justify-center">
+              <CreateCard
+                title="Create Sprint"
+                description="New sprint"
+                icon={Plus}
               onClick={() => setIsCreateDialogOpen(true)}
-              className="pm-button-primary inline-flex items-center"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create Sprint
-            </button>
+              />
+            </div>
           </div>
         )}
       </div>

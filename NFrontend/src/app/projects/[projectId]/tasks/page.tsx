@@ -11,6 +11,10 @@ import {
   LayoutGrid,
   ArrowRight,
   Loader2,
+  FileText,
+  ListTodo,
+  CheckCircle2,
+  PlayCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -18,6 +22,8 @@ import { Separator } from "@/components/ui/separator";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
 import taskService from "@/services/taskService";
+import StatCard from "@/components/common/StatCard";
+import CreateCard from "@/components/common/CreateCard";
 import { Task, TaskStatus, TaskPriority } from "@/types/project";
 import {
   getStatusLabel,
@@ -32,7 +38,7 @@ import toast from "react-hot-toast";
 const ProjectTasksPage = () => {
   const params = useParams();
   const projectId = params.projectId as string;
-  const [viewMode, setViewMode] = useState<"list" | "board">("list");
+  const [viewMode, setViewMode] = useState<"list" | "board">("board");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -135,9 +141,9 @@ const ProjectTasksPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+    <div className="min-h-screen bg-gray-50">
       <ProjectHeader />
-      <div className="px-6 py-8 max-w-full">
+      <div className="px-6 py-8 max-w-full overflow-x-hidden">
         {/* Header */}
         <div className="mb-6">
           <div className="mb-4">
@@ -202,49 +208,51 @@ const ProjectTasksPage = () => {
           {/* New Task Card */}
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <button className="pm-card p-4 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-orange-100 group-hover:bg-orange-200 transition-colors">
-                    <Plus className="h-5 w-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                      Create New Task
-                    </h3>
-                    <p className="text-xs text-gray-500">New task</p>
-                  </div>
-                </div>
-              </button>
+              <CreateCard
+                title="Create New Task"
+                description="New task"
+                icon={Plus}
+              />
             </DialogTrigger>
             <TaskCreateComponent
               projectId={projectId}
               onClose={handleTaskCreated}
             />
           </Dialog>
-          <div className="pm-card p-4">
-            <p className="text-2xl font-semibold text-gray-900">
-              {tasks.filter((t) => t.status === TaskStatus.Created).length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Created</p>
-          </div>
-          <div className="pm-card p-4">
-            <p className="text-2xl font-semibold text-gray-900">
-              {tasks.length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
-          </div>
-          <div className="pm-card p-4">
-            <p className="text-2xl font-semibold text-gray-900">
-              {tasks.filter((t) => t.status === TaskStatus.Completed).length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Completed</p>
-          </div>
-          <div className="pm-card p-4">
-            <p className="text-2xl font-semibold text-gray-900">
-              {tasks.filter((t) => t.status === TaskStatus.Active).length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">In Progress</p>
-          </div>
+          <StatCard
+            icon={FileText}
+            value={tasks.filter((t) => t.status === TaskStatus.Created).length}
+            label="Created"
+            className="p-4"
+            iconBgColor="bg-gray-100"
+            iconColor="text-gray-700"
+          />
+          <StatCard
+            icon={ListTodo}
+            value={tasks.length}
+            label="Total Tasks"
+            className="p-4"
+            iconBgColor="bg-blue-100"
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            icon={CheckCircle2}
+            value={
+              tasks.filter((t) => t.status === TaskStatus.Completed).length
+            }
+            label="Completed"
+            className="p-4"
+            iconBgColor="bg-green-100"
+            iconColor="text-green-600"
+          />
+          <StatCard
+            icon={PlayCircle}
+            value={tasks.filter((t) => t.status === TaskStatus.Active).length}
+            label="In Progress"
+            className="p-4"
+            iconBgColor="bg-orange-100"
+            iconColor="text-orange-600"
+          />
         </div>
 
         {viewMode === "list" ? (
@@ -253,6 +261,35 @@ const ProjectTasksPage = () => {
               {filteredTasks.map((task) => (
                 <TaskCard key={task.taskid} task={task} projectId={projectId} />
               ))}
+            </div>
+          ) : tasks.length === 0 ? (
+            <div className="pm-card p-16 text-center">
+              <div className="max-w-sm mx-auto">
+                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                  <ListTodo className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No tasks yet
+                </h3>
+                <p className="text-sm text-gray-500 mb-6">
+                  Create your first task to get started
+                </p>
+                <div className="flex justify-center">
+                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                    <DialogTrigger asChild>
+                      <CreateCard
+                        title="Create New Task"
+                        description="New task"
+                        icon={Plus}
+                      />
+                    </DialogTrigger>
+                    <TaskCreateComponent
+                      projectId={projectId}
+                      onClose={handleTaskCreated}
+                    />
+                  </Dialog>
+                </div>
+              </div>
             </div>
           ) : (
             (searchQuery || filterStatus !== "all") && (

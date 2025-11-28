@@ -34,6 +34,8 @@ import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
 import { useProjects } from "@/hooks/useProjects";
 import toast from "react-hot-toast";
+import CreateCard from "@/components/common/CreateCard";
+import StatCard from "@/components/common/StatCard";
 
 const ProjectsPage = () => {
   const searchParams = useSearchParams();
@@ -187,36 +189,22 @@ const ProjectsPage = () => {
               <div className="grid grid-cols-2 gap-4">
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
-                    <button className="bg-white border border-orange-200 rounded-lg p-5 shadow-sm hover:shadow-orange-500/20 hover:border-orange-300 transition-all text-left w-full group">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-orange-100 flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
-                          <CirclePlus className="h-6 w-6 text-orange-600" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                            Create Project
-                          </h3>
-                          <p className="text-xs text-gray-500">New project</p>
-                        </div>
-                      </div>
-                    </button>
+                    <CreateCard
+                      title="Create Project"
+                      description="New project"
+                      icon={CirclePlus}
+                    />
                   </DialogTrigger>
                   <CreateProjectComponent onSuccess={handleProjectCreated} />
                 </Dialog>
 
-                <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                      <Sparkles className="h-5 w-5 text-gray-700" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
-                        AI Generate
-                      </h3>
-                      <p className="text-xs text-gray-500">AI-powered</p>
-                    </div>
-                  </div>
-                </button>
+                <CreateCard
+                  title="AI Generate"
+                  description="AI-powered"
+                  icon={Sparkles}
+                  iconBgColor="bg-gray-100 group-hover:bg-gray-200"
+                  iconColor="text-gray-700"
+                />
               </div>
 
               {/* Projects Overview */}
@@ -242,26 +230,30 @@ const ProjectsPage = () => {
                   </div>
 
                   <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">
-                        {stats.total}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        Total Projects
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">
-                        {stats.active}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">Active</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">
-                        {stats.completed}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">Completed</p>
-                    </div>
+                    <StatCard
+                      icon={FolderKanban}
+                      value={stats.total}
+                      label="Total Projects"
+                      className="p-0 border-0 shadow-none bg-transparent"
+                      iconBgColor="bg-blue-100"
+                      iconColor="text-blue-600"
+                    />
+                    <StatCard
+                      icon={TrendingUp}
+                      value={stats.active}
+                      label="Active"
+                      className="p-0 border-0 shadow-none bg-transparent"
+                      iconBgColor="bg-orange-100"
+                      iconColor="text-orange-600"
+                    />
+                    <StatCard
+                      icon={CheckCircle2}
+                      value={stats.completed}
+                      label="Completed"
+                      className="p-0 border-0 shadow-none bg-transparent"
+                      iconBgColor="bg-green-100"
+                      iconColor="text-green-600"
+                    />
                   </div>
                 </div>
               </div>
@@ -597,12 +589,15 @@ const ProjectsPage = () => {
                       {!searchQuery && (
                         <Dialog>
                           <DialogTrigger asChild>
-                            <button className="px-5 py-2.5 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 inline-flex items-center gap-2">
-                              <CirclePlus className="h-4 w-4" />
-                              Create Project
-                            </button>
+                            <CreateCard
+                              title="Create Project"
+                              description="New project"
+                              icon={CirclePlus}
+                            />
                           </DialogTrigger>
-                          <CreateProjectComponent />
+                          <CreateProjectComponent
+                            onSuccess={handleProjectCreated}
+                          />
                         </Dialog>
                       )}
                     </div>

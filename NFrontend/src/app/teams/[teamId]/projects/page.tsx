@@ -7,6 +7,7 @@ import {
   Settings,
   Search,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import teamService from "@/services/teamService";
@@ -14,6 +15,7 @@ import projectService from "@/services/projectService";
 import { Team, Project } from "@/types/project";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/common/PageHeader";
+import StatCard from "@/components/common/StatCard";
 
 const TeamProjectsPage = () => {
   const params = useParams();
@@ -110,24 +112,27 @@ const TeamProjectsPage = () => {
       <div className="px-6 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 mb-6">
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {projects.length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Total Projects</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {projects.length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Active Projects</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-              {team.members.length}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Team Members</p>
-          </div>
+          <StatCard
+            icon={FolderKanban}
+            value={projects.length}
+            label="Total Projects"
+            iconBgColor="bg-blue-100"
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            icon={CheckCircle2}
+            value={projects.length}
+            label="Active Projects"
+            iconBgColor="bg-green-100"
+            iconColor="text-green-600"
+          />
+          <StatCard
+            icon={Users}
+            value={team.members.length}
+            label="Team Members"
+            iconBgColor="bg-purple-100"
+            iconColor="text-purple-600"
+          />
         </div>
 
         {/* Projects Grid */}

@@ -124,6 +124,15 @@
     transform: translateY(-2px) !important;
   }
   
+  /* Override for CreateCard orange border */
+  .pm-card[class*="border-orange"] {
+    border-color: rgb(253 186 116) !important; /* orange-300 */
+  }
+  
+  .pm-card[class*="border-orange"]:hover {
+    border-color: rgb(251 146 60) !important; /* orange-400 */
+  }
+  
   .pm-card-hover {
     @apply hover:shadow-lg hover:border-gray-300 transition-all duration-200 hover:-translate-y-0.5;
   }

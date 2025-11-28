@@ -1,7 +1,7 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { UserPlus, MoreVertical, Mail, User, Shield, Crown, Settings, Loader2, Users, Link2, Archive, AlertTriangle } from "lucide-react";
+import { UserPlus, MoreVertical, Mail, User, Shield, Crown, Settings, Loader2, Users, Link2, Archive, AlertTriangle, CheckSquare, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import InviteMemberComponent from "@/components/team/InviteMemberComponent";
 import { Separator } from "@/components/ui/separator";
+import StatCard from "@/components/common/StatCard";
+import CreateCard from "@/components/common/CreateCard";
 import projectService from "@/services/projectService";
 import taskService from "@/services/taskService";
 import teamService from "@/services/teamService";
@@ -248,89 +250,9 @@ const ProjectTeamPage = () => {
         
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-semibold text-gray-900 mb-2">Team</h1>
               <p className="text-gray-600">Manage team members and their roles</p>
-            </div>
-            <div className="flex items-center gap-3">
-              {project.team && canInviteMember() && !project.team.is_archived ? (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <button className="pm-button-primary inline-flex items-center gap-2">
-                      <UserPlus className="h-4 w-4" />
-                      Invite Member
-                    </button>
-                  </DialogTrigger>
-                  <InviteMemberComponent teamId={project.team.id.toString()} />
-                </Dialog>
-              ) : null}
-              {!project.team && canAssignTeam() && (
-                <Dialog open={isAssignDialogOpen} onOpenChange={setIsAssignDialogOpen}>
-                  <DialogTrigger asChild>
-                    <button className="pm-button-primary inline-flex items-center gap-2">
-                      <Link2 className="h-4 w-4" />
-                      Assign Team
-                    </button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogTitle>Assign Team to Project</DialogTitle>
-                    <DialogDescription>
-                      Select a team to assign to this project. You can manage team members after assignment.
-                    </DialogDescription>
-                    <div className="space-y-4 mt-4">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700 mb-2 block">
-                          Select Team
-                        </label>
-                        <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a team" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {teams.length > 0 ? (
-                              teams.map((team) => (
-                                <SelectItem key={team.id} value={team.id.toString()}>
-                                  {team.name}
-                                  {team.members && (
-                                    <span className="text-xs text-gray-500 ml-2">
-                                      ({team.members.length} members)
-                                    </span>
-                                  )}
-                                </SelectItem>
-                              ))
-                            ) : (
-                              <div className="p-4 text-center text-sm text-gray-500">
-                                No teams available. Create a team first.
-                              </div>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setIsAssignDialogOpen(false)}
-                          disabled={isAssigning}
-                        >
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAssignTeam} disabled={isAssigning || !selectedTeamId}>
-                          {isAssigning ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                              Assigning...
-                            </>
-                          ) : (
-                            "Assign Team"
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-            </Dialog>
-              )}
-            </div>
           </div>
         </div>
 
@@ -409,23 +331,40 @@ const ProjectTeamPage = () => {
         ) : (
           <>
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="pm-card p-5">
-                <p className="text-2xl font-semibold text-gray-900">{membersWithStats.length}</p>
-            <p className="text-xs text-gray-500 mt-1">Team Members</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-                  {membersWithStats.reduce((sum, m) => sum + m.tasks, 0)}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
-          </div>
-          <div className="pm-card p-5">
-            <p className="text-2xl font-semibold text-gray-900">
-                  {membersWithStats.reduce((sum, m) => sum + m.completed, 0)}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">Completed Tasks</p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {project.team && canInviteMember() && !project.team.is_archived ? (
+            <Dialog>
+              <DialogTrigger asChild>
+                <CreateCard
+                  title="Invite Member"
+                  description="Add team member"
+                  icon={UserPlus}
+                />
+              </DialogTrigger>
+              <InviteMemberComponent teamId={project.team.id.toString()} />
+            </Dialog>
+          ) : null}
+          <StatCard
+            icon={Users}
+            value={membersWithStats.length}
+            label="Team Members"
+            iconBgColor="bg-blue-100"
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            icon={CheckSquare}
+            value={membersWithStats.reduce((sum, m) => sum + m.tasks, 0)}
+            label="Total Tasks"
+            iconBgColor="bg-gray-100"
+            iconColor="text-gray-700"
+          />
+          <StatCard
+            icon={CheckCircle2}
+            value={membersWithStats.reduce((sum, m) => sum + m.completed, 0)}
+            label="Completed Tasks"
+            iconBgColor="bg-green-100"
+            iconColor="text-green-600"
+          />
         </div>
 
         {/* Team Members */}

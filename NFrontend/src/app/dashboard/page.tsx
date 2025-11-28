@@ -22,6 +22,8 @@ import { Separator } from "@/components/ui/separator";
 import { useProjects } from "@/hooks/useProjects";
 import { useActivities } from "@/hooks/useActivities";
 import ActivityFeed from "@/components/common/ActivityFeed";
+import StatCard from "@/components/common/StatCard";
+import CreateCard from "@/components/common/CreateCard";
 import { TaskStatus } from "@/types/project";
 import taskService from "@/services/taskService";
 
@@ -139,53 +141,34 @@ const DashboardPage = () => {
           <>
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mb-6">
-          <div className="pm-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <FolderKanban className="h-5 w-5 text-gray-700" />
-              </div>
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
-              <p className="text-sm text-gray-600 mt-1">Total Projects</p>
-            </div>
-          </div>
-
-          <div className="pm-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <CheckSquare className="h-5 w-5 text-gray-700" />
-              </div>
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-gray-900">{totalTasks}</p>
-              <p className="text-sm text-gray-600 mt-1">Total Tasks</p>
-            </div>
-          </div>
-
-          <div className="pm-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <Users className="h-5 w-5 text-gray-700" />
-              </div>
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-gray-900">{totalTeamMembers}</p>
-              <p className="text-sm text-gray-600 mt-1">Team Members</p>
-            </div>
-          </div>
-
-          <div className="pm-card p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <TrendingUp className="h-5 w-5 text-gray-700" />
-              </div>
-            </div>
-            <div>
-              <p className="text-2xl font-semibold text-gray-900">{overallProgress}%</p>
-              <p className="text-sm text-gray-600 mt-1">Completion Rate</p>
-            </div>
-          </div>
+          <StatCard
+            icon={FolderKanban}
+            value={stats.total}
+            label="Total Projects"
+            iconBgColor="bg-blue-100"
+            iconColor="text-blue-600"
+          />
+          <StatCard
+            icon={CheckSquare}
+            value={totalTasks}
+            label="Total Tasks"
+            iconBgColor="bg-gray-100"
+            iconColor="text-gray-700"
+          />
+          <StatCard
+            icon={Users}
+            value={totalTeamMembers}
+            label="Team Members"
+            iconBgColor="bg-purple-100"
+            iconColor="text-purple-600"
+          />
+          <StatCard
+            icon={TrendingUp}
+            value={`${overallProgress}%`}
+            label="Completion Rate"
+            iconBgColor="bg-green-100"
+            iconColor="text-green-600"
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -193,29 +176,22 @@ const DashboardPage = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
             <div className="grid grid-cols-2 gap-4">
-              <Link href="/projects" className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <FolderKanban className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">View Projects</h3>
-                    <p className="text-xs text-gray-500">All projects</p>
-                  </div>
-                </div>
-              </Link>
-
-              <Link href="/tasks" className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <CheckSquare className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">View Tasks</h3>
-                    <p className="text-xs text-gray-500">All tasks</p>
-                  </div>
-                </div>
-              </Link>
+              <CreateCard
+                title="View Projects"
+                description="All projects"
+                icon={FolderKanban}
+                href="/projects"
+                iconBgColor="bg-gray-100 group-hover:bg-gray-200"
+                iconColor="text-gray-700"
+              />
+              <CreateCard
+                title="View Tasks"
+                description="All tasks"
+                icon={CheckSquare}
+                href="/tasks"
+                iconBgColor="bg-gray-100 group-hover:bg-gray-200"
+                iconColor="text-gray-700"
+              />
             </div>
 
             {/* Dashboard Overview */}
@@ -237,18 +213,30 @@ const DashboardPage = () => {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{stats.total}</p>
-                    <p className="text-xs text-gray-500 mt-1">Total Projects</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{completedTasks}</p>
-                    <p className="text-xs text-gray-500 mt-1">Completed Tasks</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{totalTeamMembers}</p>
-                    <p className="text-xs text-gray-500 mt-1">Team Members</p>
-                  </div>
+                  <StatCard
+                    icon={FolderKanban}
+                    value={stats.total}
+                    label="Total Projects"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                    iconBgColor="bg-blue-100"
+                    iconColor="text-blue-600"
+                  />
+                  <StatCard
+                    icon={CheckSquare}
+                    value={completedTasks}
+                    label="Completed Tasks"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                    iconBgColor="bg-green-100"
+                    iconColor="text-green-600"
+                  />
+                  <StatCard
+                    icon={Users}
+                    value={totalTeamMembers}
+                    label="Team Members"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                    iconBgColor="bg-purple-100"
+                    iconColor="text-purple-600"
+                  />
                 </div>
               </div>
             </div>
