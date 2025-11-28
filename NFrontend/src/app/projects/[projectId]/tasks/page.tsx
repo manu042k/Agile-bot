@@ -1,13 +1,32 @@
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { Plus, Search, Filter, Calendar, User, Flag, MoreVertical, List, LayoutGrid, ArrowRight, Loader2 } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Calendar,
+  User,
+  Flag,
+  List,
+  LayoutGrid,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
 import taskService from "@/services/taskService";
 import { Task, TaskStatus, TaskPriority } from "@/types/project";
+import {
+  getStatusLabel,
+  getStatusDotClass,
+  getStatusBadgeClass,
+  normalizeStatus,
+  isStatusEqual,
+} from "@/lib/statusUtils";
+import TaskCard from "@/components/projects/TaskCard";
 import toast from "react-hot-toast";
 
 const ProjectTasksPage = () => {
@@ -44,36 +63,40 @@ const ProjectTasksPage = () => {
     fetchTasks();
     toast.success("Task created successfully");
   };
-  
-  const filteredTasks = tasks.filter(task => {
-    const assigneeNames = Array.isArray(task.assigned_to) 
-      ? task.assigned_to.map((u: any) => u?.email || "").join(" ")
-      : "";
-    const matchesSearch = task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         assigneeNames.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = filterStatus === "all" || task.status.toLowerCase() === filterStatus;
+
+  const filteredTasks = tasks.filter((task) => {
+    if (!searchQuery && filterStatus === "all") return true;
+
+    // Search matching
+    const searchLower = searchQuery.toLowerCase();
+    let matchesSearch = true;
+
+    if (searchQuery) {
+      const assigneeNames = Array.isArray(task.assigned_to)
+        ? task.assigned_to
+            .map((u: any) => u?.email || u?.username || "")
+            .join(" ")
+        : "";
+
+      const taskName = (task.name || "").toLowerCase();
+      const taskDescription = (task.description || "").toLowerCase();
+      const taskDetails = (task.details || "").toLowerCase();
+      const taskNumber = (task.task_number || "").toLowerCase();
+
+      matchesSearch =
+        taskName.includes(searchLower) ||
+        taskDescription.includes(searchLower) ||
+        taskDetails.includes(searchLower) ||
+        taskNumber.includes(searchLower) ||
+        assigneeNames.toLowerCase().includes(searchLower);
+    }
+
+    // Status filter matching
+    const matchesFilter =
+      filterStatus === "all" || isStatusEqual(task.status, filterStatus);
+
     return matchesSearch && matchesFilter;
   });
-
-  const getStatusColor = (status: string) => {
-    const statusLower = status.toLowerCase();
-    switch (statusLower) {
-      case "completed": 
-      case "done": return "pm-status-done";
-      case "active":
-      case "in_progress": return "pm-status-progress";
-      case "created":
-      case "todo": return "pm-status-todo";
-      default: return "pm-status-backlog";
-    }
-  };
-
-  const getAssigneeNames = (task: Task) => {
-    if (!task.assigned_to || !Array.isArray(task.assigned_to)) return "Unassigned";
-    if (task.assigned_to.length === 0) return "Unassigned";
-    return task.assigned_to.map((u: any) => u?.email?.split('@')[0] || "Unknown").join(", ");
-  };
 
   if (loading) {
     return (
@@ -95,7 +118,9 @@ const ProjectTasksPage = () => {
         <ProjectHeader />
         <div className="px-6 py-8">
           <div className="pm-card p-8 text-center border-red-200 bg-red-50">
-            <p className="text-red-600 font-medium mb-2">Failed to load tasks</p>
+            <p className="text-red-600 font-medium mb-2">
+              Failed to load tasks
+            </p>
             <p className="text-sm text-red-500 mb-4">{error}</p>
             <button
               onClick={fetchTasks}
@@ -110,43 +135,16 @@ const ProjectTasksPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       <ProjectHeader />
-      <div className="px-6 py-8">
+      <div className="px-6 py-8 max-w-full">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900 mb-2">Tasks</h1>
-              <p className="text-gray-600">Manage and track all tasks in this project</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1">
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:text-gray-900"}`}
-                  title="List view"
-                >
-                  <List className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode("board")}
-                  className={`p-2 rounded transition-colors ${viewMode === "board" ? "bg-gray-100 text-gray-900" : "text-gray-500 hover:text-gray-900"}`}
-                  title="Board view"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </button>
-              </div>
-              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                <DialogTrigger asChild>
-                  <button className="pm-button-primary">
-                    <Plus className="h-4 w-4 mr-2" />
-                    New Task
-                  </button>
-                </DialogTrigger>
-                <TaskCreateComponent projectId={projectId} onClose={handleTaskCreated} />
-              </Dialog>
-            </div>
+          <div className="mb-4">
+            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Tasks</h1>
+            <p className="text-gray-600">
+              Manage and track all tasks in this project
+            </p>
           </div>
 
           {/* Filters */}
@@ -158,168 +156,172 @@ const ProjectTasksPage = () => {
                 placeholder="Search tasks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pm-input !pl-10 pr-3 w-full"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all shadow-sm hover:shadow-md"
               />
             </div>
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="pm-input min-w-[140px] flex-shrink-0"
+              className="px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all shadow-sm hover:shadow-md min-w-[160px] flex-shrink-0 cursor-pointer"
             >
               <option value="all">All Status</option>
-              <option value="backlog">Backlog</option>
-              <option value="todo">To Do</option>
-              <option value="in_progress">In Progress</option>
-              <option value="done">Done</option>
+              <option value={TaskStatus.Backlog}>Backlog</option>
+              <option value={TaskStatus.Created}>Created</option>
+              <option value={TaskStatus.Active}>In Progress</option>
+              <option value={TaskStatus.Completed}>Done</option>
             </select>
-            <button className="pm-button-secondary whitespace-nowrap flex-shrink-0">
-              <Filter className="h-4 w-4 mr-2" />
-              More Filters
-            </button>
+            <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1 flex-shrink-0">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === "list"
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+                title="List view"
+              >
+                <List className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("board")}
+                className={`p-2 rounded transition-colors ${
+                  viewMode === "board"
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
+                title="Board view"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          {/* New Task Card */}
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <button className="pm-card p-4 text-left group hover:shadow-md transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-orange-100 group-hover:bg-orange-200 transition-colors">
+                    <Plus className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">
+                      Create New Task
+                    </h3>
+                    <p className="text-xs text-gray-500">New task</p>
+                  </div>
+                </div>
+              </button>
+            </DialogTrigger>
+            <TaskCreateComponent
+              projectId={projectId}
+              onClose={handleTaskCreated}
+            />
+          </Dialog>
           <div className="pm-card p-4">
-            <p className="text-2xl font-semibold text-gray-900">{tasks.length}</p>
+            <p className="text-2xl font-semibold text-gray-900">
+              {tasks.filter((t) => t.status === TaskStatus.Created).length}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Created</p>
+          </div>
+          <div className="pm-card p-4">
+            <p className="text-2xl font-semibold text-gray-900">
+              {tasks.length}
+            </p>
             <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
           </div>
           <div className="pm-card p-4">
-            <p className="text-2xl font-semibold text-gray-900">{tasks.filter(t => t.status === TaskStatus.Completed).length}</p>
+            <p className="text-2xl font-semibold text-gray-900">
+              {tasks.filter((t) => t.status === TaskStatus.Completed).length}
+            </p>
             <p className="text-xs text-gray-500 mt-1">Completed</p>
           </div>
           <div className="pm-card p-4">
-            <p className="text-2xl font-semibold text-gray-900">{tasks.filter(t => t.status === TaskStatus.Active).length}</p>
+            <p className="text-2xl font-semibold text-gray-900">
+              {tasks.filter((t) => t.status === TaskStatus.Active).length}
+            </p>
             <p className="text-xs text-gray-500 mt-1">In Progress</p>
-          </div>
-          <div className="pm-card p-4">
-            <p className="text-2xl font-semibold text-gray-900">{tasks.filter(t => t.status === TaskStatus.Created).length}</p>
-            <p className="text-xs text-gray-500 mt-1">To Do</p>
           </div>
         </div>
 
         {viewMode === "list" ? (
           filteredTasks.length > 0 ? (
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-8">
               {filteredTasks.map((task) => (
-                <Link key={task.taskid} href={`/projects/${projectId}/task/${task.taskid}`}>
-                  <div className="pm-card p-5 hover:shadow-md transition-all cursor-pointer">
-                    <div className="flex items-start gap-4">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className={`pm-status-dot ${getStatusColor(task.status)} flex-shrink-0 mt-1.5`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-2 flex-wrap">
-                            <h3 className="font-medium text-gray-900 text-base">{task.name}</h3>
-                            <span className={`pm-badge ${
-                              task.priority === TaskPriority.High ? "pm-priority-high" :
-                              task.priority === TaskPriority.Normal ? "pm-priority-medium" :
-                              "pm-priority-low"
-                            } flex-shrink-0`}>
-                              <Flag className="h-3 w-3 mr-1" />
-                              {task.priority}
-                            </span>
-                          </div>
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-1">{task.description || task.details}</p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
-                            <span className="flex items-center gap-1.5">
-                              <User className="h-3.5 w-3.5 flex-shrink-0" />
-                              {getAssigneeNames(task)}
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                              <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
-                              {new Date(task.created_at).toLocaleDateString()}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <button 
-                        className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
-                        title="More options"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                      >
-                        <MoreVertical className="h-4 w-4 text-gray-500" />
-                      </button>
-                    </div>
-                  </div>
-                </Link>
+                <TaskCard key={task.taskid} task={task} projectId={projectId} />
               ))}
             </div>
           ) : (
-            <div className="pm-card p-16 text-center">
-              <div className="max-w-sm mx-auto">
-                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                  <Search className="h-8 w-8 text-gray-400" />
+            (searchQuery || filterStatus !== "all") && (
+              <div className="pm-card p-16 text-center">
+                <div className="max-w-sm mx-auto">
+                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                    <Search className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    No tasks found
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Try adjusting your filters
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No tasks found</h3>
-                <p className="text-sm text-gray-500 mb-6">
-                  {searchQuery || filterStatus !== "all" 
-                    ? "Try adjusting your filters" 
-                    : "Get started by creating your first task"}
-                </p>
-                {!searchQuery && filterStatus === "all" && (
-                  <button className="pm-button-primary">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Task
-                  </button>
-                )}
               </div>
-            </div>
+            )
           )
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              { key: TaskStatus.Backlog, label: "Backlog" },
-              { key: TaskStatus.Created, label: "To Do" },
-              { key: TaskStatus.Active, label: "In Progress" },
-              { key: TaskStatus.Completed, label: "Done" }
-            ].map(({ key, label }) => {
-              const statusTasks = filteredTasks.filter(t => t.status === key);
-              return (
-                <div key={key} className="flex flex-col">
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`pm-status-dot ${
-                          key === TaskStatus.Completed ? "pm-status-done" :
-                          key === TaskStatus.Active ? "pm-status-progress" :
-                          key === TaskStatus.Created ? "pm-status-todo" :
-                          "pm-status-backlog"
-                        }`} />
-                        <h3 className="font-semibold text-gray-900 text-sm">{label}</h3>
-                      </div>
-                      <span className="pm-badge">{statusTasks.length}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-3 flex-1 min-h-[200px]">
-                    {statusTasks.map((task) => (
-                      <Link key={task.taskid} href={`/projects/${projectId}/task/${task.taskid}`}>
-                        <div className="pm-card p-4 cursor-pointer hover:shadow-md transition-all">
-                          <h4 className="font-medium text-gray-900 text-sm mb-2 line-clamp-2">{task.name}</h4>
-                          <div className="flex items-center justify-between text-xs text-gray-500 mt-3">
-                            <span className="truncate flex-1 min-w-0">{getAssigneeNames(task)}</span>
-                            <span className={`pm-badge ml-2 flex-shrink-0 ${
-                              task.priority === TaskPriority.High ? "pm-priority-high" :
-                              task.priority === TaskPriority.Normal ? "pm-priority-medium" :
-                              "pm-priority-low"
-                            }`}>
-                              {task.priority}
-                            </span>
+          <div className="w-full overflow-x-auto">
+            <div className="flex gap-6 pb-4 min-w-max">
+              {[
+                { key: TaskStatus.Backlog, label: "Backlog" },
+                { key: TaskStatus.Created, label: "Created" },
+                { key: TaskStatus.Active, label: "In Progress" },
+                { key: TaskStatus.Completed, label: "Done" },
+              ].map(({ key, label }, index) => {
+                const statusTasks = filteredTasks.filter(
+                  (t) => t.status === key
+                );
+                return (
+                  <React.Fragment key={key}>
+                    <div className="flex flex-col min-w-[240px] max-w-[260px]">
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`pm-status-dot ${getStatusDotClass(
+                                key
+                              )}`}
+                            />
+                            <h3 className="font-semibold text-gray-900 text-sm">
+                              {label}
+                            </h3>
                           </div>
+                          <span className="pm-badge">{statusTasks.length}</span>
                         </div>
-                      </Link>
-                    ))}
-                    <button className="pm-card p-3 text-center text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-all border-dashed">
-                      <Plus className="h-4 w-4 mx-auto mb-1" />
-                      Add task
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                      </div>
+                      <div className="flex flex-col gap-8 flex-1 min-h-[200px]">
+                        {statusTasks.map((task) => (
+                          <TaskCard
+                            key={task.taskid}
+                            task={task}
+                            projectId={projectId}
+                            compact={true}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    {index < 3 && (
+                      <Separator
+                        orientation="vertical"
+                        className="h-auto bg-gray-200 flex-shrink-0"
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
@@ -328,5 +330,3 @@ const ProjectTasksPage = () => {
 };
 
 export default ProjectTasksPage;
-
-

@@ -1,16 +1,16 @@
 "use client";
 import { useParams, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { 
-  LayoutDashboard, 
-  FileText, 
-  CheckSquare, 
-  Users, 
+import {
+  LayoutDashboard,
+  FileText,
+  CheckSquare,
+  Users,
   Settings,
   BarChart3,
   Sparkles,
   Calendar,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
@@ -21,7 +21,9 @@ interface ProjectHeaderProps {
   showActions?: boolean;
 }
 
-export default function ProjectHeader({ showActions = true }: ProjectHeaderProps) {
+export default function ProjectHeader({
+  showActions = true,
+}: ProjectHeaderProps) {
   const params = useParams();
   const pathname = usePathname();
   const projectId = params.projectId as string;
@@ -47,17 +49,41 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
   }, [projectId]);
 
   const navItems = [
-    { icon: LayoutDashboard, label: "Overview", href: `/projects/${projectId}` },
+    {
+      icon: LayoutDashboard,
+      label: "Overview",
+      href: `/projects/${projectId}`,
+    },
+    {
+      icon: Calendar,
+      label: "Timeline",
+      href: `/projects/${projectId}/timeline`,
+    },
     { icon: Sparkles, label: "Board", href: `/projects/${projectId}/board` },
     { icon: CheckSquare, label: "Tasks", href: `/projects/${projectId}/tasks` },
-    { icon: Calendar, label: "Timeline", href: `/projects/${projectId}/timeline` },
     { icon: Users, label: "Team", href: `/projects/${projectId}/team` },
-    { icon: FileText, label: "Documents", href: `/projects/${projectId}/documents` },
-    { icon: BarChart3, label: "Analytics", href: `/projects/${projectId}/analytics` },
-    { icon: Settings, label: "Settings", href: `/projects/${projectId}/settings` },
-  ].map(item => ({
+
+    {
+      icon: FileText,
+      label: "Documents",
+      href: `/projects/${projectId}/documents`,
+    },
+    {
+      icon: BarChart3,
+      label: "Analytics",
+      href: `/projects/${projectId}/analytics`,
+    },
+    {
+      icon: Settings,
+      label: "Settings",
+      href: `/projects/${projectId}/settings`,
+    },
+  ].map((item) => ({
     ...item,
-    active: pathname === item.href || (item.href === `/projects/${projectId}` && pathname === `/projects/${projectId}`)
+    active:
+      pathname === item.href ||
+      (item.href === `/projects/${projectId}` &&
+        pathname === `/projects/${projectId}`),
   }));
 
   if (loading) {
@@ -88,8 +114,12 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
             <FileText className="h-6 w-6 text-orange-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.name}</h1>
-            <p className="text-gray-600 leading-relaxed">{project.description}</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {project.name}
+            </h1>
+            <p className="text-gray-600 leading-relaxed">
+              {project.description}
+            </p>
           </div>
         </div>
 
@@ -119,4 +149,3 @@ export default function ProjectHeader({ showActions = true }: ProjectHeaderProps
     </div>
   );
 }
-

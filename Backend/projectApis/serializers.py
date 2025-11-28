@@ -99,9 +99,18 @@ class CommentSerializer(serializers.ModelSerializer):
 
 # Task Serializer
 class TaskSerializer(serializers.ModelSerializer):
-    comments = CommentSerializer(many=True, read_only=True)
+    comments = serializers.SerializerMethodField()
     related_work = serializers.SerializerMethodField()
     assigned_to = serializers.SerializerMethodField()
+    assigned_to_ids = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), many=True, required=False, write_only=True, source='assigned_to'
+    )
+    
+    def to_internal_value(self, data):
+        # Map 'assigned_to' to 'assigned_to_ids' for writing
+        if 'assigned_to' in data and 'assigned_to_ids' not in data:
+            data['assigned_to_ids'] = data.pop('assigned_to')
+        return super().to_internal_value(data)
     related_work_ids = serializers.SerializerMethodField()
 
     class Meta:
@@ -115,6 +124,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "priority",
             "size",
             "assigned_to",
+            "assigned_to_ids",
             "comments",
             "related_work",
             "related_work_ids",
@@ -125,7 +135,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["taskid", "task_number", "created_at", "updated_at"]
+        read_only_fields = ["taskid", "task_number", "created_at", "updated_at", "assigned_to"]
 
     def get_related_work(self, obj):
         """Return related work tasks with basic info"""
@@ -155,6 +165,29 @@ class TaskSerializer(serializers.ModelSerializer):
             }
             for user in assigned_users
         ]
+    
+    def get_comments(self, obj):
+        """Return comments for the task"""
+        comments = obj.task_comments.all()
+        return CommentSerializer(comments, many=True).data
+    
+    def create(self, validated_data):
+        """Override create to handle many-to-many relationships"""
+        assigned_to = validated_data.pop('assigned_to', [])
+        task = Task.objects.create(**validated_data)
+        if assigned_to:
+            task.assigned_to.set(assigned_to)
+        return task
+    
+    def update(self, instance, validated_data):
+        """Override update to handle many-to-many relationships"""
+        assigned_to = validated_data.pop('assigned_to', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if assigned_to is not None:
+            instance.assigned_to.set(assigned_to)
+        return instance
 
 
 class UpdateTaskSerializer(serializers.ModelSerializer):

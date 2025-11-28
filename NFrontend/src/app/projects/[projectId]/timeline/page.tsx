@@ -1,11 +1,13 @@
 "use client";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
-import { Calendar, Clock, Loader2, Plus, PlayCircle, CheckCircle2, ListTodo, TrendingUp, Edit } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, Loader2, Plus, PlayCircle, CheckCircle2, ListTodo, TrendingUp, Edit } from "lucide-react";
 import Link from "next/link";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import { Separator } from "@/components/ui/separator";
+import { Calendar } from "@/components/ui/calendar";
 import SprintCreateEditDialog from "@/components/projects/SprintCreateEditDialog";
+import SprintCalendar from "@/components/projects/SprintCalendar";
 import sprintService from "@/services/sprintService";
 import { Sprint, SprintStatus } from "@/types/project";
 import toast from "react-hot-toast";
@@ -20,6 +22,9 @@ const TimelinePage = () => {
   const [timeScale, setTimeScale] = useState<"days" | "weeks" | "months">("weeks");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingSprint, setEditingSprint] = useState<Sprint | null>(null);
+  const [viewMode, setViewMode] = useState<"calendar" | "timeline">("calendar");
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
 
   useEffect(() => {
     fetchSprints();
@@ -108,7 +113,7 @@ const TimelinePage = () => {
       case SprintStatus.Planning:
         return <ListTodo className="h-4 w-4" />;
       default:
-        return <Calendar className="h-4 w-4" />;
+        return <CalendarIcon className="h-4 w-4" />;
     }
   };
 
@@ -177,6 +182,34 @@ const TimelinePage = () => {
     router.push(`/projects/${projectId}/board?sprint=${sprintId}`);
   };
 
+  // Get sprints for a specific date
+  const getSprintsForDate = (date: Date) => {
+    return sprints.filter(sprint => {
+      const start = new Date(sprint.start_date);
+      const end = new Date(sprint.end_date);
+      const checkDate = new Date(date);
+      checkDate.setHours(0, 0, 0, 0);
+      start.setHours(0, 0, 0, 0);
+      end.setHours(0, 0, 0, 0);
+      return checkDate >= start && checkDate <= end;
+    });
+  };
+
+  // Get all dates that have sprints for calendar highlighting
+  const sprintDates = useMemo(() => {
+    const dates = new Set<string>();
+    sprints.forEach(sprint => {
+      const start = new Date(sprint.start_date);
+      const end = new Date(sprint.end_date);
+      const current = new Date(start);
+      while (current <= end) {
+        dates.add(current.toISOString().split('T')[0]);
+        current.setDate(current.getDate() + 1);
+      }
+    });
+    return dates;
+  }, [sprints]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -215,22 +248,9 @@ const TimelinePage = () => {
       <div className="px-6 py-8">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-semibold text-gray-900 mb-2">Timeline</h1>
-              <p className="text-gray-600">View sprint cycles and navigate to sprint boards</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <select
-                value={timeScale}
-                onChange={(e) => setTimeScale(e.target.value as "days" | "weeks" | "months")}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              >
-                <option value="days">Days</option>
-                <option value="weeks">Weeks</option>
-                <option value="months">Months</option>
-              </select>
-            </div>
+          <div className="mb-4">
+            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Timeline</h1>
+            <p className="text-gray-600">View sprint cycles and navigate to sprint boards</p>
           </div>
         </div>
 
@@ -255,7 +275,7 @@ const TimelinePage = () => {
           <div className="pm-card p-5">
             <div className="flex items-center justify-between mb-3">
               <div className="p-2 rounded-lg bg-gray-100">
-                <Calendar className="h-5 w-5 text-gray-700" />
+                <CalendarIcon className="h-5 w-5 text-gray-700" />
               </div>
             </div>
             <p className="text-2xl font-semibold text-gray-900">{sprints.length}</p>
@@ -281,11 +301,100 @@ const TimelinePage = () => {
           </div>
         </div>
 
-        {/* Sprint Timeline */}
+        {/* Sprint Calendar/Timeline View */}
         {sprints.length > 0 ? (
-          <div className="pm-card p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Sprint Timeline</h2>
-            <Separator className="mb-6" />
+          <>
+            {viewMode === "calendar" ? (
+              <div className="space-y-6 mb-6">
+                {/* Sprint Calendar with Integrated Bars */}
+                <div className="pm-card p-6 overflow-hidden">
+                  {/* View Toggle */}
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-gray-700">View Mode:</span>
+                      <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1">
+                        <button
+                          onClick={() => setViewMode("calendar")}
+                          className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                            viewMode === "calendar"
+                              ? "bg-orange-600 text-white"
+                              : "text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          Calendar
+                        </button>
+                        <button
+                          onClick={() => setViewMode("timeline")}
+                          className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                            viewMode === "timeline"
+                              ? "bg-orange-600 text-white"
+                              : "text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          Timeline
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto -mx-6 px-6">
+                    <SprintCalendar
+                      sprints={sprints}
+                      currentMonth={currentMonth}
+                      onMonthChange={setCurrentMonth}
+                      onSprintClick={handleSprintClick}
+                      getStatusColor={getStatusColor}
+                      getStatusIcon={getStatusIcon}
+                      getEffectiveStatus={getEffectiveStatus}
+                      formatDate={formatDate}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="pm-card p-6 mb-6">
+                {/* View Toggle */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-700">View Mode:</span>
+                    <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg p-1">
+                      <button
+                        onClick={() => setViewMode("calendar")}
+                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                          viewMode === "calendar"
+                            ? "bg-orange-600 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        Calendar
+                      </button>
+                      <button
+                        onClick={() => setViewMode("timeline")}
+                        className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                          viewMode === "timeline"
+                            ? "bg-orange-600 text-white"
+                            : "text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        Timeline
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-700">Time Scale:</span>
+                    <select
+                      value={timeScale}
+                      onChange={(e) => setTimeScale(e.target.value as "days" | "weeks" | "months")}
+                      className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="days">Days</option>
+                      <option value="weeks">Weeks</option>
+                      <option value="months">Months</option>
+                    </select>
+                  </div>
+                </div>
+                <Separator className="mb-6" />
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Sprint Timeline</h2>
+                <Separator className="mb-6" />
             
             {/* Timeline Header with Date Labels */}
             <div className="relative mb-6 overflow-x-auto">
@@ -427,10 +536,12 @@ const TimelinePage = () => {
                 );
               })}
             </div>
-          </div>
+              </div>
+            )}
+          </>
         ) : (
           <div className="pm-card p-12 text-center">
-            <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+            <CalendarIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 font-medium mb-2">No sprints yet</p>
             <p className="text-sm text-gray-500 mb-6">Create your first sprint to start planning</p>
             <button
@@ -485,7 +596,7 @@ const TimelinePage = () => {
                       )}
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <span className="flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5" />
+                          <CalendarIcon className="h-3.5 w-3.5" />
                           {formatDate(sprint.start_date)} - {formatDate(sprint.end_date)}
                         </span>
                         <span className="flex items-center gap-1.5">
@@ -516,7 +627,7 @@ const TimelinePage = () => {
           </div>
           ) : (
             <div className="text-center py-12">
-              <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <CalendarIcon className="h-12 w-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-600 font-medium mb-2">No sprints yet</p>
               <p className="text-sm text-gray-500 mb-6">Create sprints to see them on the timeline</p>
               <button

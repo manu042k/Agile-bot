@@ -354,7 +354,7 @@ class TaskDetailView(APIView):
 
     def get(self, request, pk):
         try:
-            task = Task.objects.get(pk=pk)
+            task = Task.objects.prefetch_related('assigned_to', 'related_work', 'task_comments__user').get(pk=pk)
         except Task.DoesNotExist:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
 

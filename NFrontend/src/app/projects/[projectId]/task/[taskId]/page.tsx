@@ -1,71 +1,158 @@
 "use client";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Edit, MoreVertical, User, Calendar, Flag, Tag, MessageSquare, Clock, CheckCircle2, FileText, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Edit, MoreVertical, User, Calendar, Flag, Clock, CheckCircle2, Link as LinkIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-
-// Mock task data
-const getMockTask = (projectId: string, taskId: string) => ({
-  id: taskId,
-  title: "Implement user authentication",
-  description: "Set up JWT authentication with refresh tokens. Include login, register, and password reset functionality.",
-  details: "This task involves:\n1. Setting up JWT token generation and validation\n2. Creating authentication middleware\n3. Implementing refresh token rotation\n4. Adding password hashing with bcrypt\n5. Creating login and registration endpoints\n6. Setting up password reset flow",
-  status: "in_progress",
-  priority: "high",
-  size: "medium",
-  assignees: [
-    { id: 1, name: "John Doe", email: "john@example.com", avatar: null },
-    { id: 2, name: "Jane Smith", email: "jane@example.com", avatar: null },
-  ],
-  dueDate: "2024-02-15",
-  createdBy: "AI",
-  createdAt: "2024-01-20",
-  updatedAt: "2024-02-10",
-  tags: ["Backend", "Security", "Authentication"],
-  relatedTasks: [
-    { id: 2, title: "Design authentication UI", status: "done" },
-    { id: 3, title: "Write API documentation", status: "todo" },
-  ],
-  subtasks: [
-    { id: 1, title: "Set up JWT token generation", completed: true },
-    { id: 2, title: "Create authentication middleware", completed: true },
-    { id: 3, title: "Implement refresh token rotation", completed: false },
-    { id: 4, title: "Add password hashing with bcrypt", completed: false },
-    { id: 5, title: "Create login endpoint", completed: false },
-    { id: 6, title: "Create registration endpoint", completed: false },
-  ],
-  comments: [
-    { id: 1, user: "John Doe", content: "Started working on JWT implementation", timestamp: "2 hours ago" },
-    { id: 2, user: "Jane Smith", content: "Make sure to include refresh token rotation", timestamp: "1 hour ago" },
-  ],
-  attachments: [
-    { id: 1, name: "auth_design.pdf", size: "2.4 MB", type: "pdf" },
-  ],
-});
+import taskService from "@/services/taskService";
+import projectService from "@/services/projectService";
+import { Task, TaskStatus, TaskPriority, TaskSize, Project } from "@/types/project";
+import { getStatusLabel, getStatusDotClass } from "@/lib/statusUtils";
+import toast from "react-hot-toast";
 
 const TaskDetailPage = () => {
   const params = useParams();
   const router = useRouter();
   const projectId = params.projectId as string;
   const taskId = params.taskId as string;
-  const task = getMockTask(projectId, taskId);
+  
+  const [task, setTask] = useState<Task | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [commentText, setCommentText] = useState("");
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "done": return "pm-status-done";
-      case "in_progress": return "pm-status-progress";
-      case "todo": return "pm-status-todo";
-      default: return "pm-status-backlog";
+  useEffect(() => {
+    fetchTaskData();
+  }, [projectId, taskId]);
+
+  const fetchTaskData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const [taskData, projectData] = await Promise.all([
+        taskService.getTask(taskId),
+        projectService.getProject(projectId),
+      ]);
+      setTask(taskData);
+      setProject(projectData);
+    } catch (err: any) {
+      console.error("Error fetching task:", err);
+      setError(err.message || "Failed to load task");
+      toast.error("Failed to load task");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high": return "pm-priority-high";
-      case "medium": return "pm-priority-medium";
-      default: return "pm-priority-low";
+  const handleStatusChange = async (newStatus: string) => {
+    if (!task) return;
+    try {
+      await taskService.updateTaskStatus(task.taskid, newStatus as TaskStatus);
+      await fetchTaskData();
+      toast.success("Status updated successfully");
+    } catch (err: any) {
+      toast.error("Failed to update status");
     }
+  };
+
+  const handlePriorityChange = async (newPriority: string) => {
+    if (!task) return;
+    try {
+      await taskService.updateTask(task.taskid, { priority: newPriority as TaskPriority });
+      await fetchTaskData();
+      toast.success("Priority updated successfully");
+    } catch (err: any) {
+      toast.error("Failed to update priority");
+    }
+  };
+
+  const handleSizeChange = async (newSize: string) => {
+    if (!task) return;
+    try {
+      await taskService.updateTask(task.taskid, { size: newSize as TaskSize });
+      await fetchTaskData();
+      toast.success("Size updated successfully");
+    } catch (err: any) {
+      toast.error("Failed to update size");
+    }
+  };
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!commentText.trim() || !task) return;
+    
+    try {
+      await taskService.createComment(task.taskid, commentText);
+      setCommentText("");
+      await fetchTaskData();
+      toast.success("Comment added successfully");
+    } catch (err: any) {
+      toast.error("Failed to add comment");
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        month: "2-digit",
+        day: "2-digit",
+        year: "numeric",
+      });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  const formatDateTime = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">Loading task...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !task) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="pm-card p-8 text-center border-red-200 bg-red-50">
+          <p className="text-red-600 font-medium mb-2">Failed to load task</p>
+          <p className="text-sm text-red-500 mb-4">{error || "Task not found"}</p>
+          <Link
+            href={`/projects/${projectId}/tasks`}
+            className="pm-button-primary inline-block"
+          >
+            Back to Tasks
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+
+  const getPriorityLabel = (priority: string) => {
+    return priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
   };
 
   return (
@@ -77,11 +164,11 @@ const TaskDetailPage = () => {
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Link href="/projects" className="hover:text-gray-900">Projects</Link>
             <span>/</span>
-            <Link href={`/projects/${projectId}`} className="hover:text-gray-900">E-Commerce Platform</Link>
+            <Link href={`/projects/${projectId}`} className="hover:text-gray-900">{project?.name || "Project"}</Link>
             <span>/</span>
             <Link href={`/projects/${projectId}/tasks`} className="hover:text-gray-900">Tasks</Link>
             <span>/</span>
-            <span className="text-gray-900 font-medium">{task.title}</span>
+            <span className="text-gray-900 font-medium">{task.name}</span>
           </div>
         </div>
         {/* Header Content */}
@@ -96,9 +183,9 @@ const TaskDetailPage = () => {
                 <ArrowLeft className="h-5 w-5 text-gray-600" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">{task.title}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{task.name}</h1>
                 <p className="text-sm text-gray-500 mt-1">
-                  Task #{task.id} in <Link href={`/projects/${projectId}`} className="hover:text-gray-900 font-medium">E-Commerce Platform</Link>
+                  Task #{task.task_number} in <Link href={`/projects/${projectId}`} className="hover:text-gray-900 font-medium">{project?.name || "Project"}</Link>
                 </p>
               </div>
             </div>
@@ -125,11 +212,13 @@ const TaskDetailPage = () => {
               <div className="pm-card p-6">
                 <h2 className="text-lg font-semibold text-gray-900">Description</h2>
                 <Separator className="my-4" />
-                <p className="text-gray-700 leading-relaxed mb-4">{task.description}</p>
-                <div className="pt-4 border-t border-gray-100">
-                  <h3 className="font-medium text-gray-900 mb-2">Details</h3>
-                  <pre className="text-sm text-gray-600 whitespace-pre-wrap font-sans">{task.details}</pre>
-                </div>
+                <p className="text-gray-700 leading-relaxed mb-4">{task.description || "No description provided"}</p>
+                {task.details && (
+                  <div className="pt-4 border-t border-gray-100">
+                    <h3 className="font-medium text-gray-900 mb-2">Details</h3>
+                    <pre className="text-sm text-gray-600 whitespace-pre-wrap font-sans">{task.details}</pre>
+                  </div>
+                )}
               </div>
 
               {/* Comments */}
@@ -137,24 +226,32 @@ const TaskDetailPage = () => {
                 <h2 className="text-lg font-semibold text-gray-900">Comments</h2>
                 <Separator className="my-4" />
                 <div className="space-y-4 mb-4">
-                  {task.comments.map((comment) => (
-                    <div key={comment.id} className="flex items-start gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gray-900 text-white text-xs">
-                          {comment.user.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-gray-900 text-sm">{comment.user}</span>
-                          <span className="text-xs text-gray-500">{comment.timestamp}</span>
+                  {task.comments && task.comments.length > 0 ? (
+                    task.comments.map((comment: any) => (
+                      <div key={comment.id} className="flex items-start gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-gray-900 text-white text-xs">
+                            {comment.user?.email?.charAt(0).toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-gray-900 text-sm">
+                              {comment.user?.email?.split("@")[0] || "Unknown User"}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatDateTime(comment.created_at)}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-700">{comment.content}</p>
                         </div>
-                        <p className="text-sm text-gray-700">{comment.content}</p>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">No comments yet</p>
+                  )}
                 </div>
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                <form onSubmit={handleAddComment} className="flex items-center gap-3 pt-4 border-t border-gray-100">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-gray-900 text-white text-xs">U</AvatarFallback>
                   </Avatar>
@@ -162,66 +259,15 @@ const TaskDetailPage = () => {
                     type="text"
                     placeholder="Add a comment..."
                     className="flex-1 pm-input"
+                    value={commentText}
+                    onChange={(e) => setCommentText(e.target.value)}
                   />
-                  <button className="pm-button-primary text-sm px-4">
+                  <button type="submit" className="pm-button-primary text-sm px-4">
                     Comment
                   </button>
-                </div>
+                </form>
               </div>
 
-              {/* Subtasks */}
-              <div className="pm-card p-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Subtasks</h2>
-                  <button className="text-sm text-gray-600 hover:text-gray-900">+ Add subtask</button>
-                </div>
-                <Separator className="my-4" />
-                <div className="space-y-2">
-                  {task.subtasks.map((subtask) => (
-                    <div
-                      key={subtask.id}
-                      className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={subtask.completed}
-                        className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-                      />
-                      <span
-                        className={`flex-1 text-sm ${
-                          subtask.completed
-                            ? "text-gray-500 line-through"
-                            : "text-gray-900"
-                        }`}
-                      >
-                        {subtask.title}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Attachments */}
-              {task.attachments.length > 0 && (
-                <div className="pm-card p-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Attachments</h2>
-                  <Separator className="my-4" />
-                  <div className="space-y-2">
-                    {task.attachments.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-5 w-5 text-gray-600" />
-                          <div>
-                            <p className="font-medium text-gray-900 text-sm">{file.name}</p>
-                            <p className="text-xs text-gray-500">{file.size}</p>
-                          </div>
-                        </div>
-                        <button className="text-sm text-gray-600 hover:text-gray-900">Download</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Right Panel - Sidebar */}
@@ -232,28 +278,40 @@ const TaskDetailPage = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs text-gray-500 mb-2">Status</label>
-                    <select className="pm-input w-full" defaultValue={task.status}>
-                      <option value="backlog">Backlog</option>
-                      <option value="todo">To Do</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="done">Done</option>
+                    <select 
+                      className="pm-input w-full" 
+                      value={task.status}
+                      onChange={(e) => handleStatusChange(e.target.value)}
+                    >
+                      <option value={TaskStatus.Backlog}>Backlog</option>
+                      <option value={TaskStatus.Created}>Created</option>
+                      <option value={TaskStatus.Active}>In Progress</option>
+                      <option value={TaskStatus.Completed}>Done</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-2">Priority</label>
-                    <select className="pm-input w-full" defaultValue={task.priority}>
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
+                    <select 
+                      className="pm-input w-full" 
+                      value={task.priority}
+                      onChange={(e) => handlePriorityChange(e.target.value)}
+                    >
+                      <option value={TaskPriority.Low}>Low</option>
+                      <option value={TaskPriority.Normal}>Normal</option>
+                      <option value={TaskPriority.High}>High</option>
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-2">Size</label>
-                    <select className="pm-input w-full" defaultValue={task.size}>
-                      <option value="s">Small</option>
-                      <option value="m">Medium</option>
-                      <option value="l">Large</option>
-                      <option value="xl">Extra Large</option>
+                    <select 
+                      className="pm-input w-full" 
+                      value={task.size}
+                      onChange={(e) => handleSizeChange(e.target.value)}
+                    >
+                      <option value={TaskSize.Small}>Small</option>
+                      <option value={TaskSize.Medium}>Medium</option>
+                      <option value={TaskSize.Large}>Large</option>
+                      <option value={TaskSize.ExtraLarge}>Extra Large</option>
                     </select>
                   </div>
                 </div>
@@ -263,69 +321,51 @@ const TaskDetailPage = () => {
               <div className="pm-card p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-gray-900">Assignees</h3>
-                  <button className="text-xs text-gray-600 hover:text-gray-900">Add</button>
                 </div>
                 <div className="space-y-3">
-                  {task.assignees.map((assignee) => (
-                    <div key={assignee.id} className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gray-900 text-white text-xs">
-                          {assignee.name.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{assignee.name}</p>
-                        <p className="text-xs text-gray-500 truncate">{assignee.email}</p>
+                  {task.assigned_to && Array.isArray(task.assigned_to) && task.assigned_to.length > 0 ? (
+                    task.assigned_to.map((assignee: any) => (
+                      <div key={assignee.id || assignee} className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-gray-900 text-white text-xs">
+                            {typeof assignee === 'object' 
+                              ? (assignee.email?.charAt(0).toUpperCase() || "U")
+                              : "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {typeof assignee === 'object' 
+                              ? (assignee.email?.split("@")[0] || assignee.username || "Unknown")
+                              : "Unknown"}
+                          </p>
+                          <p className="text-xs text-gray-500 truncate">
+                            {typeof assignee === 'object' ? assignee.email : ""}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Due Date */}
-              <div className="pm-card p-5">
-                <h3 className="font-semibold text-gray-900 mb-4">Due Date</h3>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-gray-600" />
-                  <input
-                    type="date"
-                    defaultValue={task.dueDate}
-                    className="pm-input flex-1"
-                  />
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div className="pm-card p-5">
-                <h3 className="font-semibold text-gray-900 mb-4">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {task.tags.map((tag, idx) => (
-                    <span key={idx} className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-600 border border-gray-200 flex items-center gap-1">
-                      <Tag className="h-3 w-3" />
-                      {tag}
-                    </span>
-                  ))}
-                  <button className="px-2 py-1 rounded text-xs border border-dashed border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600">
-                    + Add tag
-                  </button>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-2">Unassigned</p>
+                  )}
                 </div>
               </div>
 
               {/* Related Tasks */}
-              {task.relatedTasks.length > 0 && (
+              {task.related_work && task.related_work.length > 0 && (
                 <div className="pm-card p-5">
                   <h3 className="font-semibold text-gray-900 mb-4">Related Tasks</h3>
                   <div className="space-y-2">
-                    {task.relatedTasks.map((relatedTask) => (
+                    {task.related_work.map((relatedTask: any) => (
                       <Link
-                        key={relatedTask.id}
-                        href={`/projects/${projectId}/task/${relatedTask.id}`}
+                        key={relatedTask.taskid}
+                        href={`/projects/${projectId}/task/${relatedTask.taskid}`}
                         className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
                       >
                         <LinkIcon className="h-4 w-4 text-gray-400" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 truncate">{relatedTask.title}</p>
-                          <p className="text-xs text-gray-500">{relatedTask.status}</p>
+                          <p className="text-sm font-medium text-gray-900 truncate">{relatedTask.name}</p>
+                          <p className="text-xs text-gray-500">{getStatusLabel(relatedTask.status)}</p>
                         </div>
                       </Link>
                     ))}
@@ -340,15 +380,15 @@ const TaskDetailPage = () => {
                   <div className="flex items-start gap-2">
                     <Clock className="h-4 w-4 text-gray-400 mt-0.5" />
                     <div>
-                      <p className="text-gray-900">Created by {task.createdBy}</p>
-                      <p className="text-xs text-gray-500">{task.createdAt}</p>
+                      <p className="text-gray-900">Created by {task.created_by === "ai" ? "AI" : "User"}</p>
+                      <p className="text-xs text-gray-500">{formatDateTime(task.created_at)}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-gray-400 mt-0.5" />
                     <div>
                       <p className="text-gray-900">Last updated</p>
-                      <p className="text-xs text-gray-500">{task.updatedAt}</p>
+                      <p className="text-xs text-gray-500">{formatDateTime(task.updated_at)}</p>
                     </div>
                   </div>
                 </div>
