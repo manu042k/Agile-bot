@@ -5,60 +5,10 @@ import { Plug, CheckCircle, X, ExternalLink, Settings } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
+import EmptyState from "@/components/common/EmptyState";
 
-// Mock integrations data
-const mockIntegrations = [
-  {
-    id: 1,
-    name: "Slack",
-    description: "Get notifications in your Slack channels",
-    icon: "💬",
-    category: "Communication",
-    connected: true,
-    connectedAt: "2024-01-15",
-  },
-  {
-    id: 2,
-    name: "GitHub",
-    description: "Link commits and pull requests to tasks",
-    icon: "🔗",
-    category: "Development",
-    connected: false,
-  },
-  {
-    id: 3,
-    name: "Jira",
-    description: "Sync tasks and projects with Jira",
-    icon: "📋",
-    category: "Project Management",
-    connected: false,
-  },
-  {
-    id: 4,
-    name: "Google Drive",
-    description: "Import documents from Google Drive",
-    icon: "📁",
-    category: "Storage",
-    connected: true,
-    connectedAt: "2024-02-01",
-  },
-  {
-    id: 5,
-    name: "Microsoft Teams",
-    description: "Send updates to Microsoft Teams",
-    icon: "👥",
-    category: "Communication",
-    connected: false,
-  },
-  {
-    id: 6,
-    name: "Zapier",
-    description: "Connect with 5000+ apps via Zapier",
-    icon: "⚡",
-    category: "Automation",
-    connected: false,
-  },
-];
+// Integrations will be fetched from API
+const mockIntegrations: any[] = [];
 
 const categories = ["All", "Communication", "Development", "Project Management", "Storage", "Automation"];
 
@@ -66,7 +16,7 @@ export default function IntegrationsPage() {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") || "all";
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [integrations, setIntegrations] = useState(mockIntegrations);
+  const [integrations, setIntegrations] = useState<any[]>([]);
 
   const filteredIntegrations =
     selectedCategory === "All"
@@ -135,8 +85,9 @@ export default function IntegrationsPage() {
                 {selectedCategory === "All" ? "Integrations" : selectedCategory}
               </h2>
               <Separator className="my-4" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredIntegrations.map((integration) => (
+              {filteredIntegrations.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredIntegrations.map((integration) => (
                   <div
                     key={integration.id}
                     className="p-5 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-md transition-all"
@@ -191,6 +142,13 @@ export default function IntegrationsPage() {
                   </div>
                 ))}
               </div>
+              ) : (
+                <EmptyState
+                  icon={Plug}
+                  title="No integrations available"
+                  description="Integrations will be available soon to connect your favorite tools"
+                />
+              )}
             </div>
               </>
             )}

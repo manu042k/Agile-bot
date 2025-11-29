@@ -6,6 +6,7 @@ import PageHeader from "@/components/common/PageHeader";
 import { Separator } from "@/components/ui/separator";
 import StatCard from "@/components/common/StatCard";
 import DetailsCard from "@/components/common/DetailsCard";
+import EmptyState from "@/components/common/EmptyState";
 import useActivities from "@/hooks/useActivities";
 import { useUser } from "@/hooks/useUser";
 import { Activity as ActivityType } from "@/types/activity";
@@ -225,13 +226,15 @@ const ActivityPage = () => {
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                    <Search className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No activities found</h3>
-                  <p className="text-sm text-gray-500">Try adjusting your filters or perform some actions to generate activities</p>
-                </div>
+                <EmptyState
+                  icon={searchQuery || filterType !== "all" ? Search : Activity}
+                  title="No activities found"
+                  description={
+                    searchQuery || filterType !== "all"
+                      ? "Try adjusting your filters or search query"
+                      : "Perform some actions to generate activities"
+                  }
+                />
               )}
             </div>
           </div>

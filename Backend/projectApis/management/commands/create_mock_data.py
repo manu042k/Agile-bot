@@ -1,8 +1,9 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from users.models import Team, TeamMembership
-from projectApis.models import Project, Task, Comment, Activity
+from projectApis.models import Project, Task, Comment, Activity, Sprint
 from datetime import datetime, timedelta
+from django.utils import timezone
 import random
 
 User = get_user_model()
@@ -17,10 +18,10 @@ class Command(BaseCommand):
         users = []
         user_emails = [
             'manu042kpaperwork@gmail.com',
+            'manu04kus@gmail.com',
             'jane.smith@example.com',
             'mike.johnson@example.com',
             'sarah.wilson@example.com',
-            'alex.brown@example.com',
         ]
 
         for email in user_emails:
@@ -103,6 +104,50 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f'Created project: {proj_data["name"]}'))
             projects.append(project)
 
+        # Create sprints for each project
+        sprints_created = 0
+        all_sprints = []
+        for project in projects:
+            # Create 2-3 sprints per project
+            num_sprints = random.randint(2, 3)
+            for i in range(num_sprints):
+                start_date = timezone.now() - timedelta(days=random.randint(0, 30))
+                duration_days = random.choice([7, 14, 21])  # 1, 2, or 3 weeks
+                end_date = start_date + timedelta(days=duration_days)
+                
+                # Determine sprint status based on dates
+                now = timezone.now()
+                if end_date < now:
+                    status = 'completed'
+                elif start_date <= now <= end_date:
+                    status = 'active'
+                else:
+                    status = 'planning'
+                
+                sprint_names = [
+                    f'Sprint {i+1} - Initial Setup',
+                    f'Sprint {i+1} - Core Features',
+                    f'Sprint {i+1} - Polish & Testing',
+                    f'Sprint {i+1} - MVP Release',
+                ]
+                
+                sprint, created = Sprint.objects.get_or_create(
+                    name=sprint_names[i % len(sprint_names)],
+                    project=project,
+                    defaults={
+                        'goal': f'Complete key features for {project.name}',
+                        'start_date': start_date,
+                        'end_date': end_date,
+                        'status': status,
+                        'created_by': users[0],
+                    }
+                )
+                if created:
+                    sprints_created += 1
+                    all_sprints.append(sprint)
+        
+        self.stdout.write(self.style.SUCCESS(f'Created {sprints_created} sprints'))
+
         # Create tasks
         task_templates = [
             {
@@ -173,6 +218,9 @@ class Command(BaseCommand):
 
         tasks_created = 0
         for project in projects:
+            # Get sprints for this project
+            project_sprints = [s for s in all_sprints if s.project == project]
+            
             # Create 5-8 tasks per project
             num_tasks = random.randint(5, 8)
             for i in range(num_tasks):
@@ -180,6 +228,11 @@ class Command(BaseCommand):
                 
                 # Randomize some fields
                 task_number = f"{project.id}-{i+1}"
+                
+                # Assign task to a sprint (70% chance)
+                sprint = None
+                if project_sprints and random.random() < 0.7:
+                    sprint = random.choice(project_sprints)
                 
                 task, created = Task.objects.get_or_create(
                     name=f"{template['name']} - {project.name}",
@@ -192,6 +245,7 @@ class Command(BaseCommand):
                         'size': template['size'],
                         'created_by': 'ai',
                         'task_number': task_number,
+                        'sprint': sprint,
                     }
                 )
                 
@@ -242,10 +296,24 @@ class Command(BaseCommand):
                     }
                 )
                 activities_created += 1
+            
+            # Sprint activities
+            project_sprints = Sprint.objects.filter(project=project)
+            for sprint in project_sprints[:2]:
+                Activity.objects.get_or_create(
+                    user=users[0],
+                    activity_type='sprint_created',
+                    project=project,
+                    defaults={
+                        'description': f'Created sprint {sprint.name}',
+                        'target_name': sprint.name,
+                    }
+                )
+                activities_created += 1
 
         self.stdout.write(self.style.SUCCESS(f'Created {activities_created} activities'))
         self.stdout.write(self.style.SUCCESS('Mock data creation completed!'))
         self.stdout.write(self.style.WARNING('\nTest credentials:'))
-        self.stdout.write(self.style.WARNING('Email: manu042kpaperwork@gmail.com'))
+        self.stdout.write(self.style.WARNING('Email: manu042kpaperwork@gmail.com or manu04kus@gmail.com'))
         self.stdout.write(self.style.WARNING('Password: password123'))
 

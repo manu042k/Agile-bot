@@ -18,6 +18,9 @@ import {
 import {
   LineChart,
   Line,
+  PieChart,
+  Pie,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -539,52 +542,75 @@ const AnalyticsPage = () => {
                       Task Status Breakdown
                     </h2>
                     <Separator className="my-4" />
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="pm-status-dot pm-status-done" />
-                          <span className="text-sm font-medium text-gray-900">
-                            Completed
-                          </span>
+                    {metrics.totalTasks > 0 ? (
+                      <>
+                        <div className="h-80">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: 'Completed', value: metrics.completedTasks, color: '#22c55e' },
+                                  { name: 'In Progress', value: metrics.inProgressTasks, color: '#ea580c' },
+                                  { name: 'Created', value: metrics.createdTasks, color: '#3b82f6' },
+                                  { name: 'Backlog', value: metrics.backlogTasks, color: '#9ca3af' },
+                                ].filter(item => item.value > 0)}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                outerRadius={100}
+                                fill="#8884d8"
+                                dataKey="value"
+                              >
+                                {[
+                                  { name: 'Completed', value: metrics.completedTasks, color: '#22c55e' },
+                                  { name: 'In Progress', value: metrics.inProgressTasks, color: '#ea580c' },
+                                  { name: 'Created', value: metrics.createdTasks, color: '#3b82f6' },
+                                  { name: 'Backlog', value: metrics.backlogTasks, color: '#9ca3af' },
+                                ].filter(item => item.value > 0).map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={entry.color} />
+                                ))}
+                              </Pie>
+                              <Tooltip 
+                                contentStyle={{
+                                  backgroundColor: 'white',
+                                  border: '1px solid #e5e7eb',
+                                  borderRadius: '8px',
+                                  padding: '8px 12px',
+                                }}
+                              />
+                              <Legend 
+                                verticalAlign="bottom" 
+                                height={36}
+                                iconType="circle"
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
                         </div>
-                        <span className="text-lg font-semibold text-gray-900">
-                          {metrics.completedTasks}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="pm-status-dot pm-status-progress" />
-                          <span className="text-sm font-medium text-gray-900">
-                            In Progress
-                          </span>
+                        <div className="grid grid-cols-2 gap-3 mt-4">
+                          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <span className="text-sm font-medium text-gray-900">Completed</span>
+                            <span className="text-lg font-semibold text-green-600">{metrics.completedTasks}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                            <span className="text-sm font-medium text-gray-900">In Progress</span>
+                            <span className="text-lg font-semibold text-orange-600">{metrics.inProgressTasks}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <span className="text-sm font-medium text-gray-900">Created</span>
+                            <span className="text-lg font-semibold text-blue-600">{metrics.createdTasks}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <span className="text-sm font-medium text-gray-900">Backlog</span>
+                            <span className="text-lg font-semibold text-gray-600">{metrics.backlogTasks}</span>
+                          </div>
                         </div>
-                        <span className="text-lg font-semibold text-gray-900">
-                          {metrics.inProgressTasks}
-                        </span>
+                      </>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>No tasks available</p>
                       </div>
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="pm-status-dot pm-status-todo" />
-                          <span className="text-sm font-medium text-gray-900">
-                            Created
-                          </span>
-                        </div>
-                        <span className="text-lg font-semibold text-gray-900">
-                          {metrics.createdTasks}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="pm-status-dot pm-status-backlog" />
-                          <span className="text-sm font-medium text-gray-900">
-                            Backlog
-                          </span>
-                        </div>
-                        <span className="text-lg font-semibold text-gray-900">
-                          {metrics.backlogTasks}
-                        </span>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Team Performance */}
@@ -593,29 +619,33 @@ const AnalyticsPage = () => {
                       Team Performance
                     </h2>
                     <Separator className="my-4" />
-                    <div className="space-y-4">
-                      {[1, 2, 3, 4, 5].map((i) => {
-                        const performance = 60 + Math.random() * 40;
-                        return (
-                          <div key={i} className="space-y-2">
+                    {teamPerformance.length > 0 ? (
+                      <div className="space-y-4">
+                        {teamPerformance.slice(0, 5).map((member) => (
+                          <div key={member.id} className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <span className="font-medium text-gray-900">
-                                Team Member {i}
+                                {member.name}
                               </span>
                               <span className="text-gray-600">
-                                {Math.round(performance)}%
+                                {member.completedTasks}/{member.totalTasks} ({member.performance}%)
                               </span>
                             </div>
                             <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                               <div
                                 className="h-full bg-orange-600 rounded-full transition-all"
-                                style={{ width: `${performance}%` }}
+                                style={{ width: `${member.performance}%` }}
                               />
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <p>No team performance data available</p>
+                        <p className="text-xs mt-2">Assign tasks to team members to see performance metrics</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </>

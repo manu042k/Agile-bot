@@ -33,6 +33,7 @@ import {
   isStatusEqual,
 } from "@/lib/statusUtils";
 import TaskCard from "@/components/projects/TaskCard";
+import EmptyState from "@/components/common/EmptyState";
 import toast from "react-hot-toast";
 
 const ProjectTasksPage = () => {
@@ -263,48 +264,25 @@ const ProjectTasksPage = () => {
               ))}
             </div>
           ) : tasks.length === 0 ? (
-            <div className="pm-card p-16 text-center">
-              <div className="max-w-sm mx-auto">
-                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                  <ListTodo className="h-8 w-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  No tasks yet
-                </h3>
-                <p className="text-sm text-gray-500 mb-6">
-                  Create your first task to get started
-                </p>
-                <div className="flex justify-center">
-                  <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-                    <DialogTrigger asChild>
-                      <CreateCard
-                        title="Create New Task"
-                        description="New task"
-                        icon={Plus}
-                      />
-                    </DialogTrigger>
-                    <TaskCreateComponent
-                      projectId={projectId}
-                      onClose={handleTaskCreated}
-                    />
-                  </Dialog>
-                </div>
-              </div>
+            <div className="pm-card">
+              <EmptyState
+                icon={ListTodo}
+                title="No tasks yet"
+                description="Create your first task to get started"
+                action={{
+                  label: "Create Task",
+                  onClick: () => setDialogOpen(true),
+                }}
+              />
             </div>
           ) : (
             (searchQuery || filterStatus !== "all") && (
-              <div className="pm-card p-16 text-center">
-                <div className="max-w-sm mx-auto">
-                  <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                    <Search className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No tasks found
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Try adjusting your filters
-                  </p>
-                </div>
+              <div className="pm-card">
+                <EmptyState
+                  icon={Search}
+                  title="No tasks found"
+                  description="Try adjusting your filters or search query"
+                />
               </div>
             )
           )

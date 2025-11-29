@@ -5,37 +5,10 @@ import { FileText, Download, Calendar, Filter, BarChart3, TrendingUp, Users, Che
 import PageHeader from "@/components/common/PageHeader";
 import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
+import EmptyState from "@/components/common/EmptyState";
 
-// Mock reports data
-const mockReports = [
-  {
-    id: 1,
-    name: "Q1 2024 Project Summary",
-    type: "Project Summary",
-    created: "2024-03-31",
-    createdBy: "John Doe",
-    projects: 5,
-    status: "completed",
-  },
-  {
-    id: 2,
-    name: "Team Performance Report",
-    type: "Team Analytics",
-    created: "2024-03-28",
-    createdBy: "Jane Smith",
-    teams: 3,
-    status: "completed",
-  },
-  {
-    id: 3,
-    name: "Task Completion Analysis",
-    type: "Task Analytics",
-    created: "2024-03-25",
-    createdBy: "Mike Johnson",
-    tasks: 150,
-    status: "completed",
-  },
-];
+// Reports will be fetched from API
+const mockReports: any[] = [];
 
 const reportTypes = [
   { value: "all", label: "All Reports" },
@@ -144,36 +117,44 @@ export default function ReportsPage() {
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900">Reports</h2>
               <Separator className="my-4" />
-              <div className="space-y-3">
-                {mockReports.map((report) => (
-                  <div
-                    key={report.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all"
-                  >
-                    <div className="flex items-center gap-4 flex-1">
-                      <div className="p-3 rounded-lg bg-gray-100">
-                        <FileText className="h-5 w-5 text-gray-700" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-1">{report.name}</h3>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span>{report.type}</span>
-                          <span>•</span>
-                          <span>Created by {report.createdBy}</span>
-                          <span>•</span>
-                          <span>{report.created}</span>
+              {mockReports.length > 0 ? (
+                <div className="space-y-3">
+                  {mockReports.map((report) => (
+                    <div
+                      key={report.id}
+                      className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all"
+                    >
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="p-3 rounded-lg bg-gray-100">
+                          <FileText className="h-5 w-5 text-gray-700" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 mb-1">{report.name}</h3>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span>{report.type}</span>
+                            <span>•</span>
+                            <span>Created by {report.createdBy}</span>
+                            <span>•</span>
+                            <span>{report.created}</span>
+                          </div>
                         </div>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <button className="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2">
+                          <Download className="h-4 w-4" />
+                          Download
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center gap-2">
-                        <Download className="h-4 w-4" />
-                        Download
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={FileText}
+                  title="No reports yet"
+                  description="Create your first report to get insights about your projects"
+                />
+              )}
             </div>
               </>
             )}

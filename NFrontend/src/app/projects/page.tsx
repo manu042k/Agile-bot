@@ -37,6 +37,7 @@ import toast from "react-hot-toast";
 import CreateCard from "@/components/common/CreateCard";
 import StatCard from "@/components/common/StatCard";
 import DetailsCard from "@/components/common/DetailsCard";
+import EmptyState from "@/components/common/EmptyState";
 
 const ProjectsPage = () => {
   const searchParams = useSearchParams();
@@ -574,21 +575,16 @@ const ProjectsPage = () => {
                     </div>
                   )
                 ) : (
-                  <div className="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
-                    <div className="max-w-sm mx-auto">
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center mx-auto mb-4">
-                        <FolderOpen className="h-8 w-8 text-gray-400" />
-                      </div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">
-                        No projects found
-                      </h3>
-                      <p className="text-sm text-gray-500 mb-6">
-                        {searchQuery
-                          ? "Try adjusting your search"
-                          : "Get started by creating your first project"}
-                      </p>
-
-                    </div>
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+                    <EmptyState
+                      icon={searchQuery ? Search : FolderOpen}
+                      title="No projects found"
+                      description={
+                        searchQuery
+                          ? "Try adjusting your search query"
+                          : "Get started by creating your first project"
+                      }
+                    />
                   </div>
                 )}
               </div>

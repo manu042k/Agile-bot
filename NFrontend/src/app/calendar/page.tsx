@@ -4,21 +4,14 @@ import { useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, User, Flag, CalendarDays, Calendar, CalendarClock, ListTodo } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import { Separator } from "@/components/ui/separator";
-
-// Mock calendar data
-const getMockTasks = () => [
-  { id: 1, title: "Implement user authentication", dueDate: "2024-02-15", assignee: "John Doe", priority: "high", project: "E-Commerce Platform" },
-  { id: 2, title: "Design dashboard UI", dueDate: "2024-02-18", assignee: "Jane Smith", priority: "medium", project: "Analytics Dashboard" },
-  { id: 3, title: "Write API documentation", dueDate: "2024-02-20", assignee: "Mike Johnson", priority: "low", project: "Mobile Banking App" },
-  { id: 4, title: "Sprint Planning", dueDate: "2024-02-15", assignee: "Team", priority: "high", project: "E-Commerce Platform" },
-  { id: 5, title: "Code Review", dueDate: "2024-02-16", assignee: "Sarah Wilson", priority: "medium", project: "Mobile Banking App" },
-];
+import EmptyState from "@/components/common/EmptyState";
 
 const CalendarPage = () => {
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab") || "month";
   const [currentDate, setCurrentDate] = useState(new Date(2024, 1, 1)); // February 2024
-  const tasks = getMockTasks();
+  const tasks: any[] = []; // Will be populated from API
+  const tasks: any[] = []; // Will be populated from API
 
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
@@ -120,20 +113,30 @@ const CalendarPage = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{tasks.length}</p>
-                    <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
+                {tasks.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{tasks.length}</p>
+                      <p className="text-xs text-gray-500 mt-1">Total Tasks</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{tasks.filter(t => t.priority === "high").length}</p>
+                      <p className="text-xs text-gray-500 mt-1">High Priority</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-semibold text-gray-900">{new Set(tasks.map(t => t.project)).size}</p>
+                      <p className="text-xs text-gray-500 mt-1">Projects</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{tasks.filter(t => t.priority === "high").length}</p>
-                    <p className="text-xs text-gray-500 mt-1">High Priority</p>
+                ) : (
+                  <div className="pt-4 border-t border-gray-100">
+                    <EmptyState
+                      icon={CalendarIcon}
+                      title="No scheduled tasks"
+                      description="Tasks with due dates will appear in your calendar"
+                    />
                   </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-gray-900">{new Set(tasks.map(t => t.project)).size}</p>
-                    <p className="text-xs text-gray-500 mt-1">Projects</p>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
 

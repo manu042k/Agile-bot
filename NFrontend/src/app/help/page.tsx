@@ -6,7 +6,7 @@ import PageHeader from "@/components/common/PageHeader";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 
-// Mock FAQ data
+// FAQ data - can be moved to CMS later
 const mockFAQs = [
   {
     id: 1,
@@ -42,7 +42,7 @@ const mockFAQs = [
 
 const categories = ["All", "Projects", "Tasks", "Teams", "Settings", "General"];
 
-// Mock documentation sections
+// Documentation sections - can be moved to CMS later
 const documentationSections = [
   { id: 1, title: "Getting Started", icon: Book, description: "Learn the basics" },
   { id: 2, title: "Projects", icon: FileText, description: "Manage your projects" },

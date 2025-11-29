@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, List, LayoutGrid, CheckSquare, ListTodo, UserCheck, CheckCircle2, FileText, PlayCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
@@ -8,119 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
 import StatCard from "@/components/common/StatCard";
 import DetailsCard from "@/components/common/DetailsCard";
-import { Task, TaskStatus, TaskPriority, TaskSize, CreatedBy } from "@/types/project";
-
-// Mock tasks data - converted to Task type
-const mockTasks: Task[] = [
-  { 
-    taskid: "1", 
-    name: "Implement user authentication", 
-    description: "Add OAuth and JWT authentication",
-    details: "Implement secure user authentication system",
-    Project: "1", 
-    assigned_to: [{ id: 1, email: "john@example.com", username: "John Doe", first_name: "John", last_name: "Doe" }], 
-    priority: TaskPriority.High, 
-    status: TaskStatus.Active, 
-    size: TaskSize.Medium,
-    tags: ["Backend", "Security"],
-    comments: [],
-    related_work: [],
-    created_by: CreatedBy.USER,
-    task_number: "1",
-    created_at: "2024-02-10T10:00:00Z",
-    updated_at: "2024-02-15T10:00:00Z"
-  },
-  { 
-    taskid: "2", 
-    name: "Design dashboard UI", 
-    description: "Create modern dashboard interface",
-    details: "Design responsive dashboard UI",
-    Project: "2", 
-    assigned_to: [{ id: 2, email: "jane@example.com", username: "Jane Smith", first_name: "Jane", last_name: "Smith" }], 
-    priority: TaskPriority.Normal, 
-    status: TaskStatus.Created, 
-    size: TaskSize.Large,
-    tags: ["Frontend", "UI"],
-    comments: [],
-    related_work: [],
-    created_by: CreatedBy.USER,
-    task_number: "2",
-    created_at: "2024-02-12T10:00:00Z",
-    updated_at: "2024-02-18T10:00:00Z"
-  },
-  { 
-    taskid: "3", 
-    name: "Write API documentation", 
-    description: "Document all API endpoints",
-    details: "Complete API documentation",
-    Project: "3", 
-    assigned_to: [{ id: 3, email: "mike@example.com", username: "Mike Johnson", first_name: "Mike", last_name: "Johnson" }], 
-    priority: TaskPriority.Low, 
-    status: TaskStatus.Created, 
-    size: TaskSize.Small,
-    tags: ["Documentation"],
-    comments: [],
-    related_work: [],
-    created_by: CreatedBy.USER,
-    task_number: "3",
-    created_at: "2024-02-13T10:00:00Z",
-    updated_at: "2024-02-20T10:00:00Z"
-  },
-  { 
-    taskid: "4", 
-    name: "Review pull request #234", 
-    description: "Code review for authentication PR",
-    details: "Review and approve PR",
-    Project: "1", 
-    assigned_to: [{ id: 4, email: "sarah@example.com", username: "Sarah Wilson", first_name: "Sarah", last_name: "Wilson" }], 
-    priority: TaskPriority.High, 
-    status: TaskStatus.Created, 
-    size: TaskSize.Small,
-    tags: ["Code Review"],
-    comments: [],
-    related_work: [],
-    created_by: CreatedBy.USER,
-    task_number: "4",
-    created_at: "2024-02-11T10:00:00Z",
-    updated_at: "2024-02-14T10:00:00Z"
-  },
-  { 
-    taskid: "5", 
-    name: "Set up CI/CD pipeline", 
-    description: "Configure automated deployment",
-    details: "Setup CI/CD with GitHub Actions",
-    Project: "2", 
-    assigned_to: [{ id: 5, email: "alex@example.com", username: "Alex Brown", first_name: "Alex", last_name: "Brown" }], 
-    priority: TaskPriority.Normal, 
-    status: TaskStatus.Active, 
-    size: TaskSize.Large,
-    tags: ["DevOps"],
-    comments: [],
-    related_work: [],
-    created_by: CreatedBy.USER,
-    task_number: "5",
-    created_at: "2024-02-14T10:00:00Z",
-    updated_at: "2024-02-16T10:00:00Z"
-  },
-  { 
-    taskid: "6", 
-    name: "Database schema design", 
-    description: "Design database structure",
-    details: "Create optimized database schema",
-    Project: "3", 
-    assigned_to: [{ id: 6, email: "chris@example.com", username: "Chris Lee", first_name: "Chris", last_name: "Lee" }], 
-    priority: TaskPriority.High, 
-    status: TaskStatus.Completed, 
-    size: TaskSize.Medium,
-    tags: ["Database"],
-    comments: [],
-    related_work: [],
-    created_by: CreatedBy.USER,
-    task_number: "6",
-    created_at: "2024-02-09T10:00:00Z",
-    updated_at: "2024-02-17T10:00:00Z"
-  },
-];
+import EmptyState from "@/components/common/EmptyState";
+import { Task, TaskStatus } from "@/types/project";
 
 const TasksPage = () => {
   const searchParams = useSearchParams();
@@ -128,11 +17,38 @@ const TasksPage = () => {
   const [viewMode, setViewMode] = useState<"list" | "board">("list");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>("");
 
-  // Mock current user for filtering
-  const currentUserEmail = "john@example.com";
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        const userEmail = localStorage.getItem("user_email");
+        setCurrentUserEmail(userEmail || "");
 
-  const filteredTasks = mockTasks.filter(task => {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tasks/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setTasks(data);
+        }
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
+  const filteredTasks = tasks.filter(task => {
     const matchesSearch = task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          task.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === "all" || task.status === filterStatus;
@@ -149,6 +65,17 @@ const TasksPage = () => {
     
     return matchesSearch && matchesFilter && matchesTab;
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading tasks...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -199,13 +126,13 @@ const TasksPage = () => {
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-gray-600">Completion Rate</span>
                     <span className="font-medium text-gray-900">
-                      {Math.round((mockTasks.filter(t => t.status === TaskStatus.Completed).length / mockTasks.length) * 100)}%
+                      {tasks.length > 0 ? Math.round((tasks.filter(t => t.status === TaskStatus.Completed).length / tasks.length) * 100) : 0}%
                     </span>
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-orange-600 rounded-full transition-all"
-                      style={{ width: `${Math.round((mockTasks.filter(t => t.status === TaskStatus.Completed).length / mockTasks.length) * 100)}%` }}
+                      style={{ width: `${tasks.length > 0 ? Math.round((tasks.filter(t => t.status === TaskStatus.Completed).length / tasks.length) * 100) : 0}%` }}
                     />
                   </div>
                 </div>
@@ -213,7 +140,7 @@ const TasksPage = () => {
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
                   <StatCard
                     icon={FileText}
-                    value={mockTasks.length}
+                    value={tasks.length}
                     label="Total Tasks"
                     iconBgColor="bg-blue-100"
                     iconColor="text-blue-600"
@@ -221,7 +148,7 @@ const TasksPage = () => {
                   />
                   <StatCard
                     icon={CheckCircle2}
-                    value={mockTasks.filter(t => t.status === TaskStatus.Completed).length}
+                    value={tasks.filter(t => t.status === TaskStatus.Completed).length}
                     label="Completed"
                     iconBgColor="bg-green-100"
                     iconColor="text-green-600"
@@ -229,7 +156,7 @@ const TasksPage = () => {
                   />
                   <StatCard
                     icon={PlayCircle}
-                    value={mockTasks.filter(t => t.status === TaskStatus.Active).length}
+                    value={tasks.filter(t => t.status === TaskStatus.Active).length}
                     label="In Progress"
                     iconBgColor="bg-orange-100"
                     iconColor="text-orange-600"
@@ -259,17 +186,15 @@ const TasksPage = () => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                      <Search className="h-8 w-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No tasks found</h3>
-                    <p className="text-sm text-gray-500">
-                      {searchQuery || filterStatus !== "all" 
-                        ? "Try adjusting your filters" 
-                        : "No tasks available"}
-                    </p>
-                  </div>
+                  <EmptyState
+                    icon={searchQuery || filterStatus !== "all" ? Search : CheckSquare}
+                    title="No tasks found"
+                    description={
+                      searchQuery || filterStatus !== "all"
+                        ? "Try adjusting your filters or search query"
+                        : "No tasks available yet"
+                    }
+                  />
                 )
               ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -321,28 +246,28 @@ const TasksPage = () => {
                 {
                   icon: FileText,
                   label: "Total Tasks",
-                  value: mockTasks.length,
+                  value: tasks.length,
                   iconBgColor: "bg-blue-100",
                   iconColor: "text-blue-600",
                 },
                 {
                   icon: CheckCircle2,
                   label: "Completed",
-                  value: mockTasks.filter(t => t.status === TaskStatus.Completed).length,
+                  value: tasks.filter(t => t.status === TaskStatus.Completed).length,
                   iconBgColor: "bg-green-100",
                   iconColor: "text-green-600",
                 },
                 {
                   icon: PlayCircle,
                   label: "In Progress",
-                  value: mockTasks.filter(t => t.status === TaskStatus.Active).length,
+                  value: tasks.filter(t => t.status === TaskStatus.Active).length,
                   iconBgColor: "bg-orange-100",
                   iconColor: "text-orange-600",
                 },
                 {
                   icon: FileText,
                   label: "Backlog",
-                  value: mockTasks.filter(t => t.status === TaskStatus.Backlog).length,
+                  value: tasks.filter(t => t.status === TaskStatus.Backlog).length,
                   iconBgColor: "bg-gray-100",
                   iconColor: "text-gray-600",
                 },

@@ -29,6 +29,7 @@ import taskService from "@/services/taskService";
 import TaskCard from "@/components/projects/TaskCard";
 import ProjectCard from "@/components/projects/ProjectCard";
 import DetailsCard from "@/components/common/DetailsCard";
+import EmptyState from "@/components/common/EmptyState";
 import api from "@/interceptor/api";
 import { URLS } from "@/types/url-constants";
 
@@ -301,10 +302,11 @@ const DashboardPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <CheckSquare className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                  <p>No tasks assigned to you</p>
-                </div>
+                <EmptyState
+                  icon={CheckSquare}
+                  title="No tasks assigned"
+                  description="Tasks assigned to you will appear here"
+                />
               )}
             </div>
 
@@ -329,10 +331,11 @@ const DashboardPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <FolderKanban className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                  <p>No recent projects</p>
-                </div>
+                <EmptyState
+                  icon={FolderKanban}
+                  title="No recent projects"
+                  description="Projects you work on will appear here"
+                />
               )}
             </div>
           </div>
@@ -424,11 +427,11 @@ const DashboardPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <CheckSquare className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-600 font-medium mb-2">No tasks assigned to you</p>
-                  <p className="text-sm text-gray-500">Tasks assigned to you will appear here</p>
-                </div>
+                <EmptyState
+                  icon={CheckSquare}
+                  title="No tasks assigned to you"
+                  description="Tasks assigned to you will appear here"
+                />
               )}
             </div>
           </div>
@@ -451,11 +454,11 @@ const DashboardPage = () => {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <FolderKanban className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-600 font-medium mb-2">No recent projects</p>
-                  <p className="text-sm text-gray-500">Projects you work on will appear here</p>
-                </div>
+                <EmptyState
+                  icon={FolderKanban}
+                  title="No recent projects"
+                  description="Projects you work on will appear here"
+                />
               )}
             </div>
           </div>
