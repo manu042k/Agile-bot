@@ -30,27 +30,30 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DEBUG")
+DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [
+    host.strip() 
+    for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    if host.strip()
+]
 
 # CSRF trusted origins (required for Django 4.0+)
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    origin.strip() 
+    for origin in os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:3000').split(',')
+    if origin.strip()
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://localhost:3000",  # Next.js default port
-    "http://127.0.0.1:3000",
-    # Add your production frontend URL here
+    origin.strip() 
+    for origin in os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
+    if origin.strip()
 ]
-# Allow embedding in iframes from frontend origin (for development)
-# In production, you may want to restrict this or use Content-Security-Policy
-X_FRAME_OPTIONS = ""  # Empty string allows embedding from any origin (for development only)
+# X-Frame-Options: Control iframe embedding
+# Empty string allows embedding from any origin (development only)
+# In production, set to 'DENY' or 'SAMEORIGIN' for security
+X_FRAME_OPTIONS = os.getenv("X_FRAME_OPTIONS", "")
 
 AUTH_USER_MODEL = "users.User"
 # Application definition
@@ -86,16 +89,22 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    # Temporarily disabled to allow PDF preview in iframes from frontend (localhost:3000)
-    # "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # Activity tracking middleware (should be after auth middleware)
     "projectApis.activity_middleware.ActivityTrackingMiddleware",
 ]
 
-# Disable CSRF for API endpoints (handled by DRF)
-CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token if needed
-CSRF_USE_SESSIONS = False
+# Security Settings for Production
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False").lower() == "true"
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS", "False").lower() == "true"
+SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD", "False").lower() == "true"
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if os.getenv("USE_X_FORWARDED_PROTO", "True").lower() == "true" else None
+
+# CSRF Configuration
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE", "False").lower() == "true"
+CSRF_COOKIE_HTTPONLY = os.getenv("CSRF_COOKIE_HTTPONLY", "False").lower() == "true"
+CSRF_USE_SESSIONS = os.getenv("CSRF_USE_SESSIONS", "False").lower() == "true"
 
 ROOT_URLCONF = "agileBotApis.urls"
 
@@ -128,12 +137,30 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Database Configuration
+# Use PostgreSQL in production, SQLite for local development
+if os.getenv("USE_POSTGRESQL", "False").lower() == "true":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.getenv("DB_NAME", "agilebotdb"),
+            "USER": os.getenv("DB_USER", "dbadmin"),
+            "PASSWORD": os.getenv("DB_PASSWORD"),
+            "HOST": os.getenv("DB_HOST", "localhost"),
+            "PORT": os.getenv("DB_PORT", "5432"),
+            "OPTIONS": {
+                "sslmode": os.getenv("DB_SSLMODE", "require"),
+            },
+        }
     }
-}
+else:
+    # SQLite for local development
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
@@ -171,6 +198,38 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Media files (User uploads)
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+# Azure Blob Storage Configuration
+USE_AZURE_STORAGE = os.getenv("USE_AZURE_STORAGE", "False").lower() == "true"
+
+if USE_AZURE_STORAGE:
+    # Use Azure Blob Storage for media files
+    DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+    
+    AZURE_ACCOUNT_NAME = os.getenv("AZURE_ACCOUNT_NAME")
+    AZURE_ACCOUNT_KEY = os.getenv("AZURE_ACCOUNT_KEY")
+    AZURE_CONTAINER = os.getenv("AZURE_CONTAINER_NAME", "media")
+    AZURE_CUSTOM_DOMAIN = os.getenv("AZURE_CUSTOM_DOMAIN")
+    
+    # Optional: Set cache control for uploaded files (1 year)
+    AZURE_CACHE_CONTROL = "public, max-age=31536000"
+    
+    # Optional: Set blob access level (private by default)
+    AZURE_BLOB_MAX_CONNECTIONS = 2
+    
+    # Override MEDIA_URL to use Azure Blob Storage
+    if AZURE_CUSTOM_DOMAIN:
+        MEDIA_URL = f"https://{AZURE_CUSTOM_DOMAIN}/{AZURE_CONTAINER}/"
+    else:
+        MEDIA_URL = f"https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/"
+else:
+    # Use local filesystem for development
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -178,15 +237,17 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOW_CREDENTIALS = True  # Fixed typo: ALLOWS -> ALLOW
+# CORS Configuration
+# WARNING: CORS_ORIGIN_ALLOW_ALL should be False in production
+CORS_ORIGIN_ALLOW_ALL = os.getenv("CORS_ORIGIN_ALLOW_ALL", "False").lower() == "true"
+CORS_ALLOW_CREDENTIALS = os.getenv("CORS_ALLOW_CREDENTIALS", "True").lower() == "true"
 
 # Session configuration - read from environment variable
 # Default: 12 hours (43200 seconds)
 SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", "43200"))
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "False").lower() == "true"  # Set to True in production with HTTPS
-SESSION_COOKIE_SAMESITE = "Strict"
+SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
 SESSION_ENGINE = "django.contrib.sessions.backends.db"  # Using database for sessions
 
 REST_FRAMEWORK = {
@@ -230,37 +291,64 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL
 # Frontend URL for invitation links
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
+# Logging Configuration
+# In Azure, logs go to stdout/stderr and are captured by Azure Monitor
+# Local development can still use file logging
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
         "verbose": {
-            "format": "{levelname} {asctime} {module} {message}",
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
             "style": "{",
         },
         "simple": {
-            "format": "{levelname} {message}",
+            "format": "{levelname} {asctime} {message}",
             "style": "{",
         },
     },
     "handlers": {
-        "file": {
-            "level": "INFO",
-            "class": "logging.FileHandler",
-            "filename": "django_requests.log",
-            "formatter": "verbose",
-        },
         "console": {
+            "level": "INFO",
             "class": "logging.StreamHandler",
-            "formatter": "simple",
+            "formatter": "verbose",
         },
     },
     "loggers": {
         "django": {
-            "handlers": ["file", "console"],
-            "level": "INFO",
-            "propagate": True,
+            "handlers": ["console"],
+            "level": os.getenv("DJANGO_LOG_LEVEL", "INFO"),
+            "propagate": False,
         },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "celery": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "projectApis": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "users": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
     },
 }
 
@@ -269,26 +357,36 @@ CELERY_BROKER_URL = os.getenv("REDIS_URI")
 CELERY_RESULT_BACKEND = os.getenv("REDIS_URI")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
-CELERY_TIMEZONE = "UTC"
+CELERY_TIMEZONE = os.getenv("CELERY_TIMEZONE", "UTC")
 
 # Celery Beat Schedule - Periodic Tasks
 CELERY_BEAT_SCHEDULE = {
     'move-unfinished-tasks-to-backlog': {
         'task': 'projectApis.tasks.move_unfinished_tasks_to_backlog',
-        'schedule': 3600.0,  # Run every hour (3600 seconds)
-        # Alternative schedules:
-        # 'schedule': 300.0,  # Every 5 minutes (for testing)
-        # 'schedule': crontab(hour=0, minute=0),  # Daily at midnight
-        # 'schedule': crontab(hour='*/6'),  # Every 6 hours
+        'schedule': float(os.getenv("CELERY_TASK_SCHEDULE_INTERVAL", "3600")),  # Default: every hour
     },
 }
 
 # Cache configuration (for storing Google user info temporarily)
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        # For production, use Redis:
-        # 'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        # 'LOCATION': os.getenv("REDIS_URI", "redis://127.0.0.1:6379/1"),
+# Use Redis cache in production for better performance and scalability
+USE_REDIS_CACHE = os.getenv("USE_REDIS_CACHE", "False").lower() == "true"
+
+if USE_REDIS_CACHE:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': os.getenv("REDIS_URI", "redis://127.0.0.1:6379/1"),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            },
+            'KEY_PREFIX': 'agilebot',
+            'TIMEOUT': 300,  # 5 minutes default
+        }
     }
-}
+else:
+    # Local memory cache for development
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
