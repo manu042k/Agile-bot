@@ -46,7 +46,7 @@ export default function GlobalSearch() {
       // Fetch tasks from all projects
       const tasksPromises = projectsData.map(async (project) => {
         try {
-          const tasks = await taskService.getTasks(project.id.toString());
+          const tasks = await taskService.getTasks(project.uuid);
           return tasks.map((task: Task) => ({
             ...task,
             projectName: project.name,
@@ -80,7 +80,7 @@ export default function GlobalSearch() {
   };
 
   const handleSelectProject = (project: Project) => {
-    router.push(`/projects/${project.id}`);
+    router.push(`/projects/${project.uuid}`);
     setOpen(false);
     setSearchQuery("");
   };

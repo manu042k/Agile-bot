@@ -40,12 +40,12 @@ urlpatterns = [
         name="task-comment-list-create",
     ),
     path(
-        "projects/<int:project_id>/tasks/",
+        "projects/<uuid:project_uuid>/tasks/",
         TaskByProjectView.as_view(),
         name="get-tasks-by-project",
     ),
     path(
-        "projects/<int:project_id>/timeline/",
+        "projects/<uuid:project_uuid>/timeline/",
         ProjectTimelineView.as_view(),
         name="project-timeline",
     ),
@@ -59,7 +59,7 @@ urlpatterns = [
     path("activities/", ActivityListView.as_view(), name="activity-list"),
     path("activities/recent/", RecentActivitiesView.as_view(), name="recent-activities"),
     path(
-        "projects/<int:project_id>/activities/",
+        "projects/<uuid:project_uuid>/activities/",
         ProjectActivitiesView.as_view(),
         name="project-activities",
     ),
@@ -70,23 +70,23 @@ urlpatterns = [
         name="all-documents",
     ),
     path(
-        "projects/<int:project_id>/documents/",
+        "projects/<uuid:project_uuid>/documents/",
         DocumentListCreateView.as_view(),
         name="project-documents-list-create",
     ),
     path(
-        "projects/<int:project_id>/documents/<int:document_id>/",
+        "projects/<uuid:project_uuid>/documents/<uuid:document_uuid>/",
         DocumentDetailView.as_view(),
         name="project-document-detail",
     ),
     # Sprint endpoints
     path(
-        "projects/<int:project_id>/sprints/",
+        "projects/<uuid:project_uuid>/sprints/",
         SprintListView.as_view(),
         name="sprint-list-create",
     ),
     path(
-        "projects/<int:project_id>/sprints/<int:sprint_id>/",
+        "projects/<uuid:project_uuid>/sprints/<uuid:sprint_uuid>/",
         SprintDetailView.as_view(),
         name="sprint-detail",
     ),

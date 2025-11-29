@@ -45,7 +45,7 @@ const ProjectSettingsPage = () => {
     try {
       setIsSaving(true);
       await projectService.updateProject({
-        id: project.id.toString(),
+        id: project.uuid,
         name: project.name,
         description: project.description,
         visibility: project.visibility,
@@ -70,7 +70,7 @@ const ProjectSettingsPage = () => {
     if (!confirmed) return;
 
     try {
-      await projectService.deleteProject(project.id.toString());
+      await projectService.deleteProject(project.uuid);
       toast.success("Project deleted successfully");
       router.push("/projects");
     } catch (err: any) {

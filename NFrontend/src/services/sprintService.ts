@@ -10,9 +10,9 @@ const sprintService = {
     return response.data;
   },
 
-  async getSprint(projectId: string, sprintId: string): Promise<Sprint> {
+  async getSprint(projectId: string, sprintUuid: string): Promise<Sprint> {
     const response = await api.get<Sprint>(
-      `${URLS.PROJECTS}${projectId}/sprints/${sprintId}/`
+      `${URLS.PROJECTS}${projectId}/sprints/${sprintUuid}/`
     );
     return response.data;
   },
@@ -27,31 +27,31 @@ const sprintService = {
 
   async updateSprint(
     projectId: string,
-    sprintId: string,
+    sprintUuid: string,
     sprint: Partial<SprintDTO>
   ): Promise<Sprint> {
     const response = await api.patch<Sprint>(
-      `${URLS.PROJECTS}${projectId}/sprints/${sprintId}/`,
+      `${URLS.PROJECTS}${projectId}/sprints/${sprintUuid}/`,
       sprint
     );
     return response.data;
   },
 
-  async deleteSprint(projectId: string, sprintId: string): Promise<void> {
-    await api.delete(`${URLS.PROJECTS}${projectId}/sprints/${sprintId}/`);
+  async deleteSprint(projectId: string, sprintUuid: string): Promise<void> {
+    await api.delete(`${URLS.PROJECTS}${projectId}/sprints/${sprintUuid}/`);
   },
 
-  async startSprint(projectId: string, sprintId: string): Promise<Sprint> {
+  async startSprint(projectId: string, sprintUuid: string): Promise<Sprint> {
     const response = await api.post<Sprint>(
-      `${URLS.PROJECTS}${projectId}/sprints/${sprintId}/`,
+      `${URLS.PROJECTS}${projectId}/sprints/${sprintUuid}/`,
       { action: 'start' }
     );
     return response.data;
   },
 
-  async completeSprint(projectId: string, sprintId: string): Promise<Sprint> {
+  async completeSprint(projectId: string, sprintUuid: string): Promise<Sprint> {
     const response = await api.post<Sprint>(
-      `${URLS.PROJECTS}${projectId}/sprints/${sprintId}/`,
+      `${URLS.PROJECTS}${projectId}/sprints/${sprintUuid}/`,
       { action: 'complete' }
     );
     return response.data;

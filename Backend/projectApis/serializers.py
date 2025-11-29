@@ -14,6 +14,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             "id",
+            "uuid",
             "name",
             "description",
             "visibility",
@@ -22,6 +23,7 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+        read_only_fields = ["id", "uuid"]
 
 
 class FileUploadSerializer(serializers.ModelSerializer):
@@ -54,6 +56,7 @@ class DocumentSerializer(serializers.ModelSerializer):
         model = Document
         fields = [
             "id",
+            "uuid",
             "project",
             "project_name",
             "file",
@@ -66,7 +69,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "uploaded_by", "created_at", "updated_at"]
+        read_only_fields = ["id", "uuid", "uploaded_by", "created_at", "updated_at"]
         extra_kwargs = {
             "name": {"required": False},
             "category": {"required": False},
@@ -280,6 +283,7 @@ class SprintSerializer(serializers.ModelSerializer):
         model = Sprint
         fields = [
             "id",
+            "uuid",
             "project",
             "name",
             "description",
@@ -294,7 +298,7 @@ class SprintSerializer(serializers.ModelSerializer):
             "task_count",
             "completed_task_count",
         ]
-        read_only_fields = ["id", "created_by", "created_at", "updated_at", "project"]
+        read_only_fields = ["id", "uuid", "created_by", "created_at", "updated_at", "project"]
         extra_kwargs = {
             "description": {"required": False, "allow_blank": True},
             "goal": {"required": False, "allow_blank": True},

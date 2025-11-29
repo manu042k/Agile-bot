@@ -257,7 +257,7 @@ const TeamDetailPage = () => {
               <div className="space-y-3">
                 {projects.length > 0 ? (
                   projects.slice(0, 3).map((project) => (
-                    <Link key={project.id} href={`/projects/${project.id}`}>
+                    <Link key={project.id} href={`/projects/${project.uuid}`}>
                       <div className="p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-medium text-gray-900 text-sm">

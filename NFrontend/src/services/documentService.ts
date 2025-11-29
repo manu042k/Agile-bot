@@ -2,6 +2,7 @@ import api from "@/interceptor/api";
 
 export interface Document {
   id: number;
+  uuid: string;
   project: number;
   project_name?: string;
   file: string;
@@ -60,19 +61,19 @@ const documentService = {
 
   async updateDocument(
     projectId: string,
-    documentId: number,
+    documentUuid: string,
     data: { name?: string; category?: string }
   ): Promise<Document> {
     const response = await api.patch<Document>(
-      `/api/project-management/projects/${projectId}/documents/${documentId}/`,
+      `/api/project-management/projects/${projectId}/documents/${documentUuid}/`,
       data
     );
     return response.data;
   },
 
-  async deleteDocument(projectId: string, documentId: number): Promise<void> {
+  async deleteDocument(projectId: string, documentUuid: string): Promise<void> {
     await api.delete(
-      `/api/project-management/projects/${projectId}/documents/${documentId}/`
+      `/api/project-management/projects/${projectId}/documents/${documentUuid}/`
     );
   },
 };

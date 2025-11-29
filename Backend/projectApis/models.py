@@ -7,6 +7,8 @@ from users.models import User
 
 
 class Project(models.Model):
+    id = models.AutoField(primary_key=True)  # Keep for internal DB relationships
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, db_index=True)  # Public-facing ID
     name = models.CharField(max_length=100, blank=False)
     description = models.TextField()
     visibility = models.CharField(
@@ -37,6 +39,8 @@ class Sprint(models.Model):
         ("cancelled", "Cancelled"),
     ]
     
+    id = models.AutoField(primary_key=True)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, db_index=True)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="sprints")
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -146,6 +150,8 @@ class FileUpload(models.Model):
 
 class Document(models.Model):
     """Model for storing multiple documents per project"""
+    id = models.AutoField(primary_key=True)
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, db_index=True)
     project = models.ForeignKey("Project", on_delete=models.CASCADE, related_name="documents")
     file = models.FileField(upload_to=document_upload_path, blank=False)
     name = models.CharField(max_length=255, blank=True)  # Original filename

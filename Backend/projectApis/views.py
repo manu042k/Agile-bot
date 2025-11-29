@@ -31,6 +31,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
     serializer_class = ProjectDetailSerializer
     permission_classes = [IsAuthenticated, IsProjectOwnerOrTeamMember]
+    lookup_field = 'uuid'  # Use UUID instead of ID for URL lookups
 
     def get_queryset(self):
         """
@@ -52,11 +53,11 @@ class AssigenTeamToProject(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        project_id = request.data.get("project_id")
+        project_uuid = request.data.get("project_uuid") or request.data.get("project_id")  # Support both for backward compatibility
         team_id = request.data.get("team_id")
 
         try:
-            project = Project.objects.get(id=project_id)
+            project = Project.objects.get(uuid=project_uuid)
         except Project.DoesNotExist:
             return Response(
                 {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
@@ -148,10 +149,10 @@ class DocumentListCreateView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, project_id):
+    def get(self, request, project_uuid):
         """Get all documents for a project"""
         try:
-            project = Project.objects.get(id=project_id)
+            project = Project.objects.get(uuid=project_uuid)
             # Check if user has access to the project
             if not (project.created_by == request.user or 
                     (project.team and request.user in project.team.members.all())):
@@ -160,7 +161,7 @@ class DocumentListCreateView(APIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
             
-            documents = Document.objects.filter(project_id=project_id)
+            documents = Document.objects.filter(project=project)
             serializer = DocumentSerializer(documents, many=True, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Project.DoesNotExist:
@@ -169,10 +170,10 @@ class DocumentListCreateView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-    def post(self, request, project_id):
+    def post(self, request, project_uuid):
         """Upload one or multiple documents"""
         try:
-            project = Project.objects.get(id=project_id)
+            project = Project.objects.get(uuid=project_uuid)
             # Check if user has access to the project
             if not (project.created_by == request.user or 
                     (project.team and request.user in project.team.members.all())):
@@ -236,12 +237,12 @@ class DocumentDetailView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, project_id, document_id):
+    def get(self, request, project_uuid, document_uuid):
         """Get a specific document"""
         try:
-            document = Document.objects.get(id=document_id, project_id=project_id)
+            project = Project.objects.get(uuid=project_uuid)
+            document = Document.objects.get(uuid=document_uuid, project=project)
             # Check if user has access
-            project = document.project
             if not (project.created_by == request.user or 
                     (project.team and request.user in project.team.members.all())):
                 return Response(
@@ -251,18 +252,18 @@ class DocumentDetailView(APIView):
             
             serializer = DocumentSerializer(document, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Document.DoesNotExist:
+        except (Project.DoesNotExist, Document.DoesNotExist):
             return Response(
                 {"error": "Document not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-    def patch(self, request, project_id, document_id):
+    def patch(self, request, project_uuid, document_uuid):
         """Update a document (e.g., category, name)"""
         try:
-            document = Document.objects.get(id=document_id, project_id=project_id)
+            project = Project.objects.get(uuid=project_uuid)
+            document = Document.objects.get(uuid=document_uuid, project=project)
             # Check if user has access
-            project = document.project
             if not (project.created_by == request.user or 
                     (project.team and request.user in project.team.members.all())):
                 return Response(
@@ -280,18 +281,18 @@ class DocumentDetailView(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Document.DoesNotExist:
+        except (Project.DoesNotExist, Document.DoesNotExist):
             return Response(
                 {"error": "Document not found."},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-    def delete(self, request, project_id, document_id):
+    def delete(self, request, project_uuid, document_uuid):
         """Delete a document"""
         try:
-            document = Document.objects.get(id=document_id, project_id=project_id)
+            project = Project.objects.get(uuid=project_uuid)
+            document = Document.objects.get(uuid=document_uuid, project=project)
             # Check if user has access
-            project = document.project
             if not (project.created_by == request.user or 
                     (project.team and request.user in project.team.members.all())):
                 return Response(
@@ -304,7 +305,7 @@ class DocumentDetailView(APIView):
                 {"message": "Document deleted successfully."},
                 status=status.HTTP_204_NO_CONTENT
             )
-        except Document.DoesNotExist:
+        except (Project.DoesNotExist, Document.DoesNotExist):
             return Response(
                 {"error": "Document not found."},
                 status=status.HTTP_404_NOT_FOUND
@@ -391,20 +392,23 @@ class TaskPatchView(APIView):
 class TaskByProjectView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, project_id):
+    def get(self, request, project_uuid):
         """
-        Retrieve all tasks for a given project ID
+        Retrieve all tasks for a given project UUID
         """
         try:
+            # Get project by UUID
+            project = Project.objects.get(uuid=project_uuid)
+            
             # Fetch tasks that belong to the given project
-            tasks = Task.objects.filter(Project_id=project_id).select_related('Project').prefetch_related('related_work', 'assigned_to', 'comments')
+            tasks = Task.objects.filter(Project=project).select_related('Project').prefetch_related('related_work', 'assigned_to', 'comments')
 
             # Serialize the data
             serializer = TaskSerializer(tasks, many=True)
 
             # Return serialized data
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Task.DoesNotExist:
+        except Project.DoesNotExist:
             return Response(
                 {"detail": "Project not found."}, status=status.HTTP_404_NOT_FOUND
             )
@@ -414,7 +418,7 @@ class ProjectTimelineView(APIView):
     """API endpoint for timeline data with calculated positions and durations"""
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, project_id):
+    def get(self, request, project_uuid):
         """
         Get timeline data for a project with calculated positions and durations
         """
@@ -424,7 +428,7 @@ class ProjectTimelineView(APIView):
             
             # Get project
             try:
-                project = Project.objects.get(id=project_id)
+                project = Project.objects.get(uuid=project_uuid)
             except Project.DoesNotExist:
                 return Response(
                     {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
@@ -439,7 +443,7 @@ class ProjectTimelineView(APIView):
                 )
             
             # Fetch tasks with related data
-            tasks = Task.objects.filter(Project_id=project_id).select_related('Project').prefetch_related('related_work', 'assigned_to', 'comments').order_by('created_at')
+            tasks = Task.objects.filter(Project=project).select_related('Project').prefetch_related('related_work', 'assigned_to', 'comments').order_by('created_at')
             
             if not tasks.exists():
                 return Response({
@@ -708,33 +712,35 @@ class RecentActivitiesView(APIView):
 class ProjectActivitiesView(generics.ListAPIView):
     """
     Get activities for a specific project
-    GET /api/project-management/projects/{project_id}/activities/
+    GET /api/project-management/projects/{project_uuid}/activities/
     """
     serializer_class = ActivitySerializer
     permission_classes = [IsAuthenticated]
     pagination_class = ActivityPagination
 
     def get_queryset(self):
-        project_id = self.kwargs["project_id"]
+        project_uuid = self.kwargs["project_uuid"]
         user = self.request.user
         
         # Ensure user has access to the project
-        if not Project.objects.filter(
-            Q(id=project_id), Q(team__members=user) | Q(created_by=user)
-        ).exists():
+        try:
+            project = Project.objects.get(
+                Q(uuid=project_uuid), Q(team__members=user) | Q(created_by=user)
+            )
+        except Project.DoesNotExist:
             raise NotFound("Project not found or user does not have access.")
         
-        return Activity.objects.filter(project_id=project_id).order_by("-created_at")
+        return Activity.objects.filter(project=project).order_by("-created_at")
 
 
 class SprintListView(APIView):
     """List and create sprints for a project"""
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, project_id):
+    def get(self, request, project_uuid):
         """Get all sprints for a project"""
         try:
-            project = Project.objects.get(id=project_id)
+            project = Project.objects.get(uuid=project_uuid)
         except Project.DoesNotExist:
             return Response(
                 {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
@@ -748,7 +754,7 @@ class SprintListView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        sprints = Sprint.objects.filter(project_id=project_id).order_by('-start_date')
+        sprints = Sprint.objects.filter(project=project).order_by('-start_date')
         
         # Auto-update status for all sprints based on current date
         for sprint in sprints:
@@ -761,10 +767,10 @@ class SprintListView(APIView):
         serializer = SprintSerializer(sprints, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request, project_id):
+    def post(self, request, project_uuid):
         """Create a new sprint"""
         try:
-            project = Project.objects.get(id=project_id)
+            project = Project.objects.get(uuid=project_uuid)
         except Project.DoesNotExist:
             return Response(
                 {"error": "Project not found."}, status=status.HTTP_404_NOT_FOUND
@@ -840,17 +846,17 @@ class SprintDetailView(APIView):
     """Retrieve, update, or delete a sprint"""
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, project_id, sprint_id):
+    def get(self, request, project_uuid, sprint_uuid):
         """Get sprint details"""
         try:
-            sprint = Sprint.objects.get(id=sprint_id, project_id=project_id)
-        except Sprint.DoesNotExist:
+            project = Project.objects.get(uuid=project_uuid)
+            sprint = Sprint.objects.get(uuid=sprint_uuid, project=project)
+        except (Project.DoesNotExist, Sprint.DoesNotExist):
             return Response(
                 {"error": "Sprint not found."}, status=status.HTTP_404_NOT_FOUND
             )
         
         # Check permissions
-        project = sprint.project
         if not (project.created_by == request.user or 
                 (project.team and request.user in project.team.members.all())):
             return Response(
@@ -868,17 +874,17 @@ class SprintDetailView(APIView):
         serializer = SprintSerializer(sprint)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def patch(self, request, project_id, sprint_id):
+    def patch(self, request, project_uuid, sprint_uuid):
         """Update sprint"""
         try:
-            sprint = Sprint.objects.get(id=sprint_id, project_id=project_id)
-        except Sprint.DoesNotExist:
+            project = Project.objects.get(uuid=project_uuid)
+            sprint = Sprint.objects.get(uuid=sprint_uuid, project=project)
+        except (Project.DoesNotExist, Sprint.DoesNotExist):
             return Response(
                 {"error": "Sprint not found."}, status=status.HTTP_404_NOT_FOUND
             )
         
         # Check permissions
-        project = sprint.project
         if not (project.created_by == request.user or 
                 (project.team and request.user in project.team.members.all())):
             return Response(
@@ -907,17 +913,17 @@ class SprintDetailView(APIView):
             return Response(SprintSerializer(sprint).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, project_id, sprint_id):
+    def delete(self, request, project_uuid, sprint_uuid):
         """Delete sprint"""
         try:
-            sprint = Sprint.objects.get(id=sprint_id, project_id=project_id)
-        except Sprint.DoesNotExist:
+            project = Project.objects.get(uuid=project_uuid)
+            sprint = Sprint.objects.get(uuid=sprint_uuid, project=project)
+        except (Project.DoesNotExist, Sprint.DoesNotExist):
             return Response(
                 {"error": "Sprint not found."}, status=status.HTTP_404_NOT_FOUND
             )
         
         # Check permissions
-        project = sprint.project
         if not (project.created_by == request.user or 
                 (project.team and request.user in project.team.members.all())):
             return Response(

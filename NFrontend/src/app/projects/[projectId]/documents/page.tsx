@@ -91,7 +91,7 @@ const ProjectDocumentsPage = () => {
     if (!documentToDelete) return;
 
     try {
-      await documentService.deleteDocument(projectId, documentToDelete.id);
+      await documentService.deleteDocument(projectId, documentToDelete.uuid);
       toast.success("Document deleted successfully");
       setDeleteDialogOpen(false);
       setDocumentToDelete(null);

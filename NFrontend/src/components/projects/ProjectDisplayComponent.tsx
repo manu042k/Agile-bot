@@ -87,7 +87,7 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
       if (!project) {
         return;
       }
-      await projectService.deleteProject(project.id.toString());
+      await projectService.deleteProject(project.uuid);
       router.push("/projects");
       toast.success("Project deleted successfully!");
     } catch (err) {

@@ -47,7 +47,7 @@ export const useProjects = () => {
       const enrichedProjects = await Promise.all(
         fetchedProjects.map(async (project, index) => {
           try {
-            const tasks = await taskService.getTasks(project.id.toString());
+            const tasks = await taskService.getTasks(project.uuid);
             const completedTasks = tasks.filter(t => t.status === TaskStatus.Completed).length;
             
             return {

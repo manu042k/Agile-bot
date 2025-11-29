@@ -102,7 +102,7 @@ const SprintCreateEditDialog = ({
       };
 
       if (isEdit && sprint) {
-        await sprintService.updateSprint(projectId, sprint.id.toString(), sprintData);
+        await sprintService.updateSprint(projectId, sprint.uuid, sprintData);
         toast.success("Sprint updated successfully");
       } else {
         await sprintService.createSprint(projectId, sprintData);

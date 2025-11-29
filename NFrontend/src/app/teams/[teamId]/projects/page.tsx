@@ -139,7 +139,7 @@ const TeamProjectsPage = () => {
         {filteredProjects.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProjects.map((project) => (
-              <Link key={project.id} href={`/projects/${project.id}`}>
+              <Link key={project.id} href={`/projects/${project.uuid}`}>
                 <div className="group relative bg-white rounded-2xl p-6 h-full flex flex-col shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-gray-200 overflow-hidden">
                   {/* Accent Bar */}
                   <div className="absolute top-0 left-0 right-0 h-1.5 bg-gray-900" />

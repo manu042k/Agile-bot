@@ -70,7 +70,7 @@ const DashboardPage = () => {
       try {
         setTasksLoading(true);
         const tasksPromises = projects.map(project => 
-          taskService.getTasks(project.id.toString()).catch(() => [])
+          taskService.getTasks(project.uuid).catch(() => [])
         );
         const tasksArrays = await Promise.all(tasksPromises);
         const tasks = tasksArrays.flat();

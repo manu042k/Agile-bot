@@ -31,7 +31,6 @@ api.interceptors.response.use(
   (error) => {
     // Handle network errors gracefully
     if (error.code === "ERR_NETWORK") {
-      console.error("Network error - backend may be down or CORS issue");
       // Don't show toast for network errors on public pages
       if (typeof window !== "undefined") {
         const currentPath = window.location.pathname;
@@ -49,11 +48,10 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    // Handle 401 Unauthorized
     if (error.response?.status === 401) {
-      // Session expired or invalid
       if (typeof window !== "undefined") {
         const currentPath = window.location.pathname;
-        // Don't redirect if already on login/register/home page or during OAuth callback
         const isAuthPage =
           currentPath === "/" ||
           currentPath === "/login" ||
@@ -69,6 +67,30 @@ api.interceptors.response.use(
         }
       }
     }
+
+    // Handle 403 Forbidden
+    if (error.response?.status === 403) {
+      const errorMessage = error.response?.data?.error || error.response?.data?.detail;
+      if (errorMessage && typeof window !== "undefined") {
+        toast.error(errorMessage);
+      }
+    }
+
+    // Handle 404 Not Found
+    if (error.response?.status === 404) {
+      const errorMessage = error.response?.data?.error || error.response?.data?.detail;
+      if (errorMessage && typeof window !== "undefined") {
+        toast.error(errorMessage);
+      }
+    }
+
+    // Handle 500 Internal Server Error
+    if (error.response?.status === 500) {
+      if (typeof window !== "undefined") {
+        toast.error("Server error. Please try again later.");
+      }
+    }
+
     return Promise.reject(error);
   }
 );

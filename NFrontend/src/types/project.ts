@@ -11,7 +11,8 @@ export enum TeamMemberRole {
   Developer = "developer",
 }
 export interface Project {
-  id: number;
+  id: number;  // Internal ID (for backward compatibility)
+  uuid: string;  // Public-facing UUID for URLs
   name: string;
   description: string;
   visibility: ProjectVisibility;
@@ -125,6 +126,7 @@ export enum SprintStatus {
 
 export interface Sprint {
   id: number;
+  uuid: string;
   project: number;
   name: string;
   description: string;

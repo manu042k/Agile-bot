@@ -322,7 +322,7 @@ const ProjectsPage = () => {
                               {statusProjects.map((project) => (
                                 <Link
                                   key={project.id}
-                                  href={`/projects/${project.id}`}
+                                  href={`/projects/${project.uuid}`}
                                 >
                                   <div className="p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all">
                                     <h4 className="font-medium text-gray-900 mb-2">
@@ -393,7 +393,7 @@ const ProjectsPage = () => {
                               />
                             )}
                             <Link
-                              href={`/projects/${project.id}`}
+                              href={`/projects/${project.uuid}`}
                               className="flex-1 flex flex-col"
                             >
                               {/* Accent Bar */}
@@ -514,7 +514,7 @@ const ProjectsPage = () => {
                                 />
                               )}
                               <Link
-                                href={`/projects/${project.id}`}
+                                href={`/projects/${project.uuid}`}
                                 className="flex items-center gap-4 flex-1"
                               >
                                 <div className="p-2.5 rounded-xl bg-gray-900 shadow-sm flex-shrink-0">

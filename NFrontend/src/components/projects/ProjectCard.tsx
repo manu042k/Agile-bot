@@ -57,7 +57,7 @@ export default function ProjectCard({ project, compact = false }: ProjectCardPro
   };
 
   return (
-    <Link href={`/projects/${project.id}`} className="block group">
+    <Link href={`/projects/${project.uuid}`} className="block group">
       <div className="pm-card p-4 hover:shadow-lg transition-all flex flex-col min-h-[180px]">
         {/* Header with Icon */}
         <div className="flex items-start gap-3 mb-3">
