@@ -18,7 +18,8 @@ const WebSockets = () => {
       socketRef.current.close();
     }
 
-    socketRef.current = new WebSocket("ws://localhost:8000/ws/chat/");
+    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+    socketRef.current = new WebSocket(`${wsUrl}/ws/chat/`);
 
     socketRef.current.onopen = () => {
       console.log("WebSocket connected");

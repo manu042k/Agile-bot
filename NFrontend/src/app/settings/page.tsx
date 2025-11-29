@@ -33,7 +33,6 @@ const SettingsPage = () => {
   
   const tabs = [
     { id: "notifications", label: "Notifications", icon: Bell },
-    { id: "appearance", label: "Appearance", icon: Palette },
     { id: "security", label: "Security", icon: Shield },
   ];
 
@@ -187,49 +186,6 @@ const SettingsPage = () => {
                           </label>
                         </div>
                       ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Appearance Tab */}
-              {activeTab === "appearance" && preferences && (
-                <div className="pm-card p-6 space-y-6">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900">
-                      Appearance
-                    </h2>
-                    <Separator className="my-4" />
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                          Theme
-                        </label>
-                        <div className="grid grid-cols-3 gap-3">
-                          {[
-                            { value: 'light' as const, label: 'Light' },
-                            { value: 'dark' as const, label: 'Dark' },
-                            { value: 'system' as const, label: 'System' }
-                          ].map((theme) => (
-                            <button
-                              key={theme.value}
-                              onClick={() => handleThemeChange(theme.value)}
-                              className={`p-4 border-2 rounded-lg transition-all text-center ${
-                                preferences.theme === theme.value
-                                  ? "border-orange-600 bg-orange-50"
-                                  : "border-gray-200 hover:border-gray-300"
-                              }`}
-                            >
-                              <p className="font-medium text-gray-900">
-                                {theme.label}
-                              </p>
-                            </button>
-                          ))}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                          Choose how Agile Bot looks to you
-                        </p>
-                      </div>
                     </div>
                   </div>
                 </div>
