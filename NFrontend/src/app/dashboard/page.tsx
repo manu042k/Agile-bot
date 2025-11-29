@@ -24,8 +24,13 @@ import { useActivities } from "@/hooks/useActivities";
 import ActivityFeed from "@/components/common/ActivityFeed";
 import StatCard from "@/components/common/StatCard";
 import CreateCard from "@/components/common/CreateCard";
-import { TaskStatus } from "@/types/project";
+import { TaskStatus, Task } from "@/types/project";
 import taskService from "@/services/taskService";
+import TaskCard from "@/components/projects/TaskCard";
+import ProjectCard from "@/components/projects/ProjectCard";
+import DetailsCard from "@/components/common/DetailsCard";
+import api from "@/interceptor/api";
+import { URLS } from "@/types/url-constants";
 
 const DashboardPage = () => {
   const searchParams = useSearchParams();
@@ -41,8 +46,22 @@ const DashboardPage = () => {
   } = useProjects();
   const { activities = [], loading: activitiesLoading } = useActivities({ limit: 10 });
   
-  const [allTasks, setAllTasks] = useState<any[]>([]);
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  // Fetch current user
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await api.get(URLS.USER_ME);
+        setCurrentUser(response.data);
+      } catch (err) {
+        console.error("Error fetching current user:", err);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   // Fetch all tasks across all projects
   useEffect(() => {
@@ -69,15 +88,25 @@ const DashboardPage = () => {
     }
   }, [projects]);
 
-  // Calculate my tasks (show recent tasks - ideally we'd filter by current user from backend)
+  // Calculate my tasks - filter by current user
   const myTasks = useMemo(() => {
-    // For now, show the most recently created tasks
-    // TODO: Add backend endpoint to fetch current user's tasks
+    if (!currentUser) return [];
+    
     return allTasks
-      .filter(task => task.status !== TaskStatus.Completed)
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 4);
-  }, [allTasks]);
+      .filter(task => {
+        // Check if task is not completed
+        if (task.status === TaskStatus.Completed) return false;
+        
+        // Check if current user is assigned to this task
+        if (!task.assigned_to || !Array.isArray(task.assigned_to)) return false;
+        
+        return task.assigned_to.some((assignee: any) => {
+          const assigneeId = typeof assignee === 'object' ? assignee.id : assignee;
+          return assigneeId === currentUser.id;
+        });
+      })
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [allTasks, currentUser]);
 
   // Calculate team members count
   const totalTeamMembers = useMemo(() => {
@@ -90,12 +119,16 @@ const DashboardPage = () => {
     return uniqueMembers.size;
   }, [projects]);
 
-  // Get recent projects (top 3 by updated date)
+  // Get recent projects (sorted by updated date)
   const recentProjects = useMemo(() => {
     return [...projects]
-      .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime())
-      .slice(0, 3);
+      .sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
   }, [projects]);
+
+  // Get top 3 for overview
+  const topRecentProjects = useMemo(() => {
+    return recentProjects.slice(0, 3);
+  }, [recentProjects]);
 
   const loading = projectsLoading || tasksLoading;
 
@@ -245,54 +278,27 @@ const DashboardPage = () => {
             <div className="pm-card p-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">My Tasks</h2>
-                <Link href="/tasks" className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
+                <Link href="/dashboard?tab=my-tasks" className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
                   View all
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
               <Separator className="my-4" />
               {myTasks.length > 0 ? (
-                <div className="space-y-3">
-                  {myTasks.map((task) => {
-                    const projectInfo = projects.find(p => p.id.toString() === task.Project);
-                    return (
-                      <Link key={task.taskid} href={`/projects/${task.Project}`}>
-                        <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all cursor-pointer">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <h3 className="font-medium text-gray-900 mb-1">{task.name}</h3>
-                              <p className="text-sm text-gray-500">{projectInfo?.name || "Unknown Project"}</p>
-                            </div>
-                            {task.priority && (
-                              <span className={`pm-badge ${
-                                task.priority === "high" ? "pm-priority-high" :
-                                task.priority === "medium" ? "pm-priority-medium" :
-                                "pm-priority-low"
-                              }`}>
-                                {task.priority}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                            <div className="flex items-center gap-4 text-xs text-gray-500">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="h-3.5 w-3.5" />
-                                {new Date(task.created_at).toLocaleDateString()}
-                              </span>
-                              <span className={`px-2 py-0.5 rounded text-xs font-medium border ${
-                                task.status === TaskStatus.Completed ? "bg-gray-800 text-white border-gray-800" :
-                                task.status === TaskStatus.Active ? "bg-orange-100 text-orange-800 border-orange-300" :
-                                task.status === TaskStatus.Created ? "bg-blue-100 text-blue-800 border-blue-300" :
-                                "bg-gray-100 text-gray-800 border-gray-300"
-                              }`}>
-                                {task.status}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {myTasks.slice(0, 4).map((task) => (
+                    <TaskCard
+                      key={task.taskid}
+                      task={task}
+                      projectId={task.Project}
+                      compact={true}
+                      onUpdate={(updatedTask) => {
+                        setAllTasks(prev => 
+                          prev.map(t => t.taskid === updatedTask.taskid ? updatedTask : t)
+                        );
+                      }}
+                    />
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
@@ -306,32 +312,20 @@ const DashboardPage = () => {
             <div className="pm-card p-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
-                <Link href="/projects" className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
+                <Link href="/dashboard?tab=projects" className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
                   View all
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
               <Separator className="my-4" />
-              {recentProjects.length > 0 ? (
-                <div className="space-y-4">
-                  {recentProjects.map((project) => (
-                    <Link key={project.id} href={`/projects/${project.id}`}>
-                      <div className="p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-medium text-gray-900">{project.name}</h3>
-                          <span className="text-sm font-medium text-gray-700">{project.progress}%</span>
-                        </div>
-                        <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
-                          <div
-                            className="h-full bg-orange-600 rounded-full transition-all"
-                            style={{ width: `${project.progress}%` }}
-                          />
-                        </div>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>{project.completedTasks}/{project.tasks} tasks completed</span>
-                        </div>
-                      </div>
-                    </Link>
+              {topRecentProjects.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {topRecentProjects.map((project) => (
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                      compact={true}
+                    />
                   ))}
                 </div>
               ) : (
@@ -346,24 +340,39 @@ const DashboardPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Dashboard Details */}
-            <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900">Dashboard Details</h3>
-              <Separator className="my-4" />
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1.5">Active Projects</p>
-                  <p className="text-sm font-medium text-gray-900">{stats.active}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1.5">Completed Projects</p>
-                  <p className="text-sm font-medium text-gray-900">{stats.completed}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 mb-1.5">Total Tasks</p>
-                  <p className="text-sm font-medium text-gray-900">{totalTasks}</p>
-                </div>
-              </div>
-            </div>
+            <DetailsCard
+              title="Dashboard Details"
+              items={[
+                {
+                  icon: FolderKanban,
+                  label: "Total Projects",
+                  value: stats.total,
+                  iconBgColor: "bg-blue-100",
+                  iconColor: "text-blue-600",
+                },
+                {
+                  icon: TrendingUp,
+                  label: "Active Projects",
+                  value: stats.active,
+                  iconBgColor: "bg-orange-100",
+                  iconColor: "text-orange-600",
+                },
+                {
+                  icon: CheckSquare,
+                  label: "Total Tasks",
+                  value: totalTasks,
+                  iconBgColor: "bg-green-100",
+                  iconColor: "text-green-600",
+                },
+                {
+                  icon: Users,
+                  label: "Team Members",
+                  value: totalTeamMembers,
+                  iconBgColor: "bg-purple-100",
+                  iconColor: "text-purple-600",
+                },
+              ]}
+            />
 
             {/* Recent Activity */}
             <ActivityFeed 
@@ -395,47 +404,24 @@ const DashboardPage = () => {
         {tab === "my-tasks" && (
           <div className="space-y-6 mt-6">
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900">My Tasks</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">My Tasks</h2>
+              <p className="text-sm text-gray-500 mb-4">Tasks assigned to you across all projects</p>
               <Separator className="my-4" />
               {myTasks.length > 0 ? (
-                <div className="space-y-3">
-                  {myTasks.map((task) => {
-                    const projectInfo = projects.find(p => p.id.toString() === task.Project);
-                    return (
-                      <Link key={task.taskid} href={`/projects/${task.Project}`}>
-                        <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 mb-1">{task.name}</h3>
-                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                              <span>{projectInfo?.name || "Unknown Project"}</span>
-                              <span>•</span>
-                              <span>Created: {new Date(task.created_at).toLocaleDateString()}</span>
-                              {task.priority && (
-                                <>
-                                  <span>•</span>
-                                  <span className={`px-2 py-1 rounded text-xs ${
-                                    task.priority === "high" ? "pm-priority-high" :
-                                    task.priority === "medium" ? "pm-priority-medium" :
-                                    "pm-priority-low"
-                                  }`}>
-                                    {task.priority}
-                                  </span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                          <span className={`px-2.5 py-1 rounded text-xs font-medium border ${
-                            task.status === TaskStatus.Completed ? "bg-gray-800 text-white border-gray-800" :
-                            task.status === TaskStatus.Active ? "bg-orange-100 text-orange-800 border-orange-300" :
-                            task.status === TaskStatus.Created ? "bg-blue-100 text-blue-800 border-blue-300" :
-                            "bg-gray-100 text-gray-800 border-gray-300"
-                          }`}>
-                            {task.status}
-                          </span>
-                        </div>
-                      </Link>
-                    );
-                  })}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {myTasks.map((task) => (
+                    <TaskCard
+                      key={task.taskid}
+                      task={task}
+                      projectId={task.Project}
+                      compact={true}
+                      onUpdate={(updatedTask) => {
+                        setAllTasks(prev => 
+                          prev.map(t => t.taskid === updatedTask.taskid ? updatedTask : t)
+                        );
+                      }}
+                    />
+                  ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -452,38 +438,16 @@ const DashboardPage = () => {
         {tab === "projects" && (
           <div className="space-y-6 mt-6">
             <div className="pm-card p-6">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Projects</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-1">Recent Projects</h2>
+              <p className="text-sm text-gray-500 mb-4">Your most recently updated projects</p>
               <Separator className="my-4" />
               {recentProjects.length > 0 ? (
-                <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {recentProjects.map((project) => (
-                    <Link key={project.id} href={`/projects/${project.id}`}>
-                      <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:shadow-sm transition-all">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-1">{project.name}</h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
-                            <span>{project.completedTasks}/{project.tasks} tasks completed</span>
-                            <span>•</span>
-                            <span className={`px-2 py-0.5 rounded text-xs font-medium border ${
-                              project.status === "completed" ? "bg-gray-800 text-white border-gray-800" :
-                              project.status === "active" ? "bg-orange-100 text-orange-800 border-orange-300" :
-                              "bg-gray-100 text-gray-800 border-gray-300"
-                            }`}>
-                              {project.status}
-                            </span>
-                          </div>
-                          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-orange-600 rounded-full transition-all"
-                              style={{ width: `${project.progress}%` }}
-                            />
-                          </div>
-                        </div>
-                        <div className="text-right ml-4">
-                          <p className="text-xl font-bold text-gray-900">{project.progress}%</p>
-                        </div>
-                      </div>
-                    </Link>
+                    <ProjectCard
+                      key={project.id}
+                      project={project}
+                    />
                   ))}
                 </div>
               ) : (

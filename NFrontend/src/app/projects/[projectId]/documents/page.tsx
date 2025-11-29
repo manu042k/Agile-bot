@@ -276,16 +276,9 @@ const ProjectDocumentsPage = () => {
                 <FileText className="h-8 w-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No documents yet</h3>
-              <p className="text-sm text-gray-500 mb-6">
+              <p className="text-sm text-gray-500">
                 Upload your first document to get started
               </p>
-              <div className="flex justify-center">
-                <UploadDocumentButton
-                  projectId={projectId}
-                  description="Add new files"
-                  onSuccess={fetchDocuments}
-                />
-              </div>
             </div>
           </div>
         ) : (

@@ -381,8 +381,10 @@ class TaskPatchView(APIView):
 
         serializer = UpdateTaskSerializer(task, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
+            updated_task = serializer.save()
+            # Return full task data with proper serialization
+            response_serializer = TaskSerializer(updated_task)
+            return Response(response_serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -535,6 +537,8 @@ class ProjectTimelineView(APIView):
                             "id": user.id,
                             "email": user.email,
                             "username": user.email.split('@')[0] if user.email else "Unknown",
+                            "first_name": "",  # Not stored in DB
+                            "last_name": "",   # Not stored in DB
                         }
                         for user in task.assigned_to.all()
                     ],
@@ -579,14 +583,30 @@ class CommentListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request, task_id):
-        data = request.data
-        data["task"] = task_id  # Ensure the task_id is included in the comment data
-
-        serializer = CommentSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
+        try:
+            # Get the task
+            task = Task.objects.get(pk=task_id)
+            
+            # Create the comment with user and task
+            comment = Comment.objects.create(
+                user=request.user,
+                task=task,
+                content=request.data.get('content', '')
+            )
+            
+            # Serialize and return
+            serializer = CommentSerializer(comment)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Task.DoesNotExist:
+            return Response(
+                {"error": "Task not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class TriggerTaskGeneration(APIView):

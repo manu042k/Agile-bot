@@ -36,6 +36,7 @@ import { useProjects } from "@/hooks/useProjects";
 import toast from "react-hot-toast";
 import CreateCard from "@/components/common/CreateCard";
 import StatCard from "@/components/common/StatCard";
+import DetailsCard from "@/components/common/DetailsCard";
 
 const ProjectsPage = () => {
   const searchParams = useSearchParams();
@@ -586,20 +587,7 @@ const ProjectsPage = () => {
                           ? "Try adjusting your search"
                           : "Get started by creating your first project"}
                       </p>
-                      {!searchQuery && (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <CreateCard
-                              title="Create Project"
-                              description="New project"
-                              icon={CirclePlus}
-                            />
-                          </DialogTrigger>
-                          <CreateProjectComponent
-                            onSuccess={handleProjectCreated}
-                          />
-                        </Dialog>
-                      )}
+
                     </div>
                   </div>
                 )}
@@ -609,34 +597,39 @@ const ProjectsPage = () => {
             {/* Sidebar */}
             <div className="space-y-6">
               {/* Projects Details */}
-              <div className="pm-card p-5">
-                <h3 className="font-semibold text-gray-900 mb-4">
-                  Projects Details
-                </h3>
-                <Separator className="my-4" />
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1.5">
-                      Total Projects
-                    </p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {stats.total}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1.5">Active</p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {stats.active}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1.5">Completed</p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {stats.completed}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <DetailsCard
+                title="Projects Details"
+                items={[
+                  {
+                    icon: FolderKanban,
+                    label: "Total Projects",
+                    value: stats.total,
+                    iconBgColor: "bg-blue-100",
+                    iconColor: "text-blue-600",
+                  },
+                  {
+                    icon: TrendingUp,
+                    label: "Active",
+                    value: stats.active,
+                    iconBgColor: "bg-orange-100",
+                    iconColor: "text-orange-600",
+                  },
+                  {
+                    icon: CheckCircle2,
+                    label: "Completed",
+                    value: stats.completed,
+                    iconBgColor: "bg-green-100",
+                    iconColor: "text-green-600",
+                  },
+                  {
+                    icon: Clock,
+                    label: "Planning",
+                    value: stats.planning,
+                    iconBgColor: "bg-gray-100",
+                    iconColor: "text-gray-600",
+                  },
+                ]}
+              />
 
               {/* Recent Activity */}
               <ActivityFeed limit={5} />

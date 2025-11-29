@@ -110,6 +110,7 @@ export interface Task {
   Project: string;
   created_by: CreatedBy;
   sprint?: number | null;
+  tags?: string[];
   created_at: string;
   updated_at: string;
   task_number: string;

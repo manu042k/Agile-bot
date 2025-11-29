@@ -4,6 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { Filter, Search, User, CheckCircle2, MessageSquare, FileText, Users, Calendar, Activity, UserCircle, FolderOpen, Loader2, Folder } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import { Separator } from "@/components/ui/separator";
+import StatCard from "@/components/common/StatCard";
+import DetailsCard from "@/components/common/DetailsCard";
 import useActivities from "@/hooks/useActivities";
 import { useUser } from "@/hooks/useUser";
 import { Activity as ActivityType } from "@/types/activity";
@@ -32,9 +34,13 @@ const ActivityPage = () => {
       // Apply tab filters
       let matchesTab = true;
       if (tab === "my-activity") {
-        matchesTab = activity.user?.email === currentUser?.email;
+        // Show only activities by the current user
+        matchesTab = activity.user_email === currentUser?.email;
       } else if (tab === "projects") {
-        matchesTab = activity.activity_type.includes("project") || activity.activity_type.includes("task");
+        // Show only project and task related activities
+        matchesTab = activity.activity_type.includes("project") || 
+                     activity.activity_type.includes("task") ||
+                     activity.activity_type.includes("document");
       }
       
       return matchesSearch && matchesFilter && matchesTab;
@@ -110,7 +116,7 @@ const ActivityPage = () => {
         description="Track all activities across your projects and teams"
         icon={Activity}
         tabs={[
-          { icon: Activity, label: "Activity", href: "/activity" },
+          { icon: Activity, label: "All Activity", href: "/activity" },
           { icon: UserCircle, label: "My Activity", href: "/activity?tab=my-activity" },
           { icon: FolderOpen, label: "Projects", href: "/activity?tab=projects" },
         ]}
@@ -137,33 +143,6 @@ const ActivityPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-4">
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Filter className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Filter Activity</h3>
-                    <p className="text-xs text-gray-500">Advanced filters</p>
-                  </div>
-                </div>
-              </button>
-
-              <button className="pm-card p-5 text-left group hover:shadow-md transition-all">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-gray-100 group-hover:bg-gray-200 transition-colors">
-                    <Search className="h-5 w-5 text-gray-700" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-0.5">Search Activity</h3>
-                    <p className="text-xs text-gray-500">Find activities</p>
-                  </div>
-                </div>
-              </button>
-            </div>
-
             {/* Activity Overview */}
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900">Activity Overview</h2>
@@ -173,34 +152,31 @@ const ActivityPage = () => {
                   <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between text-sm mb-2">
-                      <span className="text-gray-600">Total Activities</span>
-                      <span className="font-medium text-gray-900">{activities.length}</span>
-                    </div>
-                    <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gray-900 rounded-full transition-all"
-                        style={{ width: `${Math.min((activities.length / 20) * 100, 100)}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-100">
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">{activities.length}</p>
-                      <p className="text-xs text-gray-500 mt-1">Total Activities</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">{activityTypes.size}</p>
-                      <p className="text-xs text-gray-500 mt-1">Activity Types</p>
-                    </div>
-                    <div>
-                      <p className="text-2xl font-semibold text-gray-900">{activeUsers.size}</p>
-                      <p className="text-xs text-gray-500 mt-1">Active Users</p>
-                    </div>
-                  </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <StatCard
+                    icon={Activity}
+                    value={activities.length}
+                    label="Total Activities"
+                    iconBgColor="bg-blue-100"
+                    iconColor="text-blue-600"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                  />
+                  <StatCard
+                    icon={FileText}
+                    value={activityTypes.size}
+                    label="Activity Types"
+                    iconBgColor="bg-purple-100"
+                    iconColor="text-purple-600"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                  />
+                  <StatCard
+                    icon={Users}
+                    value={activeUsers.size}
+                    label="Active Users"
+                    iconBgColor="bg-green-100"
+                    iconColor="text-green-600"
+                    className="p-0 border-0 shadow-none bg-transparent"
+                  />
                 </div>
               )}
             </div>
@@ -263,34 +239,41 @@ const ActivityPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Activity Details */}
-            <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900">Activity Details</h3>
-              <Separator className="my-4" />
-              {loading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1.5">Total Activities</p>
-                    <p className="text-sm font-medium text-gray-900">{activities.length}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1.5">Activity Types</p>
-                    <p className="text-sm font-medium text-gray-900">{activityTypes.size}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1.5">Active Users</p>
-                    <p className="text-sm font-medium text-gray-900">{activeUsers.size}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500 mb-1.5">Filtered Results</p>
-                    <p className="text-sm font-medium text-gray-900">{filteredActivities.length}</p>
-                  </div>
-                </div>
-              )}
-            </div>
+            {!loading && (
+              <DetailsCard
+                title="Activity Details"
+                items={[
+                  {
+                    icon: Activity,
+                    label: "Total Activities",
+                    value: activities.length,
+                    iconBgColor: "bg-blue-100",
+                    iconColor: "text-blue-600",
+                  },
+                  {
+                    icon: FileText,
+                    label: "Activity Types",
+                    value: activityTypes.size,
+                    iconBgColor: "bg-purple-100",
+                    iconColor: "text-purple-600",
+                  },
+                  {
+                    icon: Users,
+                    label: "Active Users",
+                    value: activeUsers.size,
+                    iconBgColor: "bg-green-100",
+                    iconColor: "text-green-600",
+                  },
+                  {
+                    icon: Search,
+                    label: "Filtered Results",
+                    value: filteredActivities.length,
+                    iconBgColor: "bg-orange-100",
+                    iconColor: "text-orange-600",
+                  },
+                ]}
+              />
+            )}
 
             {/* Recent Activity */}
             <div className="pm-card p-5">

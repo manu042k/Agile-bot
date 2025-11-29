@@ -1,67 +1,154 @@
 "use client";
 import { useState } from "react";
-import { Plus, Search, Filter, Calendar, User, Flag, MoreVertical, List, LayoutGrid, CheckSquare, ListTodo, UserCheck, CheckCircle2, FileText, PlayCircle } from "lucide-react";
-import Link from "next/link";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { useParams, useSearchParams } from "next/navigation";
+import { Plus, Search, List, LayoutGrid, CheckSquare, ListTodo, UserCheck, CheckCircle2, FileText, PlayCircle } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import PageHeader from "@/components/common/PageHeader";
-import TaskCreateComponent from "@/components/projects/TaskCreateComponent";
-import { getPriorityClass } from "@/lib/colorUtils";
+import TaskCard from "@/components/projects/TaskCard";
 import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
 import StatCard from "@/components/common/StatCard";
-import CreateCard from "@/components/common/CreateCard";
+import DetailsCard from "@/components/common/DetailsCard";
+import { Task, TaskStatus, TaskPriority, TaskSize, CreatedBy } from "@/types/project";
 
-// Mock tasks data
-const mockTasks = [
-  { id: 1, title: "Implement user authentication", project: "E-Commerce Platform", assignee: "John Doe", dueDate: "2024-02-15", priority: "high", status: "in_progress", tags: ["Backend", "Security"] },
-  { id: 2, title: "Design dashboard UI", project: "Analytics Dashboard", assignee: "Jane Smith", dueDate: "2024-02-18", priority: "medium", status: "todo", tags: ["Frontend", "UI"] },
-  { id: 3, title: "Write API documentation", project: "Mobile Banking App", assignee: "Mike Johnson", dueDate: "2024-02-20", priority: "low", status: "todo", tags: ["Documentation"] },
-  { id: 4, title: "Review pull request #234", project: "E-Commerce Platform", assignee: "Sarah Wilson", dueDate: "2024-02-14", priority: "high", status: "todo", tags: ["Code Review"] },
-  { id: 5, title: "Set up CI/CD pipeline", project: "AI Analytics Dashboard", assignee: "Alex Brown", dueDate: "2024-02-16", priority: "medium", status: "in_progress", tags: ["DevOps"] },
-  { id: 6, title: "Database schema design", project: "Mobile Banking App", assignee: "Chris Lee", dueDate: "2024-02-17", priority: "high", status: "done", tags: ["Database"] },
+// Mock tasks data - converted to Task type
+const mockTasks: Task[] = [
+  { 
+    taskid: "1", 
+    name: "Implement user authentication", 
+    description: "Add OAuth and JWT authentication",
+    details: "Implement secure user authentication system",
+    Project: "1", 
+    assigned_to: [{ id: 1, email: "john@example.com", username: "John Doe", first_name: "John", last_name: "Doe" }], 
+    priority: TaskPriority.High, 
+    status: TaskStatus.Active, 
+    size: TaskSize.Medium,
+    tags: ["Backend", "Security"],
+    comments: [],
+    related_work: [],
+    created_by: CreatedBy.USER,
+    task_number: "1",
+    created_at: "2024-02-10T10:00:00Z",
+    updated_at: "2024-02-15T10:00:00Z"
+  },
+  { 
+    taskid: "2", 
+    name: "Design dashboard UI", 
+    description: "Create modern dashboard interface",
+    details: "Design responsive dashboard UI",
+    Project: "2", 
+    assigned_to: [{ id: 2, email: "jane@example.com", username: "Jane Smith", first_name: "Jane", last_name: "Smith" }], 
+    priority: TaskPriority.Normal, 
+    status: TaskStatus.Created, 
+    size: TaskSize.Large,
+    tags: ["Frontend", "UI"],
+    comments: [],
+    related_work: [],
+    created_by: CreatedBy.USER,
+    task_number: "2",
+    created_at: "2024-02-12T10:00:00Z",
+    updated_at: "2024-02-18T10:00:00Z"
+  },
+  { 
+    taskid: "3", 
+    name: "Write API documentation", 
+    description: "Document all API endpoints",
+    details: "Complete API documentation",
+    Project: "3", 
+    assigned_to: [{ id: 3, email: "mike@example.com", username: "Mike Johnson", first_name: "Mike", last_name: "Johnson" }], 
+    priority: TaskPriority.Low, 
+    status: TaskStatus.Created, 
+    size: TaskSize.Small,
+    tags: ["Documentation"],
+    comments: [],
+    related_work: [],
+    created_by: CreatedBy.USER,
+    task_number: "3",
+    created_at: "2024-02-13T10:00:00Z",
+    updated_at: "2024-02-20T10:00:00Z"
+  },
+  { 
+    taskid: "4", 
+    name: "Review pull request #234", 
+    description: "Code review for authentication PR",
+    details: "Review and approve PR",
+    Project: "1", 
+    assigned_to: [{ id: 4, email: "sarah@example.com", username: "Sarah Wilson", first_name: "Sarah", last_name: "Wilson" }], 
+    priority: TaskPriority.High, 
+    status: TaskStatus.Created, 
+    size: TaskSize.Small,
+    tags: ["Code Review"],
+    comments: [],
+    related_work: [],
+    created_by: CreatedBy.USER,
+    task_number: "4",
+    created_at: "2024-02-11T10:00:00Z",
+    updated_at: "2024-02-14T10:00:00Z"
+  },
+  { 
+    taskid: "5", 
+    name: "Set up CI/CD pipeline", 
+    description: "Configure automated deployment",
+    details: "Setup CI/CD with GitHub Actions",
+    Project: "2", 
+    assigned_to: [{ id: 5, email: "alex@example.com", username: "Alex Brown", first_name: "Alex", last_name: "Brown" }], 
+    priority: TaskPriority.Normal, 
+    status: TaskStatus.Active, 
+    size: TaskSize.Large,
+    tags: ["DevOps"],
+    comments: [],
+    related_work: [],
+    created_by: CreatedBy.USER,
+    task_number: "5",
+    created_at: "2024-02-14T10:00:00Z",
+    updated_at: "2024-02-16T10:00:00Z"
+  },
+  { 
+    taskid: "6", 
+    name: "Database schema design", 
+    description: "Design database structure",
+    details: "Create optimized database schema",
+    Project: "3", 
+    assigned_to: [{ id: 6, email: "chris@example.com", username: "Chris Lee", first_name: "Chris", last_name: "Lee" }], 
+    priority: TaskPriority.High, 
+    status: TaskStatus.Completed, 
+    size: TaskSize.Medium,
+    tags: ["Database"],
+    comments: [],
+    related_work: [],
+    created_by: CreatedBy.USER,
+    task_number: "6",
+    created_at: "2024-02-09T10:00:00Z",
+    updated_at: "2024-02-17T10:00:00Z"
+  },
 ];
 
 const TasksPage = () => {
-  const params = useParams();
   const searchParams = useSearchParams();
   const tab = searchParams.get("tab");
   const [viewMode, setViewMode] = useState<"list" | "board">("list");
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  // For global tasks, use first project or allow selection
-  const defaultProjectId = "1";
 
   // Mock current user for filtering
-  const currentUser = "John Doe";
+  const currentUserEmail = "john@example.com";
 
   const filteredTasks = mockTasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         task.project.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         task.assignee.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         task.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filterStatus === "all" || task.status === filterStatus;
     
     // Apply tab filters
     let matchesTab = true;
     if (tab === "my-tasks") {
-      matchesTab = task.assignee === currentUser;
+      matchesTab = task.assigned_to.some((assignee: any) => assignee.email === currentUserEmail);
     } else if (tab === "assigned") {
-      matchesTab = task.assignee !== null && task.assignee !== "";
-    } else if (tab === "completed") {
-      matchesTab = task.status === "done";
+      matchesTab = task.assigned_to && task.assigned_to.length > 0;
+    } else if (tab === "done") {
+      matchesTab = task.status === TaskStatus.Completed;
     }
     
     return matchesSearch && matchesFilter && matchesTab;
   });
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "done": return "pm-status-done";
-      case "in_progress": return "pm-status-progress";
-      case "todo": return "pm-status-todo";
-      default: return "pm-status-backlog";
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,41 +157,30 @@ const TasksPage = () => {
         description="Manage and track all your tasks across projects"
         icon={CheckSquare}
         tabs={[
-          { icon: CheckSquare, label: "Tasks", href: "/tasks" },
+          { icon: CheckSquare, label: "All Tasks", href: "/tasks" },
           { icon: ListTodo, label: "My Tasks", href: "/tasks?tab=my-tasks" },
           { icon: UserCheck, label: "Assigned", href: "/tasks?tab=assigned" },
-          { icon: CheckCircle2, label: "Completed", href: "/tasks?tab=completed" },
+          { icon: CheckCircle2, label: "Done", href: "/tasks?tab=done" },
         ]}
         searchPlaceholder="Search tasks..."
         searchValue={searchQuery}
         onSearchChange={(e) => setSearchQuery(e.target.value)}
         viewModeButtons={
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
-                title="List view"
-              >
-                <List className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("board")}
-                className={`p-2 rounded transition-colors ${viewMode === "board" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
-                title="Board view"
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </button>
-            </div>
-            <Dialog>
-              <DialogTrigger asChild>
-                <button className="pm-button-primary inline-flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  New Task
-                </button>
-              </DialogTrigger>
-              <TaskCreateComponent projectId={defaultProjectId} />
-            </Dialog>
+          <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 rounded transition-colors ${viewMode === "list" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+              title="List view"
+            >
+              <List className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode("board")}
+              className={`p-2 rounded transition-colors ${viewMode === "board" ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-900"}`}
+              title="Board view"
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
           </div>
         }
       />
@@ -114,28 +190,6 @@ const TasksPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-4">
-              <Dialog>
-                <DialogTrigger asChild>
-                  <CreateCard
-                    title="Create Task"
-                    description="New task"
-                    icon={Plus}
-                  />
-                </DialogTrigger>
-                <TaskCreateComponent projectId={defaultProjectId} />
-              </Dialog>
-
-              <CreateCard
-                title="Filter Tasks"
-                description="Advanced filters"
-                icon={Filter}
-                iconBgColor="bg-gray-100 group-hover:bg-gray-200"
-                iconColor="text-gray-700"
-              />
-            </div>
-
             {/* Tasks Overview */}
             <div className="pm-card p-6">
               <h2 className="text-lg font-semibold text-gray-900">Tasks Overview</h2>
@@ -145,13 +199,13 @@ const TasksPage = () => {
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-gray-600">Completion Rate</span>
                     <span className="font-medium text-gray-900">
-                      {Math.round((mockTasks.filter(t => t.status === "done").length / mockTasks.length) * 100)}%
+                      {Math.round((mockTasks.filter(t => t.status === TaskStatus.Completed).length / mockTasks.length) * 100)}%
                     </span>
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-orange-600 rounded-full transition-all"
-                      style={{ width: `${Math.round((mockTasks.filter(t => t.status === "done").length / mockTasks.length) * 100)}%` }}
+                      style={{ width: `${Math.round((mockTasks.filter(t => t.status === TaskStatus.Completed).length / mockTasks.length) * 100)}%` }}
                     />
                   </div>
                 </div>
@@ -167,7 +221,7 @@ const TasksPage = () => {
                   />
                   <StatCard
                     icon={CheckCircle2}
-                    value={mockTasks.filter(t => t.status === "done").length}
+                    value={mockTasks.filter(t => t.status === TaskStatus.Completed).length}
                     label="Completed"
                     iconBgColor="bg-green-100"
                     iconColor="text-green-600"
@@ -175,7 +229,7 @@ const TasksPage = () => {
                   />
                   <StatCard
                     icon={PlayCircle}
-                    value={mockTasks.filter(t => t.status === "in_progress").length}
+                    value={mockTasks.filter(t => t.status === TaskStatus.Active).length}
                     label="In Progress"
                     iconBgColor="bg-orange-100"
                     iconColor="text-orange-600"
@@ -191,68 +245,18 @@ const TasksPage = () => {
               <Separator className="my-4" />
               {viewMode === "list" ? (
                 filteredTasks.length > 0 ? (
-                  <div className="space-y-3">
-                    {filteredTasks.map((task) => {
-                      // Extract project ID from task (assuming task has projectId or we can derive it)
-                      const projectId = task.id % 3 + 1; // Mock: derive from task ID for demo
-                      return (
-                        <Link key={task.id} href={`/projects/${projectId}/task/${task.id}`}>
-                          <div className="pm-card p-5 hover:shadow-md transition-all cursor-pointer">
-                            <div className="flex items-start gap-4">
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <div className={`pm-status-dot ${getStatusColor(task.status)} flex-shrink-0 mt-1.5`} />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                    <h3 className="font-medium text-gray-900 text-base">{task.title}</h3>
-                                    <span className={`pm-badge inline-flex items-center gap-1 ${getPriorityClass(task.priority)} flex-shrink-0`}>
-                                      <Flag className="h-3 w-3" />
-                                      {task.priority}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-4 text-sm text-gray-500 flex-wrap">
-                                    <Link 
-                                      href={`/projects/${projectId}`} 
-                                      className="hover:text-gray-900 flex items-center gap-1.5"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
-                                      {task.project}
-                                    </Link>
-                                    <span className="flex items-center gap-1.5">
-                                      <User className="h-3.5 w-3.5 flex-shrink-0" />
-                                      {task.assignee}
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                      <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
-                                      {task.dueDate}
-                                    </span>
-                                  </div>
-                                  {task.tags && task.tags.length > 0 && (
-                                    <div className="flex items-center gap-2 mt-3 flex-wrap">
-                                      {task.tags.map((tag, idx) => (
-                                        <span key={idx} className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-600 border border-gray-200">
-                                          {tag}
-                                        </span>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              <button 
-                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
-                                title="More options"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                }}
-                              >
-                                <MoreVertical className="h-4 w-4 text-gray-500" />
-                              </button>
-                            </div>
-                          </div>
-                        </Link>
-                      );
-                    })}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredTasks.map((task) => (
+                      <TaskCard
+                        key={task.taskid}
+                        task={task}
+                        projectId={task.Project}
+                        onUpdate={(updatedTask) => {
+                          // Handle task update if needed
+                          console.log("Task updated:", updatedTask);
+                        }}
+                      />
+                    ))}
                   </div>
                 ) : (
                   <div className="text-center py-12">
@@ -260,64 +264,45 @@ const TasksPage = () => {
                       <Search className="h-8 w-8 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">No tasks found</h3>
-                    <p className="text-sm text-gray-500 mb-6">
+                    <p className="text-sm text-gray-500">
                       {searchQuery || filterStatus !== "all" 
                         ? "Try adjusting your filters" 
-                        : "Get started by creating your first task"}
+                        : "No tasks available"}
                     </p>
-                    {!searchQuery && filterStatus === "all" && (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <CreateCard
-                            title="Create Task"
-                            description="New task"
-                            icon={Plus}
-                          />
-                        </DialogTrigger>
-                        <TaskCreateComponent projectId={defaultProjectId} />
-                      </Dialog>
-                    )}
                   </div>
                 )
               ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {["todo", "in_progress", "review", "done"].map((status) => {
-              const statusTasks = filteredTasks.filter(t => {
-                if (status === "review") return false;
-                return t.status === status;
-              });
+            {[
+              { key: TaskStatus.Backlog, label: "Backlog", dotClass: "pm-status-backlog" },
+              { key: TaskStatus.Created, label: "Created", dotClass: "pm-status-todo" },
+              { key: TaskStatus.Active, label: "In Progress", dotClass: "pm-status-progress" },
+              { key: TaskStatus.Completed, label: "Done", dotClass: "pm-status-done" }
+            ].map((statusConfig) => {
+              const statusTasks = filteredTasks.filter(t => t.status === statusConfig.key);
               return (
-                <div key={status} className="flex flex-col">
+                <div key={statusConfig.key} className="flex flex-col">
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <div className={`pm-status-dot ${
-                          status === "done" ? "pm-status-done" :
-                          status === "in_progress" ? "pm-status-progress" :
-                          status === "todo" ? "pm-status-todo" :
-                          "pm-status-backlog"
-                        }`} />
-                        <h3 className="font-semibold text-gray-900 capitalize text-sm">{status.replace("_", " ")}</h3>
+                        <div className={`pm-status-dot ${statusConfig.dotClass}`} />
+                        <h3 className="font-semibold text-gray-900 text-sm">{statusConfig.label}</h3>
                       </div>
                       <span className="pm-badge">{statusTasks.length}</span>
                     </div>
                   </div>
                   <div className="space-y-3 flex-1 min-h-[200px]">
                     {statusTasks.map((task) => (
-                      <div key={task.id} className="pm-card p-4 cursor-pointer hover:shadow-md transition-all">
-                        <h4 className="font-medium text-gray-900 text-sm mb-2 line-clamp-2">{task.title}</h4>
-                        <div className="flex items-center justify-between text-xs text-gray-500 mt-3">
-                          <span className="truncate flex-1 min-w-0">{task.project}</span>
-                          <span className={`pm-badge ml-2 flex-shrink-0 ${getPriorityClass(task.priority)}`}>
-                            {task.priority}
-                          </span>
-                        </div>
-                      </div>
+                      <TaskCard
+                        key={task.taskid}
+                        task={task}
+                        projectId={task.Project}
+                        compact={true}
+                        onUpdate={(updatedTask) => {
+                          console.log("Task updated:", updatedTask);
+                        }}
+                      />
                     ))}
-                    <button className="pm-card p-3 text-center text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-all border-dashed">
-                      <Plus className="h-4 w-4 mx-auto mb-1" />
-                      Add task
-                    </button>
                   </div>
                 </div>
               );
@@ -330,29 +315,39 @@ const TasksPage = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Task Details */}
-            <div className="pm-card p-5">
-              <h3 className="font-semibold text-gray-900">Task Details</h3>
-              <Separator className="my-4" />
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1.5">Status</p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">To Do</span>
-                      <span className="text-sm font-medium text-gray-900">{mockTasks.filter(t => t.status === "todo").length}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">In Progress</span>
-                      <span className="text-sm font-medium text-gray-900">{mockTasks.filter(t => t.status === "in_progress").length}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Done</span>
-                      <span className="text-sm font-medium text-gray-900">{mockTasks.filter(t => t.status === "done").length}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <DetailsCard
+              title="Task Details"
+              items={[
+                {
+                  icon: FileText,
+                  label: "Total Tasks",
+                  value: mockTasks.length,
+                  iconBgColor: "bg-blue-100",
+                  iconColor: "text-blue-600",
+                },
+                {
+                  icon: CheckCircle2,
+                  label: "Completed",
+                  value: mockTasks.filter(t => t.status === TaskStatus.Completed).length,
+                  iconBgColor: "bg-green-100",
+                  iconColor: "text-green-600",
+                },
+                {
+                  icon: PlayCircle,
+                  label: "In Progress",
+                  value: mockTasks.filter(t => t.status === TaskStatus.Active).length,
+                  iconBgColor: "bg-orange-100",
+                  iconColor: "text-orange-600",
+                },
+                {
+                  icon: FileText,
+                  label: "Backlog",
+                  value: mockTasks.filter(t => t.status === TaskStatus.Backlog).length,
+                  iconBgColor: "bg-gray-100",
+                  iconColor: "text-gray-600",
+                },
+              ]}
+            />
 
             {/* Recent Activity */}
             <ActivityFeed limit={5} />

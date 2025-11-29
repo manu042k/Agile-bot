@@ -13,6 +13,7 @@ import {
   Bell,
   Search,
   Command,
+  Activity,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -32,7 +33,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   // Don't show sidebar on auth pages
   const authPages = [
@@ -61,11 +61,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     if (isAuthPage) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + K for search
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setSearchOpen(true);
-      }
       // Cmd/Ctrl + P for create project
       if ((e.metaKey || e.ctrlKey) && e.key === "p") {
         e.preventDefault();
@@ -81,15 +76,11 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         e.preventDefault();
         router.push("/tasks");
       }
-      // Escape to close search
-      if (e.key === "Escape" && searchOpen) {
-        setSearchOpen(false);
-      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [searchOpen, router, isAuthPage]);
+  }, [router, isAuthPage]);
 
   const mainNavItems = [
     {
@@ -109,6 +100,12 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       href: "/tasks",
       icon: CheckSquare,
       active: pathname.startsWith("/tasks"),
+    },
+    {
+      name: "Activity",
+      href: "/activity",
+      icon: Activity,
+      active: pathname.startsWith("/activity"),
     },
     {
       name: "Teams",
@@ -262,22 +259,8 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
 
           {/* Search */}
-          <div className="hidden lg:flex flex-1 max-w-md">
-            <button
-              onClick={() => setSearchOpen(true)}
-              className="relative w-full flex items-center gap-3 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-500 hover:border-gray-300 transition-colors"
-            >
-              <Search className="h-4 w-4 text-gray-400" />
-              <span className="flex-1 text-left">Search...</span>
-              <div className="flex items-center gap-1 text-xs text-gray-400">
-                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200">
-                  ⌘
-                </kbd>
-                <kbd className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200">
-                  K
-                </kbd>
-              </div>
-            </button>
+          <div className="hidden lg:flex">
+            <GlobalSearch />
           </div>
 
           {/* Right Side Actions */}
@@ -314,9 +297,6 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto relative">{children}</main>
       </div>
-
-      {/* Global Search Modal */}
-      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </div>
   );
 };

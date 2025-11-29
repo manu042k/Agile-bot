@@ -89,7 +89,7 @@ export default function ProjectHeader({
   if (loading) {
     return (
       <div className="sticky top-0 z-50 glass-navbar">
-        <div className="px-6 py-6 flex items-center justify-center">
+        <div className="px-6 py-4 flex items-center justify-center h-24">
           <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function ProjectHeader({
   if (!project) {
     return (
       <div className="sticky top-0 z-50 glass-navbar">
-        <div className="px-6 py-6">
+        <div className="px-6 py-4 h-24 flex items-center">
           <p className="text-red-600">Project not found</p>
         </div>
       </div>
@@ -108,32 +108,31 @@ export default function ProjectHeader({
 
   return (
     <div className="sticky top-0 z-50 glass-navbar">
-      <div className="px-6 py-6 space-y-6">
-        <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-lg bg-white/60 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-            <FileText className="h-6 w-6 text-orange-600" />
+      <div className="px-6 py-4">
+        {/* Project Info - Compact */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-lg bg-white/60 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
+            <FileText className="h-5 w-5 text-orange-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-xl font-bold text-gray-900 truncate">
               {project.name}
             </h1>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-sm text-gray-600 truncate">
               {project.description}
             </p>
           </div>
         </div>
 
-        <Separator className="bg-white/30" />
-
         {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide -mx-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                   item.active
                     ? "bg-orange-600 text-white shadow-lg"
                     : "text-gray-700 hover:bg-white/50 hover:text-gray-900"

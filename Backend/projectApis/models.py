@@ -228,6 +228,7 @@ class Task(models.Model):
     sprint = models.ForeignKey(
         "Sprint", on_delete=models.SET_NULL, blank=True, null=True, related_name="tasks"
     )
+    tags = models.JSONField(default=list, blank=True, help_text="Task tags like design, frontend, backend, etc.")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

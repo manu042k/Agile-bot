@@ -271,6 +271,18 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_TIMEZONE = "UTC"
 
+# Celery Beat Schedule - Periodic Tasks
+CELERY_BEAT_SCHEDULE = {
+    'move-unfinished-tasks-to-backlog': {
+        'task': 'projectApis.tasks.move_unfinished_tasks_to_backlog',
+        'schedule': 3600.0,  # Run every hour (3600 seconds)
+        # Alternative schedules:
+        # 'schedule': 300.0,  # Every 5 minutes (for testing)
+        # 'schedule': crontab(hour=0, minute=0),  # Daily at midnight
+        # 'schedule': crontab(hour='*/6'),  # Every 6 hours
+    },
+}
+
 # Cache configuration (for storing Google user info temporarily)
 CACHES = {
     'default': {

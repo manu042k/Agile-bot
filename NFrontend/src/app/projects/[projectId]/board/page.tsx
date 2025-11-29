@@ -22,7 +22,13 @@ import { getStatusColumnColor } from "@/lib/colorUtils";
 import { getStatusLabel } from "@/lib/statusUtils";
 import taskService from "@/services/taskService";
 import sprintService from "@/services/sprintService";
-import { Task, TaskStatus, TaskPriority, Sprint, SprintStatus } from "@/types/project";
+import {
+  Task,
+  TaskStatus,
+  TaskPriority,
+  Sprint,
+  SprintStatus,
+} from "@/types/project";
 import toast from "react-hot-toast";
 
 interface Column {
@@ -63,10 +69,12 @@ function DroppableColumn({
   column,
   tasks,
   projectId,
+  onTaskUpdate,
 }: {
   column: Column;
   tasks: Task[];
   projectId: string;
+  onTaskUpdate: () => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -112,6 +120,7 @@ function DroppableColumn({
                   projectId={projectId}
                   compact={true}
                   draggable={true}
+                  onUpdate={onTaskUpdate}
                 />
               ))
             ) : (
@@ -127,6 +136,15 @@ function DroppableColumn({
 }
 
 const BoardPage = () => {
+    // Modal state for task details
+    const [modalTask, setModalTask] = useState<Task | null>(null);
+    React.useEffect(() => {
+      const handler = (e: any) => {
+        setModalTask(e.detail);
+      };
+      window.addEventListener("openTaskModal", handler);
+      return () => window.removeEventListener("openTaskModal", handler);
+    }, []);
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -138,76 +156,76 @@ const BoardPage = () => {
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filteredSprints, setFilteredSprints] = useState<Sprint[]>([]);
 
-  const fetchSprint = async () => {
-    // If sprintId is provided in URL, use that
-    if (sprintId) {
-      try {
-        const sprintData = await sprintService.getSprint(projectId, sprintId);
-        setSprint(sprintData);
-        return sprintData;
-      } catch (err: any) {
-        console.error("Error fetching sprint:", err);
-        return null;
-      }
-    }
-
-    // Otherwise, find the current active sprint
-    try {
-      const sprints = await sprintService.getSprints(projectId);
-      const activeSprint = sprints.find(
-        (s: Sprint) => s.status === SprintStatus.Active || s.auto_status === SprintStatus.Active
-      );
-      if (activeSprint) {
-        setSprint(activeSprint);
-        return activeSprint;
-      } else {
-        setSprint(null);
-        return null;
-      }
-    } catch (err: any) {
-      console.error("Error fetching sprints:", err);
-      return null;
-    }
-  };
-
-  const fetchTasks = async (currentSprint: Sprint | null = null) => {
+  // Fetch tasks and sprint data
+  const fetchTasks = async () => {
     try {
       setLoading(true);
-      const fetchedTasks = await taskService.getTasks(projectId);
+      setError(null);
 
-      // Filter by sprint if sprintId is provided or if we have a current sprint
-      let filteredTasks = fetchedTasks;
-      const sprintToUse = currentSprint || sprint;
-      const currentSprintId = sprintId || sprintToUse?.id?.toString();
-      if (currentSprintId) {
-        filteredTasks = fetchedTasks.filter(
-          (task: Task) => task.sprint && task.sprint.toString() === currentSprintId
-        );
+      // Fetch all sprints first
+      const sprintsData = await sprintService.getSprints(projectId);
+      setFilteredSprints(sprintsData);
+
+      // Determine which sprint to load
+      let targetSprintId = sprintId;
+      
+      if (!targetSprintId && sprintsData.length > 0) {
+        // No sprint specified - find the current active sprint
+        const activeSprint = sprintsData.find(s => s.status === SprintStatus.Active);
+        
+        if (activeSprint) {
+          // Redirect to the active sprint
+          router.replace(`/projects/${projectId}/board?sprint=${activeSprint.id}`);
+          return; // Let the redirect trigger a new fetch
+        } else {
+          // No active sprint, use the most recent sprint
+          const sortedSprints = [...sprintsData].sort((a, b) => 
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          if (sortedSprints.length > 0) {
+            router.replace(`/projects/${projectId}/board?sprint=${sortedSprints[0].id}`);
+            return;
+          }
+        }
       }
 
-      setTasks(filteredTasks);
-      setError(null);
+      if (targetSprintId) {
+        // Fetch sprint details
+        const sprintData = await sprintService.getSprint(projectId, targetSprintId);
+        setSprint(sprintData);
+
+        // Fetch tasks for this sprint
+        const allTasks = await taskService.getTasks(projectId);
+        const tasksData = allTasks.filter(task => task.sprint === parseInt(targetSprintId));
+        setTasks(tasksData);
+      } else {
+        // No sprints exist - show all tasks
+        const tasksData = await taskService.getTasks(projectId);
+        setTasks(tasksData);
+      }
     } catch (err: any) {
-      console.error("Error fetching tasks:", err);
-      setError(err.message || "Failed to fetch tasks");
+      console.error("Error fetching board data:", err);
+      setError(err.message || "Failed to load board data");
+      toast.error("Failed to load board data");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      const currentSprint = await fetchSprint();
-      await fetchTasks(currentSprint);
-    };
-    loadData();
+    if (projectId) {
+      fetchTasks();
+    }
   }, [projectId, sprintId]);
 
   const handleDragStart = (event: DragStartEvent) => {
-    const taskId = event.active.id as string;
-    const task = tasks.find((t) => t.taskid === taskId);
-    setActiveTask(task || null);
+    const { active } = event;
+    const task = tasks.find((t) => t.taskid === active.id);
+    if (task) {
+      setActiveTask(task);
+    }
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -217,40 +235,28 @@ const BoardPage = () => {
     if (!over) return;
 
     const taskId = active.id as string;
-    const overId = over.id as string;
-
-    // Check if dropped on a column
-    const column = columns.find((col) => col.id === overId);
-    let newStatus: TaskStatus | null = null;
-
-    if (column) {
-      newStatus = column.status;
-    } else {
-      // Check if dropped on another task (find the column of that task)
-      const overTask = tasks.find((t) => t.taskid === overId);
-      if (overTask) {
-        newStatus = overTask.status;
-      }
-    }
+    const newStatus = columns.find((col) => col.id === over.id)?.status;
 
     if (!newStatus) return;
 
-    // Optimistically update the UI
+    const task = tasks.find((t) => t.taskid === taskId);
+    if (!task || task.status === newStatus) return;
+
+    // Optimistically update UI
     setTasks((prevTasks) =>
-      prevTasks.map((task) =>
-        task.taskid === taskId ? { ...task, status: newStatus! } : task
+      prevTasks.map((t) =>
+        t.taskid === taskId ? { ...t, status: newStatus } : t
       )
     );
 
-    // Update the task status in the backend
     try {
-      await taskService.updateTaskStatus(taskId, newStatus);
+      await taskService.updateTask(taskId, { status: newStatus });
       toast.success("Task status updated");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating task status:", err);
       toast.error("Failed to update task status");
-      // Revert the optimistic update on error
-      fetchTasks(sprint);
+      // Revert on error
+      fetchTasks();
     }
   };
 
@@ -299,54 +305,78 @@ const BoardPage = () => {
           <div className="mb-6 pm-card p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
+                {/* Sprint navigation arrows */}
                 <button
-                  onClick={() => router.push(`/projects/${projectId}/timeline`)}
                   className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  title="Back to Timeline"
+                  title="Previous Sprint"
+                  disabled={filteredSprints.length === 0 || !sprint || filteredSprints.findIndex(s => s.id === sprint.id) === 0}
+                  onClick={() => {
+                    if (!sprint) return;
+                    const idx = filteredSprints.findIndex(s => s.id === sprint.id);
+                    if (idx > 0) {
+                      const prevSprint = filteredSprints[idx - 1];
+                      router.push(`/projects/${projectId}/board?sprint=${prevSprint.id}`);
+                    }
+                  }}
                 >
-                  <ArrowLeft className="h-5 w-5 text-gray-600" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                 </button>
                 <div>
                   <div className="flex items-center gap-3">
                     <h2 className="text-xl font-semibold text-gray-900">
-                      {sprint.name}
+                      {sprint?.name}
                     </h2>
                     <span
                       className={`px-2 py-1 rounded text-xs font-medium ${
-                        sprint.status === "active"
+                        sprint?.status === "active"
                           ? "bg-orange-100 text-orange-800"
-                          : sprint.status === "completed"
+                          : sprint?.status === "completed"
                           ? "bg-gray-100 text-gray-800"
-                          : sprint.status === "planning"
+                          : sprint?.status === "planning"
                           ? "bg-blue-100 text-blue-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {sprint.status}
+                      {sprint?.status}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600">
-                    {new Date(sprint.start_date).toLocaleDateString()} -{" "}
-                    {new Date(sprint.end_date).toLocaleDateString()}
-                    {sprint.goal && ` • ${sprint.goal}`}
+                    {sprint?.start_date ? new Date(sprint.start_date).toLocaleDateString() : ""} -{" "}
+                    {sprint?.end_date ? new Date(sprint.end_date).toLocaleDateString() : ""}
+                    {sprint?.goal && ` • ${sprint.goal}`}
                   </p>
                 </div>
+                <button
+                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  title="Next Sprint"
+                  disabled={filteredSprints.length === 0 || !sprint || filteredSprints.findIndex(s => s.id === sprint.id) === filteredSprints.length - 1}
+                  onClick={() => {
+                    if (!sprint) return;
+                    const idx = filteredSprints.findIndex(s => s.id === sprint.id);
+                    if (idx < filteredSprints.length - 1) {
+                      const nextSprint = filteredSprints[idx + 1];
+                      router.push(`/projects/${projectId}/board?sprint=${nextSprint.id}`);
+                    }
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </button>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="text-sm text-gray-600">
-                    {sprint.completed_task_count || 0} /{" "}
-                    {sprint.task_count || 0} tasks completed
+                    {sprint?.completed_task_count || 0} /{" "}
+                    {sprint?.task_count || 0} tasks completed
                   </p>
                   <div className="w-32 h-2 bg-gray-100 rounded-full mt-1">
                     <div
                       className="h-full bg-orange-600 rounded-full"
                       style={{
                         width: `${
-                          sprint.task_count && sprint.task_count > 0
+                          sprint?.task_count && sprint?.task_count > 0
                             ? Math.round(
-                                ((sprint.completed_task_count || 0) /
-                                  sprint.task_count) *
+                                ((sprint?.completed_task_count || 0) /
+                                  sprint?.task_count) *
                                   100
                               )
                             : 0
@@ -355,69 +385,44 @@ const BoardPage = () => {
                     />
                   </div>
                 </div>
-                {/* Sprint Actions */}
-                {sprint.status === "planning" && (
-                  <button
-                    onClick={async () => {
-                      try {
-                        await sprintService.startSprint(
-                          projectId,
-                          sprint.id.toString()
-                        );
-                        toast.success("Sprint started successfully");
-                        const updatedSprint = await fetchSprint();
-                        await fetchTasks(updatedSprint);
-                      } catch (err: any) {
-                        toast.error(
-                          err.response?.data?.error || "Failed to start sprint"
-                        );
-                      }
-                    }}
-                    className="pm-button-primary"
-                  >
-                    Start Sprint
-                  </button>
-                )}
-                {sprint.status === "active" && (
-                  <button
-                    onClick={async () => {
-                      if (
-                        confirm(
-                          "Are you sure you want to complete this sprint?"
-                        )
-                      ) {
-                        try {
-                          await sprintService.completeSprint(
-                            projectId,
-                            sprint.id.toString()
-                          );
-                          toast.success("Sprint completed successfully");
-                          const updatedSprint = await fetchSprint();
-                          await fetchTasks(updatedSprint);
-                        } catch (err: any) {
-                          toast.error(
-                            err.response?.data?.error ||
-                              "Failed to complete sprint"
-                          );
-                        }
-                      }
-                    }}
-                    className="px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-900 transition-colors"
-                  >
-                    Complete Sprint
-                  </button>
-                )}
-                <button
-                  onClick={() => router.push(`/projects/${projectId}/timeline`)}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  title="Close Sprint View"
-                >
-                  <X className="h-5 w-5 text-gray-600" />
-                </button>
               </div>
             </div>
           </div>
         )}
+
+        {/* Task Modal */}
+        {modalTask && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+            <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full relative">
+              <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                onClick={() => setModalTask(null)}
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <h2 className="text-xl font-bold mb-2">{modalTask.name}</h2>
+              <p className="mb-2 text-gray-700">{modalTask.description || modalTask.details}</p>
+              <div className="mb-2">
+                <span className="font-semibold">Status:</span> {modalTask.status}
+              </div>
+              <div className="mb-2">
+                <span className="font-semibold">Priority:</span> {modalTask.priority}
+              </div>
+              <div className="mb-2">
+                <span className="font-semibold">Assigned to:</span> {Array.isArray(modalTask.assigned_to) ? modalTask.assigned_to.map(u => typeof u === "object" && "name" in u ? (u as any).name : typeof u === "string" ? u : "User").join(", ") : "Unassigned"}
+              </div>
+              <div className="mb-2">
+                <span className="font-semibold">Created at:</span> {new Date(modalTask.created_at).toLocaleString()}
+              </div>
+              <div className="mb-2">
+                <span className="font-semibold">Updated at:</span> {new Date(modalTask.updated_at).toLocaleString()}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Sprint not found message */}
+
 
         {!sprint && sprintId && (
           <div className="mb-6 pm-card p-4 border-orange-200 bg-orange-50">
@@ -449,6 +454,7 @@ const BoardPage = () => {
                     column={column}
                     tasks={tasks}
                     projectId={projectId}
+                    onTaskUpdate={fetchTasks}
                   />
                   {index < columns.length - 1 && (
                     <Separator

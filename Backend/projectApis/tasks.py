@@ -1,3 +1,10 @@
+from celery import shared_task
+from .models import Task, Sprint
+from django.utils import timezone
+import logging
+
+logger = logging.getLogger(__name__)
+
 # from .rag_pipeline import TaskExtractor
 # from .models import Task, FileUpload
 # from agileBotApis.celery import app
@@ -71,3 +78,127 @@
 #     except Exception as e:
 #         print(f"Error occurred: {e}")
 #         return False
+
+
+@shared_task
+def move_unfinished_tasks_to_backlog():
+    """
+    Background job that runs periodically to check for ended sprints
+    and move all unfinished tasks to backlog.
+    """
+    logger.info("Starting sprint cleanup job...")
+    
+    try:
+        # Get current time
+        now = timezone.now()
+        
+        # Find all sprints that have ended but are still marked as active
+        ended_sprints = Sprint.objects.filter(
+            end_date__lt=now,
+            status='active'
+        )
+        
+        total_tasks_moved = 0
+        total_sprints_completed = 0
+        
+        for sprint in ended_sprints:
+            logger.info(f"Processing sprint: {sprint.name} (ID: {sprint.id})")
+            
+            # Get all unfinished tasks in this sprint
+            unfinished_tasks = Task.objects.filter(
+                sprint=sprint
+            ).exclude(
+                status='completed'
+            )
+            
+            tasks_moved = 0
+            for task in unfinished_tasks:
+                # Move task to backlog
+                task.status = 'backlog'
+                task.sprint = None  # Remove from sprint
+                task.save()
+                tasks_moved += 1
+                logger.info(f"Moved task '{task.name}' (ID: {task.taskid}) to backlog")
+            
+            # Mark sprint as completed
+            sprint.status = 'completed'
+            sprint.save()
+            
+            total_tasks_moved += tasks_moved
+            total_sprints_completed += 1
+            
+            logger.info(
+                f"Sprint '{sprint.name}' completed. "
+                f"Moved {tasks_moved} unfinished tasks to backlog."
+            )
+        
+        logger.info(
+            f"Sprint cleanup completed. "
+            f"Processed {total_sprints_completed} sprints, "
+            f"moved {total_tasks_moved} tasks to backlog."
+        )
+        
+        return {
+            'success': True,
+            'sprints_completed': total_sprints_completed,
+            'tasks_moved': total_tasks_moved
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in sprint cleanup job: {str(e)}", exc_info=True)
+        return {
+            'success': False,
+            'error': str(e)
+        }
+
+
+@shared_task
+def check_and_complete_sprint(sprint_id):
+    """
+    Manually trigger sprint completion for a specific sprint.
+    Useful for testing or manual sprint closure.
+    """
+    try:
+        sprint = Sprint.objects.get(id=sprint_id)
+        
+        # Get all unfinished tasks
+        unfinished_tasks = Task.objects.filter(
+            sprint=sprint
+        ).exclude(
+            status='completed'
+        )
+        
+        tasks_moved = 0
+        for task in unfinished_tasks:
+            task.status = 'backlog'
+            task.sprint = None
+            task.save()
+            tasks_moved += 1
+        
+        # Mark sprint as completed
+        sprint.status = 'completed'
+        sprint.save()
+        
+        logger.info(
+            f"Manually completed sprint '{sprint.name}'. "
+            f"Moved {tasks_moved} tasks to backlog."
+        )
+        
+        return {
+            'success': True,
+            'sprint_name': sprint.name,
+            'tasks_moved': tasks_moved
+        }
+        
+    except Sprint.DoesNotExist:
+        logger.error(f"Sprint with ID {sprint_id} not found")
+        return {
+            'success': False,
+            'error': 'Sprint not found'
+        }
+    except Exception as e:
+        logger.error(f"Error completing sprint {sprint_id}: {str(e)}", exc_info=True)
+        return {
+            'success': False,
+            'error': str(e)
+        }

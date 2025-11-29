@@ -290,25 +290,13 @@ const TeamsPage = () => {
                       ? "No teams yet"
                       : "No teams match your filter"}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
+                  <p className="text-sm text-gray-500 max-w-md mx-auto">
                     {searchQuery
                       ? "Try adjusting your search query to find teams"
                       : teams.length === 0
                       ? "Create your first team to start collaborating and managing projects together"
                       : "Try changing your search or filters"}
                   </p>
-                  {teams.length === 0 && (
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <CreateCard
-                          title="Create Team"
-                          description="New team"
-                          icon={CirclePlus}
-                        />
-                      </DialogTrigger>
-                      <CreateTeamComponent onTeamCreated={refreshTeams} />
-                    </Dialog>
-                  )}
                 </div>
               )}
             </div>

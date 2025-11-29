@@ -132,6 +132,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "created_by",
             "task_number",
             "sprint",
+            "tags",
             "created_at",
             "updated_at",
         ]
@@ -161,7 +162,9 @@ class TaskSerializer(serializers.ModelSerializer):
             {
                 "id": user.id,
                 "email": user.email,
-                "username": user.username if hasattr(user, 'username') else user.email.split('@')[0],
+                "username": user.email.split('@')[0] if user.email else "Unknown",
+                "first_name": "",  # Not stored in DB, fetched from Google dynamically
+                "last_name": "",   # Not stored in DB, fetched from Google dynamically
             }
             for user in assigned_users
         ]
@@ -215,7 +218,27 @@ class UpdateTaskSerializer(serializers.ModelSerializer):
             "Project",
             "created_by",
             "task_number",
+            "sprint",
+            "tags",
         ]
+    
+    def update(self, instance, validated_data):
+        """Override update to handle many-to-many relationships"""
+        assigned_to = validated_data.pop('assigned_to', None)
+        related_work = validated_data.pop('related_work', None)
+        
+        # Update regular fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update many-to-many fields
+        if assigned_to is not None:
+            instance.assigned_to.set(assigned_to)
+        if related_work is not None:
+            instance.related_work.set(related_work)
+        
+        return instance
 
 
 class ActivitySerializer(serializers.ModelSerializer):

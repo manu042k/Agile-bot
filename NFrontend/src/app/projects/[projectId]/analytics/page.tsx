@@ -11,6 +11,21 @@ import taskService from "@/services/taskService";
 import sprintService from "@/services/sprintService";
 import { Project, Task, TaskStatus, Sprint, SprintStatus } from "@/types/project";
 import toast from "react-hot-toast";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 const ProjectAnalyticsPage = () => {
   const params = useParams();
@@ -224,29 +239,30 @@ const ProjectAnalyticsPage = () => {
         {/* Sprint Burndown Chart */}
         {sprints.length > 0 && (
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Sprint Burndown</h2>
-              <select
-                value={selectedSprint?.id.toString() || ""}
-                onChange={(e) => {
-                  const sprint = sprints.find(s => s.id.toString() === e.target.value);
-                  setSelectedSprint(sprint || null);
-                }}
-                className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              >
-                <option value="">Select a sprint...</option>
-                {sprints.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.status})
-                  </option>
-                ))}
-              </select>
-            </div>
             {selectedSprint ? (
-              <SprintBurndownChart 
-                sprint={selectedSprint} 
-                tasks={tasks.filter(t => t.sprint && t.sprint.toString() === selectedSprint.id.toString())}
-              />
+              <div className="pm-card p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">Sprint Burndown</h2>
+                  <select
+                    value={selectedSprint?.id.toString() || ""}
+                    onChange={(e) => {
+                      const sprint = sprints.find(s => s.id.toString() === e.target.value);
+                      setSelectedSprint(sprint || null);
+                    }}
+                    className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white"
+                  >
+                    {sprints.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name} ({s.status})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <SprintBurndownChart 
+                  sprint={selectedSprint} 
+                  tasks={tasks.filter(t => t.sprint && t.sprint.toString() === selectedSprint.id.toString())}
+                />
+              </div>
             ) : (
               <div className="pm-card p-12 text-center">
                 <BarChart3 className="h-12 w-12 text-gray-300 mx-auto mb-4" />
@@ -293,87 +309,422 @@ const ProjectAnalyticsPage = () => {
         <div className="pm-card p-6 mb-6">
           <h2 className="text-lg font-semibold text-gray-900">Task Completion Trend (Last 5 Weeks)</h2>
             <Separator className="my-4" />
-            <div className="h-64 flex items-end justify-between gap-2">
-              {analytics.taskCompletion.map((week, idx) => {
-              const maxCompleted = Math.max(...analytics.taskCompletion.map(w => w.completed), 1);
-                const height = (week.completed / maxCompleted) * 100;
-                return (
-                  <div key={idx} className="flex-1 flex flex-col items-center">
-                    <div className="w-full flex flex-col items-center justify-end h-full">
-                      <div
-                      className="w-full bg-orange-600 rounded-t transition-all"
-                      style={{ height: height > 0 ? `${height}%` : '8px' }}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-2">{week.week}</p>
-                    <p className="text-xs font-medium text-gray-700 mt-1">{week.completed}</p>
-                  </div>
-                );
-              })}
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={analytics.taskCompletion}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="week" 
+                    stroke="#6b7280"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <YAxis 
+                    stroke="#6b7280"
+                    style={{ fontSize: '12px' }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                    }}
+                    labelStyle={{ color: '#111827', fontWeight: 600 }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="completed"
+                    fill="#ea580c"
+                    name="Tasks Completed"
+                    radius={[8, 8, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
           </div>
         </div>
 
         {/* Status Distribution */}
         <div className="pm-card p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-900">Status Distribution</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Task Status Distribution</h2>
           <Separator className="my-4" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {Object.entries(analytics.statusDistribution).map(([status, count]) => {
-              const total = Object.values(analytics.statusDistribution).reduce((a, b) => a + b, 0);
-              const percentage = (count / total) * 100;
-              return (
-                <div key={status} className="text-center">
-                  <div className="text-3xl font-semibold text-gray-900 mb-2">{count}</div>
-                  <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
-                    <div
-                      className="h-full bg-orange-600 rounded-full"
-                      style={{ width: `${percentage}%` }}
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Donut Chart */}
+            <div className="flex items-center justify-center">
+              <div className="relative h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: 'Completed', value: analytics.statusDistribution.completed, color: '#22c55e' },
+                        { name: 'Active', value: analytics.statusDistribution.active, color: '#3b82f6' },
+                        { name: 'Created', value: analytics.statusDistribution.created, color: '#eab308' },
+                        { name: 'Backlog', value: analytics.statusDistribution.backlog, color: '#6b7280' },
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={80}
+                      outerRadius={120}
+                      paddingAngle={2}
+                      dataKey="value"
+                    >
+                      {[
+                        { name: 'Completed', value: analytics.statusDistribution.completed, color: '#22c55e' },
+                        { name: 'Active', value: analytics.statusDistribution.active, color: '#3b82f6' },
+                        { name: 'Created', value: analytics.statusDistribution.created, color: '#eab308' },
+                        { name: 'Backlog', value: analytics.statusDistribution.backlog, color: '#6b7280' },
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                      }}
                     />
-                  </div>
-                  <p className="text-sm text-gray-600 capitalize">{status.replace(/([A-Z])/g, " $1").trim()}</p>
+                  </PieChart>
+                </ResponsiveContainer>
+                
+                {/* Center Text */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                  <p className="text-4xl font-bold text-gray-900">{analytics.overview.totalTasks}</p>
+                  <p className="text-sm text-gray-500 mt-1">Total Tasks</p>
                 </div>
-              );
-            })}
+              </div>
+            </div>
+
+            {/* Legend with Stats */}
+            <div className="flex flex-col justify-center space-y-4">
+              <div className="flex items-center justify-between p-4 border-l-4 border-green-500 bg-green-50 rounded-r-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Completed</p>
+                    <p className="text-xs text-gray-600">Tasks finished</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-green-600">{analytics.statusDistribution.completed}</p>
+                  <p className="text-xs text-gray-500">
+                    {analytics.overview.totalTasks > 0 
+                      ? Math.round((analytics.statusDistribution.completed / analytics.overview.totalTasks) * 100)
+                      : 0}%
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border-l-4 border-blue-500 bg-blue-50 rounded-r-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Active</p>
+                    <p className="text-xs text-gray-600">In progress</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-blue-600">{analytics.statusDistribution.active}</p>
+                  <p className="text-xs text-gray-500">
+                    {analytics.overview.totalTasks > 0 
+                      ? Math.round((analytics.statusDistribution.active / analytics.overview.totalTasks) * 100)
+                      : 0}%
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border-l-4 border-yellow-500 bg-yellow-50 rounded-r-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Created</p>
+                    <p className="text-xs text-gray-600">Ready to start</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-yellow-600">{analytics.statusDistribution.created}</p>
+                  <p className="text-xs text-gray-500">
+                    {analytics.overview.totalTasks > 0 
+                      ? Math.round((analytics.statusDistribution.created / analytics.overview.totalTasks) * 100)
+                      : 0}%
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border-l-4 border-gray-500 bg-gray-50 rounded-r-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+                  <div>
+                    <p className="font-semibold text-gray-900">Backlog</p>
+                    <p className="text-xs text-gray-600">Not started</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-2xl font-bold text-gray-600">{analytics.statusDistribution.backlog}</p>
+                  <p className="text-xs text-gray-500">
+                    {analytics.overview.totalTasks > 0 
+                      ? Math.round((analytics.statusDistribution.backlog / analytics.overview.totalTasks) * 100)
+                      : 0}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Additional Analytics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="pm-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-lg bg-blue-100">
+                <TrendingUp className="h-6 w-6 text-blue-600" />
+              </div>
+              <span className="text-xs text-gray-500">This Week</span>
+            </div>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {tasks.filter(t => {
+                const created = new Date(t.created_at);
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                return created >= weekAgo;
+              }).length}
+            </p>
+            <p className="text-sm text-gray-600">Tasks Created</p>
+            <div className="mt-3 flex items-center text-xs">
+              <ArrowUp className="h-3 w-3 text-green-600 mr-1" />
+              <span className="text-green-600 font-medium">Active</span>
+            </div>
+          </div>
+
+          <div className="pm-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-lg bg-purple-100">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+              <span className="text-xs text-gray-500">Team</span>
+            </div>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {project?.team?.members?.length || 0}
+            </p>
+            <p className="text-sm text-gray-600">Active Members</p>
+            <div className="mt-3 flex items-center text-xs">
+              <span className="text-purple-600 font-medium">Collaborating</span>
+            </div>
+          </div>
+
+          <div className="pm-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 rounded-lg bg-orange-100">
+                <Calendar className="h-6 w-6 text-orange-600" />
+              </div>
+              <span className="text-xs text-gray-500">Average</span>
+            </div>
+            <p className="text-3xl font-bold text-gray-900 mb-1">
+              {analytics.overview.avgTaskCompletion > 0 
+                ? analytics.overview.avgTaskCompletion.toFixed(1)
+                : 'N/A'}
+            </p>
+            <p className="text-sm text-gray-600">Days per Task</p>
+            <div className="mt-3 flex items-center text-xs">
+              <span className="text-orange-600 font-medium">Completion Time</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Task Activity Timeline */}
+        <div className="pm-card p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900">Task Activity by Status</h2>
+          <Separator className="my-4" />
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-sm font-medium text-gray-700">Completed</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">{analytics.statusDistribution.completed}</span>
+              </div>
+              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-green-500 rounded-full transition-all"
+                  style={{ 
+                    width: `${analytics.overview.totalTasks > 0 
+                      ? (analytics.statusDistribution.completed / analytics.overview.totalTasks) * 100 
+                      : 0}%` 
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-sm font-medium text-gray-700">Active</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">{analytics.statusDistribution.active}</span>
+              </div>
+              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-500 rounded-full transition-all"
+                  style={{ 
+                    width: `${analytics.overview.totalTasks > 0 
+                      ? (analytics.statusDistribution.active / analytics.overview.totalTasks) * 100 
+                      : 0}%` 
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                  <span className="text-sm font-medium text-gray-700">Created</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">{analytics.statusDistribution.created}</span>
+              </div>
+              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-yellow-500 rounded-full transition-all"
+                  style={{ 
+                    width: `${analytics.overview.totalTasks > 0 
+                      ? (analytics.statusDistribution.created / analytics.overview.totalTasks) * 100 
+                      : 0}%` 
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+                  <span className="text-sm font-medium text-gray-700">Backlog</span>
+                </div>
+                <span className="text-sm font-bold text-gray-900">{analytics.statusDistribution.backlog}</span>
+              </div>
+              <div className="w-full h-3 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gray-500 rounded-full transition-all"
+                  style={{ 
+                    width: `${analytics.overview.totalTasks > 0 
+                      ? (analytics.statusDistribution.backlog / analytics.overview.totalTasks) * 100 
+                      : 0}%` 
+                  }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Team Performance */}
-        <div className="pm-card p-6">
-          <h2 className="text-lg font-semibold text-gray-900">Team Performance</h2>
-          <Separator className="my-4" />
-          {analytics.teamPerformance.length > 0 ? (
-          <div className="space-y-4">
-            {analytics.teamPerformance.map((member, idx) => (
-              <div key={idx} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
-                <div className="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center text-white font-medium flex-shrink-0">
-                    {member.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-900">{member.name}</h3>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
-                    <span>{member.tasksCompleted} tasks completed</span>
-                    <span>Avg: {member.avgTime}</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Team Members List */}
+          <div className="pm-card p-6">
+            <h2 className="text-lg font-semibold text-gray-900">Team Performance</h2>
+            <Separator className="my-4" />
+            {analytics.teamPerformance.length > 0 ? (
+              <div className="space-y-3">
+                {analytics.teamPerformance.slice(0, 5).map((member, idx) => (
+                  <div key={idx} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                    <div className="relative">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold flex-shrink-0 shadow-md">
+                        {member.name.charAt(0).toUpperCase()}
+                      </div>
+                      {idx < 3 && (
+                        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-yellow-400 border-2 border-white flex items-center justify-center text-xs font-bold">
+                          {idx + 1}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900">{member.name}</h3>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-sm text-gray-600">
+                          <span className="font-medium text-green-600">{member.tasksCompleted}</span> completed
+                        </span>
+                        <span className="text-xs text-gray-400">•</span>
+                        <span className="text-sm text-gray-600">{member.avgTime}</span>
+                      </div>
+                      <div className="mt-2 w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full transition-all"
+                          style={{ width: `${member.efficiency}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-gray-900">{member.efficiency}%</p>
+                      <p className="text-xs text-gray-500">Efficiency</p>
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-semibold text-gray-900">{member.efficiency}%</p>
-                  <p className="text-xs text-gray-500">Efficiency</p>
-                </div>
-                <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                      className="h-full bg-orange-600 rounded-full"
-                    style={{ width: `${member.efficiency}%` }}
-                  />
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <Users className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <p className="font-medium">No team performance data</p>
+                <p className="text-sm mt-1">Assign and complete tasks to see metrics</p>
+              </div>
+            )}
           </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p>No team performance data available yet</p>
-              <p className="text-sm mt-1">Assign and complete tasks to see team performance metrics</p>
-            </div>
-          )}
+
+          {/* Performance Comparison Chart */}
+          <div className="pm-card p-6">
+            <h2 className="text-lg font-semibold text-gray-900">Tasks Completed Comparison</h2>
+            <Separator className="my-4" />
+            {analytics.teamPerformance.length > 0 ? (
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={analytics.teamPerformance.slice(0, 5)}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis 
+                      type="number"
+                      stroke="#6b7280"
+                      style={{ fontSize: '12px' }}
+                    />
+                    <YAxis 
+                      type="category"
+                      dataKey="name" 
+                      stroke="#6b7280"
+                      style={{ fontSize: '12px' }}
+                      width={100}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        padding: '8px 12px',
+                      }}
+                      cursor={{ fill: 'rgba(234, 88, 12, 0.1)' }}
+                    />
+                    <Bar
+                      dataKey="tasksCompleted"
+                      fill="#ea580c"
+                      name="Tasks Completed"
+                      radius={[0, 8, 8, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <BarChart3 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                <p className="font-medium">No comparison data</p>
+                <p className="text-sm mt-1">Complete tasks to see comparison</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
