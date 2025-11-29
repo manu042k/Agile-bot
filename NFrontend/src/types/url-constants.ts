@@ -3,6 +3,8 @@ export enum URLS {
   USER_INFO = "api/accounts/user/info/",
   USERS = "api/accounts/users/",
   USER_DETAIL = "api/accounts/users/", // Append user ID
+  USER_PREFERENCES = "api/accounts/preferences/",
+  USER_PROFILE_UPDATE = "api/accounts/profile/update/",
   ADD_MEMBER = "/add-member/",
   INVITE_MEMBER = "/invite/",
   REMOVE_MEMBER = "/remove-member/",

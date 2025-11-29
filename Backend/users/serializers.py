@@ -4,12 +4,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Serializer for User objects - includes Google info when available"""
+    """Serializer for User objects - includes cached Google data from database"""
     
-    # These fields are computed from Google, not stored in DB
-    first_name = serializers.SerializerMethodField()
-    last_name = serializers.SerializerMethodField()
-    avatar_url = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -26,41 +22,11 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",
             "date_joined",
         ]
-        read_only_fields = ["id", "is_active", "date_joined", "google_id", "first_name", "last_name", "avatar_url", "full_name"]
-    
-    def get_first_name(self, obj):
-        """Get first name from Google info in context or session"""
-        request = self.context.get('request')
-        if request:
-            google_info = request.session.get('google_user_info', {})
-            return google_info.get('first_name', '')
-        return ''
-    
-    def get_last_name(self, obj):
-        """Get last name from Google info in context or session"""
-        request = self.context.get('request')
-        if request:
-            google_info = request.session.get('google_user_info', {})
-            return google_info.get('last_name', '')
-        return ''
-    
-    def get_avatar_url(self, obj):
-        """Get avatar URL from Google info in context or session"""
-        request = self.context.get('request')
-        if request:
-            google_info = request.session.get('google_user_info', {})
-            return google_info.get('avatar_url', '')
-        return ''
+        read_only_fields = ["id", "is_active", "date_joined", "google_id"]
     
     def get_full_name(self, obj):
-        """Get full name from Google info"""
-        request = self.context.get('request')
-        if request:
-            google_info = request.session.get('google_user_info', {})
-            first = google_info.get('first_name', '')
-            last = google_info.get('last_name', '')
-            return f"{first} {last}".strip() or obj.email
-        return obj.email
+        """Get full name from database"""
+        return obj.get_full_name()
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -113,3 +79,26 @@ class AddTeamMemberSerializer(serializers.Serializer):
     def validate_user_email(self, value):
         # Note: User existence check removed - use invitation endpoint for new users
         return value
+
+
+
+class UserPreferencesSerializer(serializers.ModelSerializer):
+    """Serializer for UserPreferences"""
+    
+    class Meta:
+        from .models import UserPreferences
+        model = UserPreferences
+        fields = [
+            'id',
+            'email_notifications',
+            'task_assignments',
+            'project_updates',
+            'deadline_reminders',
+            'team_mentions',
+            'theme',
+            'language',
+            'timezone',
+            'date_format',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'updated_at']

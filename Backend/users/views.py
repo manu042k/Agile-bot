@@ -85,29 +85,46 @@ class GoogleCallbackView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Get or create user - only store essential data (email, google_id)
+            # Get or create user - store Google data in database
             user, created = User.objects.get_or_create(
                 google_id=google_id,
                 defaults={
                     'email': email,
+                    'first_name': google_user_info.get('given_name', ''),
+                    'last_name': google_user_info.get('family_name', ''),
+                    'avatar_url': google_user_info.get('picture', ''),
+                    'google_data_synced_at': timezone.now(),
                 }
             )
             
-            # Update email if it changed (rare, but possible)
-            if not created and user.email != email:
-                user.email = email
-                user.save()
+            # Update user data if changed or stale
+            if not created:
+                needs_update = (
+                    user.email != email or
+                    user.first_name != google_user_info.get('given_name', '') or
+                    user.last_name != google_user_info.get('family_name', '') or
+                    user.avatar_url != google_user_info.get('picture', '') or
+                    user.needs_google_sync()
+                )
+                
+                if needs_update:
+                    user.email = email
+                    user.first_name = google_user_info.get('given_name', '')
+                    user.last_name = google_user_info.get('family_name', '')
+                    user.avatar_url = google_user_info.get('picture', '')
+                    user.google_data_synced_at = timezone.now()
+                    user.save()
             
             # Create Django session
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             
-            # Store session creation time and Google user info in session data
+            # Store session creation time and Google user info in session data (for backward compatibility)
             request.session['session_created'] = timezone.now().isoformat()
             request.session['google_user_info'] = {
-                'first_name': google_user_info.get('given_name', ''),
-                'last_name': google_user_info.get('family_name', ''),
-                'avatar_url': google_user_info.get('picture', ''),
-                'email': email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'avatar_url': user.avatar_url,
+                'email': user.email,
             }
             request.session.save()
             
@@ -676,3 +693,85 @@ class UserDetailView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'id'
+
+
+
+class UserPreferencesView(APIView):
+    """Get and update user preferences"""
+    
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+    
+    def get(self, request):
+        """Get current user's preferences"""
+        try:
+            from .models import UserPreferences
+            from .serializers import UserPreferencesSerializer
+            
+            # Get or create preferences for the user
+            preferences, created = UserPreferences.objects.get_or_create(user=request.user)
+            
+            serializer = UserPreferencesSerializer(preferences)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error fetching user preferences: {str(e)}")
+            return Response(
+                {"error": "Failed to fetch preferences"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    def patch(self, request):
+        """Update user preferences"""
+        try:
+            from .models import UserPreferences
+            from .serializers import UserPreferencesSerializer
+            
+            # Get or create preferences for the user
+            preferences, created = UserPreferences.objects.get_or_create(user=request.user)
+            
+            serializer = UserPreferencesSerializer(
+                preferences,
+                data=request.data,
+                partial=True
+            )
+            
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.error(f"Error updating user preferences: {str(e)}")
+            return Response(
+                {"error": "Failed to update preferences"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class UpdateUserProfileView(APIView):
+    """Update user profile information"""
+    
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication]
+    
+    def patch(self, request):
+        """Update user profile (only phone_number is editable)"""
+        try:
+            user = request.user
+            phone_number = request.data.get('phone_number')
+            
+            if phone_number is not None:
+                user.phone_number = phone_number
+                user.save()
+            
+            serializer = UserSerializer(user, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Error updating user profile: {str(e)}")
+            return Response(
+                {"error": "Failed to update profile"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

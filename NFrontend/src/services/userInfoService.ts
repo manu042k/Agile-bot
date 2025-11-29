@@ -28,7 +28,7 @@ const userInfoService = {
   },
   async updateUserInfo(data: { phone_number?: string }): Promise<User> {
     // Update user information (only phone_number is editable)
-    const response = await api.patch<User>(URLS.USER_ME, data);
+    const response = await api.patch<User>(URLS.USER_PROFILE_UPDATE, data);
     return response.data;
   },
 };

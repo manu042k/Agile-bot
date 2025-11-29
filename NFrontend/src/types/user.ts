@@ -10,4 +10,5 @@ export interface User {
   is_active?: boolean;
   date_joined?: string;
   google_id?: string;
+  username?: string; // For backward compatibility
 }

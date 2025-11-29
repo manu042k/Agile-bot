@@ -3,14 +3,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Activity, Bell, Shield, UserCircle, ExternalLink, Lock, KeyRound, FolderKanban, CheckCircle2, Users } from "lucide-react";
+import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Shield, UserCircle, ExternalLink, Lock, KeyRound } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/common/PageHeader";
 import { useUser } from "@/hooks/useUser";
 import { useMemo, useState, useEffect } from "react";
-import StatCard from "@/components/common/StatCard";
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -118,8 +117,6 @@ const ProfilePage = () => {
         icon={UserCircle}
         tabs={[
           { icon: User, label: "Personal Info", href: "/profile" },
-          { icon: Activity, label: "Activity", href: "/profile?tab=activity" },
-          { icon: Bell, label: "Preferences", href: "/profile?tab=preferences" },
           { icon: Shield, label: "Security", href: "/profile?tab=security" },
         ]}
       />
@@ -227,66 +224,6 @@ const ProfilePage = () => {
               </>
             )}
 
-            {/* Activity Tab */}
-            {activeTab === "activity" && (
-              <Card className="pm-card border-0">
-                <CardHeader>
-                  <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-                  <Separator className="my-4" />
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-                          {i}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-gray-900 mb-1">
-                            Completed task "Implement user authentication"
-                          </p>
-                          <p className="text-xs text-gray-500">2 hours ago</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Preferences Tab */}
-            {activeTab === "preferences" && (
-              <Card className="pm-card border-0">
-                <CardHeader>
-                  <h3 className="text-lg font-semibold text-gray-900">Notification Preferences</h3>
-                  <Separator className="my-4" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <p className="font-medium text-gray-900">Email Notifications</p>
-                      <p className="text-sm text-gray-500">Receive email updates about your projects</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5 text-orange-600 focus:ring-orange-500 focus:ring-offset-0 rounded border-gray-300" />
-                  </div>
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <p className="font-medium text-gray-900">In-App Notifications</p>
-                      <p className="text-sm text-gray-500">Get notified within the application</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5 text-orange-600 focus:ring-orange-500 focus:ring-offset-0 rounded border-gray-300" />
-                  </div>
-                  <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                    <div>
-                      <p className="font-medium text-gray-900">Task Assignments</p>
-                      <p className="text-sm text-gray-500">Notify when tasks are assigned to you</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="w-5 h-5 text-orange-600 focus:ring-orange-500 focus:ring-offset-0 rounded border-gray-300" />
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Security Tab */}
             {activeTab === "security" && (
               <Card className="pm-card border-0">
@@ -383,11 +320,19 @@ const ProfilePage = () => {
                 <Separator className="my-4" />
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push('/analytics')}
+                >
                   <BarChart2 className="h-4 w-4" />
                   View Analytics
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => router.push('/settings')}
+                >
                   <Settings className="h-4 w-4" />
                   Settings
                 </Button>
@@ -402,39 +347,7 @@ const ProfilePage = () => {
               </CardContent>
             </Card>
 
-            {/* Stats */}
-            <Card className="pm-card border-0">
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-gray-900">Statistics</h3>
-                <Separator className="my-4" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <StatCard
-                  icon={FolderKanban}
-                  value={12}
-                  label="Projects"
-                  className="p-0 border-0 shadow-none bg-transparent"
-                  iconBgColor="bg-blue-100"
-                  iconColor="text-blue-600"
-                />
-                <StatCard
-                  icon={CheckCircle2}
-                  value={48}
-                  label="Tasks Completed"
-                  className="p-0 border-0 shadow-none bg-transparent"
-                  iconBgColor="bg-green-100"
-                  iconColor="text-green-600"
-                />
-                <StatCard
-                  icon={Users}
-                  value={5}
-                  label="Teams"
-                  className="p-0 border-0 shadow-none bg-transparent"
-                  iconBgColor="bg-purple-100"
-                  iconColor="text-purple-600"
-                />
-              </CardContent>
-            </Card>
+
           </div>
         </div>
         </div>

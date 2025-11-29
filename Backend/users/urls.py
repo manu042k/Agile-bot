@@ -16,6 +16,8 @@ from .views import (
     UserDetailView,
     InviteTeamMemberView,
     AcceptInvitationView,
+    UserPreferencesView,
+    UpdateUserProfileView,
 )
 
 urlpatterns = [
@@ -57,4 +59,7 @@ urlpatterns = [
     ),
     path("users/", UserListView.as_view(), name="user-list"),
     path("users/<int:id>/", UserDetailView.as_view(), name="user-detail"),
+    # User preferences and profile
+    path("preferences/", UserPreferencesView.as_view(), name="user-preferences"),
+    path("profile/update/", UpdateUserProfileView.as_view(), name="update-profile"),
 ]
