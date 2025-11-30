@@ -129,3 +129,51 @@ class ActivityConsumer(AsyncWebsocketConsumer):
             "type": "activity",
             "data": activity
         }))
+
+
+class TaskGenerationConsumer(AsyncWebsocketConsumer):
+    """WebSocket consumer for task generation progress updates"""
+
+    async def connect(self):
+        """Handle WebSocket connection"""
+        self.user = self.scope["user"]
+        
+        # Check authentication
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+        
+        # Get project_id from URL (can be UUID or numeric ID)
+        self.project_id = self.scope["url_route"]["kwargs"]["project_id"]
+        self.group_name = f"task_generation_{self.project_id}"
+        
+        # Subscribe to task generation channel for this project
+        await self.channel_layer.group_add(
+            self.group_name,
+            self.channel_name
+        )
+        
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        """Handle WebSocket disconnection"""
+        # Unsubscribe from task generation channel
+        await self.channel_layer.group_discard(
+            self.group_name,
+            self.channel_name
+        )
+
+    async def receive(self, text_data):
+        """Handle messages from WebSocket client (optional)"""
+        pass
+
+    async def task_generation_progress(self, event):
+        """Handle task generation progress updates from channel layer"""
+        # Send progress update to WebSocket
+        await self.send(text_data=json.dumps({
+            "type": "progress",
+            "message": event["message"],
+            "progress": event["progress"],
+            "status": event["status"],
+            "data": event.get("data", {})
+        }))

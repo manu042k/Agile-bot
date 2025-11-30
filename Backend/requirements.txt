@@ -117,9 +117,17 @@ vine==5.1.0
 virtualenv==20.28.0
 wcwidth==0.2.13
 yarl==1.18.3
+channels
+channels-redis
 daphne
 django-storages[azure]
 azure-storage-blob
 psycopg2-binary
 gunicorn
 django-redis
+
+# LLM Task Generation Dependencies
+google-genai
+qdrant-client
+sentence-transformers
+docling

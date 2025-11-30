@@ -10,6 +10,7 @@ from .views import (
     CommentListCreateView,
     TaskPatchView,
     TriggerTaskGeneration,
+    GenerateTasksView,
     ActivityListView,
     RecentActivitiesView,
     ProjectActivitiesView,
@@ -55,6 +56,11 @@ urlpatterns = [
         name="assign-team-to-project",
     ),
     path("trigger/", TriggerTaskGeneration.as_view(), name="trigger-task-generation"),
+    path(
+        "projects/<uuid:project_uuid>/generate-tasks/",
+        GenerateTasksView.as_view(),
+        name="generate-tasks",
+    ),
     # Activity endpoints
     path("activities/", ActivityListView.as_view(), name="activity-list"),
     path("activities/recent/", RecentActivitiesView.as_view(), name="recent-activities"),

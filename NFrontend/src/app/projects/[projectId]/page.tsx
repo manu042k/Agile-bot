@@ -15,8 +15,8 @@ import ProjectHeader from "@/components/projects/ProjectHeader";
 import { Separator } from "@/components/ui/separator";
 import ActivityFeed from "@/components/common/ActivityFeed";
 import UploadDocumentButton from "@/components/projects/UploadDocumentButton";
+import GenerateTasksButton from "@/components/projects/GenerateTasksButton";
 import StatCard from "@/components/common/StatCard";
-import CreateCard from "@/components/common/CreateCard";
 import projectService from "@/services/projectService";
 import taskService from "@/services/taskService";
 import { Project, TaskStatus } from "@/types/project";
@@ -33,6 +33,26 @@ const ProjectDetailPage = () => {
     progress: 0,
   });
 
+  const fetchTaskStats = async () => {
+    try {
+      const tasks = await taskService.getTasks(projectId);
+      const completedTasks = tasks.filter(
+        (t) => t.status === TaskStatus.Completed
+      ).length;
+      const progress =
+        tasks.length > 0
+          ? Math.round((completedTasks / tasks.length) * 100)
+          : 0;
+      setTaskStats({
+        total: tasks.length,
+        completed: completedTasks,
+        progress,
+      });
+    } catch (err) {
+      console.error("Error fetching tasks:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchProjectData = async () => {
       try {
@@ -41,23 +61,7 @@ const ProjectDetailPage = () => {
         setProject(projectData);
 
         // Fetch tasks for progress calculation
-        try {
-          const tasks = await taskService.getTasks(projectId);
-          const completedTasks = tasks.filter(
-            (t) => t.status === TaskStatus.Completed
-          ).length;
-          const progress =
-            tasks.length > 0
-              ? Math.round((completedTasks / tasks.length) * 100)
-              : 0;
-          setTaskStats({
-            total: tasks.length,
-            completed: completedTasks,
-            progress,
-          });
-        } catch (err) {
-          console.error("Error fetching tasks:", err);
-        }
+        await fetchTaskStats();
       } catch (err: any) {
         setError(err.message || "Failed to load project");
       } finally {
@@ -128,12 +132,9 @@ const ProjectDetailPage = () => {
                 description="Requirements & specs"
               />
 
-              <CreateCard
-                title="Generate Tasks"
-                description="AI-powered"
-                icon={Sparkles}
-                iconBgColor="bg-orange-100 group-hover:bg-orange-200"
-                iconColor="text-orange-600"
+              <GenerateTasksButton
+                projectId={projectId}
+                onTasksGenerated={fetchTaskStats}
               />
             </div>
 

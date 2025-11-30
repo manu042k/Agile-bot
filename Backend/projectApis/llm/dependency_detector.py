@@ -1,0 +1,310 @@
+"""
+Optimized dependency detection engine
+"""
+import re
+import time
+import logging
+import numpy as np
+from typing import List, Dict, Optional, Set
+import concurrent.futures
+from sentence_transformers import SentenceTransformer
+
+from .models import TaskDependency
+from .config import (
+    EMBEDDING_MODEL,
+    DEPENDENCY_SIMILARITY_THRESHOLD,
+    ENTITY_EXTRACTION_THRESHOLD,
+    NUM_WORKERS,
+    BATCH_SIZE
+)
+
+logger = logging.getLogger(__name__)
+
+
+class DependencyDetector:
+    """
+    Optimized dependency detection using multi-tier approach:
+    - Tier 1: Fast checks (hierarchy, layers)
+    - Tier 2: Entity-based checks
+    - Tier 3: Semantic similarity (expensive, filtered)
+    """
+    
+    LAYER_HIERARCHY = {
+        'database': 1, 'schema': 1, 'model': 2,
+        'service': 3, 'api': 4, 'controller': 4, 'handler': 4,
+        'ui': 5, 'frontend': 5, 'interface': 5,
+        'test': 6, 'validation': 6,
+    }
+    
+    ENTITY_PATTERNS = {
+        'database': r'\b(database|table|schema|record|entity)\b',
+        'api': r'\b(api|endpoint|rest|http|route)\b',
+        'service': r'\b(service|module|component|manager|factory)\b',
+        'authentication': r'\b(auth|login|password|token|permission)\b',
+        'validation': r'\b(validate|verify|check|constraint)\b',
+        'data': r'\b(data|field|column|value|entry)\b',
+        'ui': r'\b(ui|display|render|form|button|screen)\b',
+        'file': r'\b(file|export|import|csv|json)\b',
+    }
+    
+    def __init__(self, num_workers: int = NUM_WORKERS, batch_size: int = BATCH_SIZE):
+        self.num_workers = num_workers
+        self.batch_size = batch_size
+        self.encoder = SentenceTransformer(EMBEDDING_MODEL)
+        
+        # Caches
+        self.entity_cache = {}
+        self.layer_cache = {}
+        self.embedding_cache = {}
+        self.req_hierarchy_cache = {}
+        
+        logger.info(f"DependencyDetector initialized with {num_workers} workers")
+    
+    def detect_dependencies(self, tasks: List[Dict]) -> List[TaskDependency]:
+        """
+        Detect dependencies between tasks
+        
+        Args:
+            tasks: List of task dictionaries with keys: task_id, description, requirement_id
+            
+        Returns:
+            List of TaskDependency objects
+        """
+        logger.info(f"Starting dependency detection for {len(tasks)} tasks")
+        start_time = time.time()
+        
+        # Precompute properties
+        self._batch_precompute(tasks)
+        
+        # Detect dependencies with intelligent filtering
+        dependencies = self._detect_with_filtering(tasks)
+        
+        elapsed = time.time() - start_time
+        logger.info(f"Detected {len(dependencies)} dependencies in {elapsed:.2f}s")
+        
+        return dependencies
+    
+    def _batch_precompute(self, tasks: List[Dict]):
+        """Precompute task properties for faster detection"""
+        logger.info(f"Precomputing properties for {len(tasks)} tasks...")
+        start = time.time()
+        
+        with concurrent.futures.ThreadPoolExecutor(max_workers=self.num_workers) as executor:
+            # Entity extraction (parallelizable)
+            entity_futures = {
+                task['task_id']: executor.submit(self._extract_entities, task['description'])
+                for task in tasks
+            }
+            
+            # Layer identification (fast, local)
+            for task in tasks:
+                self.layer_cache[task['task_id']] = self._identify_layer(task['description'])
+            
+            # Requirement hierarchy (fast, cached)
+            unique_reqs = set(t['requirement_id'] for t in tasks)
+            for req_id in unique_reqs:
+                self.req_hierarchy_cache[req_id] = self._parse_requirement_hierarchy(req_id)
+            
+            # Batch embeddings (vectorized)
+            descriptions = [t['description'] for t in tasks]
+            embeddings = self.encoder.encode(
+                descriptions,
+                batch_size=self.batch_size,
+                show_progress_bar=False
+            )
+        
+        # Collect entity futures
+        for task_id, future in entity_futures.items():
+            self.entity_cache[task_id] = future.result()
+        
+        # Store embeddings
+        for task, emb in zip(tasks, embeddings):
+            self.embedding_cache[task['task_id']] = emb
+        
+        elapsed = time.time() - start
+        logger.info(f"Precomputation completed in {elapsed:.2f}s")
+    
+    def _detect_with_filtering(self, tasks: List[Dict]) -> List[TaskDependency]:
+        """Detect dependencies with intelligent filtering"""
+        dependencies = []
+        detected_pairs = set()
+        
+        for i, task1 in enumerate(tasks):
+            for task2 in tasks[i+1:]:
+                pair_key = (task1['task_id'], task2['task_id'])
+                if pair_key in detected_pairs:
+                    continue
+                
+                # Tier 1: Fast checks
+                dep = self._check_requirement_hierarchy(task1, task2)
+                if dep and dep.confidence > 0.90:
+                    dependencies.append(dep)
+                    detected_pairs.add(pair_key)
+                    continue
+                
+                dep = self._check_layer_dependency(task1, task2)
+                if dep and dep.confidence > 0.85:
+                    dependencies.append(dep)
+                    detected_pairs.add(pair_key)
+                    continue
+                
+                # Tier 2: Entity-based
+                dep = self._check_entity_dependency(task1, task2)
+                if dep and dep.confidence > 0.75:
+                    dependencies.append(dep)
+                    detected_pairs.add(pair_key)
+                    continue
+                
+                # Tier 3: Semantic (only if needed)
+                if self._should_check_semantic(task1, task2):
+                    dep = self._check_semantic_dependency(task1, task2)
+                    if dep:
+                        dependencies.append(dep)
+                        detected_pairs.add(pair_key)
+        
+        return dependencies
+    
+    def _identify_layer(self, description: str) -> int:
+        """Identify architectural layer of a task"""
+        desc_lower = description.lower()
+        max_layer = 0
+        
+        for layer_name, layer_level in self.LAYER_HIERARCHY.items():
+            if layer_name in desc_lower:
+                max_layer = max(max_layer, layer_level)
+        
+        return max_layer
+    
+    def _extract_entities(self, description: str) -> frozenset:
+        """Extract entities from task description"""
+        entities = set()
+        desc_lower = description.lower()
+        
+        for entity_type, pattern in self.ENTITY_PATTERNS.items():
+            matches = re.finditer(pattern, desc_lower)
+            for match in matches:
+                entity = match.group(0).strip()
+                if len(entity) > 2:
+                    entities.add(f"{entity_type}:{entity}")
+        
+        return frozenset(entities)
+    
+    def _parse_requirement_hierarchy(self, req_id: str) -> Dict:
+        """Parse requirement hierarchy from ID"""
+        parts = req_id.split('-')
+        if len(parts) < 2:
+            return {'parent': None, 'level': 0, 'root': 'UNKNOWN'}
+        
+        num_parts = parts[1].split('.')
+        parent = f"{parts[0]}-{num_parts[0]}" if len(num_parts) > 1 else None
+        
+        return {
+            'parent': parent,
+            'level': len(num_parts),
+            'root': parts[0]
+        }
+    
+    def _check_requirement_hierarchy(self, task1: Dict, task2: Dict) -> Optional[TaskDependency]:
+        """Check if tasks have hierarchical relationship"""
+        req_id1 = task1['requirement_id']
+        req_id2 = task2['requirement_id']
+        
+        hier1 = self.req_hierarchy_cache.get(req_id1)
+        hier2 = self.req_hierarchy_cache.get(req_id2)
+        
+        if hier1 and hier2 and hier2.get('parent') == req_id1:
+            return TaskDependency(
+                from_task_id=task1['task_id'],
+                to_task_id=task2['task_id'],
+                dependency_type='sequential',
+                strength='hard',
+                confidence=0.95,
+                reasoning=f"Hierarchy: {req_id1} (parent) -> {req_id2} (child)"
+            )
+        
+        return None
+    
+    def _check_layer_dependency(self, task1: Dict, task2: Dict) -> Optional[TaskDependency]:
+        """Check if tasks have layer dependency"""
+        layer1 = self.layer_cache.get(task1['task_id'], 0)
+        layer2 = self.layer_cache.get(task2['task_id'], 0)
+        
+        if layer1 > 0 and layer2 > layer1:
+            return TaskDependency(
+                from_task_id=task1['task_id'],
+                to_task_id=task2['task_id'],
+                dependency_type='infrastructure',
+                strength='hard',
+                confidence=0.85,
+                reasoning=f"Layer: {layer1} (foundation) -> {layer2} (dependent)"
+            )
+        
+        return None
+    
+    def _check_entity_dependency(self, task1: Dict, task2: Dict) -> Optional[TaskDependency]:
+        """Check if tasks share entities"""
+        entities1 = self.entity_cache.get(task1['task_id'])
+        entities2 = self.entity_cache.get(task2['task_id'])
+        
+        if not entities1 or not entities2:
+            return None
+        
+        intersection = len(entities1 & entities2)
+        union = len(entities1 | entities2)
+        overlap = intersection / union if union > 0 else 0
+        
+        if overlap > ENTITY_EXTRACTION_THRESHOLD:
+            return TaskDependency(
+                from_task_id=task1['task_id'],
+                to_task_id=task2['task_id'],
+                dependency_type='data',
+                strength='soft',
+                confidence=min(0.90, overlap * 1.2),
+                reasoning=f"Entity overlap: {overlap:.2%} ({intersection} shared)"
+            )
+        
+        return None
+    
+    def _check_semantic_dependency(self, task1: Dict, task2: Dict) -> Optional[TaskDependency]:
+        """Check semantic similarity between tasks"""
+        emb1 = self.embedding_cache.get(task1['task_id'])
+        emb2 = self.embedding_cache.get(task2['task_id'])
+        
+        if emb1 is None or emb2 is None:
+            return None
+        
+        similarity = np.dot(emb1, emb2) / (
+            np.linalg.norm(emb1) * np.linalg.norm(emb2) + 1e-8
+        )
+        
+        if similarity > DEPENDENCY_SIMILARITY_THRESHOLD:
+            return TaskDependency(
+                from_task_id=task1['task_id'],
+                to_task_id=task2['task_id'],
+                dependency_type='functional',
+                strength='soft',
+                confidence=float(similarity),
+                reasoning=f"Semantic similarity: {similarity:.2%}"
+            )
+        
+        return None
+    
+    def _should_check_semantic(self, task1: Dict, task2: Dict) -> bool:
+        """Determine if semantic check is needed"""
+        req_base1 = task1['requirement_id'].split('-')[0]
+        req_base2 = task2['requirement_id'].split('-')[0]
+        
+        if req_base1 == req_base2:
+            return True
+        
+        words1 = set(task1['description'].lower().split())
+        words2 = set(task2['description'].lower().split())
+        
+        common = words1 & words2
+        stop_words = {
+            'the', 'a', 'an', 'and', 'or', 'to', 'of', 'in', 'for', 'on',
+            'at', 'is', 'be', 'by', 'with', 'from', 'that', 'this', 'shall', 'system'
+        }
+        meaningful_common = common - stop_words
+        
+        return len(meaningful_common) > 3

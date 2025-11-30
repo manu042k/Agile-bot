@@ -84,6 +84,16 @@ const taskService = {
   },
 
   /**
+   * Generate tasks for a project (new endpoint with document validation)
+   */
+  async generateTasks(projectId: string): Promise<any> {
+    const response = await api.post<any>(
+      `${URLS.PROJECTS}${projectId}/generate-tasks/`
+    );
+    return response.data;
+  },
+
+  /**
    * Get project timeline
    */
   async getTimeline(projectId: string): Promise<any> {

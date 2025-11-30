@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.git/
+.gitignore
+.env.production.template
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+dist/
+build/

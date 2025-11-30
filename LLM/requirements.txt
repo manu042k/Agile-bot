@@ -1,0 +1,6 @@
+google-genai
+qdrant-client
+sentence-transformers
+docling
+pydantic
+numpy

@@ -1,0 +1,3021 @@
+{
+  "timestamp": "2025-11-29T15:42:15.333317",
+  "summary": {
+    "total_tasks": 108,
+    "total_dependencies": 197,
+    "sprints": 0
+  },
+  "tasks": [
+    {
+      "task_id": "TASK-GENERAL-001",
+      "name": "Setup Project Documentation",
+      "description": "Create initial project documentation structure including SRS document location and access guidelines.",
+      "requirement_id": "GENERAL",
+      "reasoning": "Ensures all team members can easily access and contribute to project documentation.",
+      "tags": [
+        "documents",
+        "devops"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-GENERAL-002",
+      "name": "Configure CI/CD Pipeline",
+      "description": "Set up a basic CI/CD pipeline to automatically build and deploy the application.",
+      "requirement_id": "GENERAL",
+      "reasoning": "Automates the build and deployment process, reducing manual effort and improving consistency.",
+      "tags": [
+        "devops"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-GENERAL-003",
+      "name": "Establish Testing Framework",
+      "description": "Set up the initial testing framework and tools for unit, integration, and end-to-end testing.",
+      "requirement_id": "GENERAL",
+      "reasoning": "Ensures code quality through automated testing, and provides a means to validate functionality.",
+      "tags": [
+        "testing",
+        "devops"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-GENERAL-004",
+      "name": "Define API Specification",
+      "description": "Design the API endpoints, request/response schemas, and authentication methods.",
+      "requirement_id": "GENERAL",
+      "reasoning": "Establishes a clear contract between the frontend and backend, improving communication and development efficiency.",
+      "tags": [
+        "design",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-21-001",
+      "name": "Create Database Schema",
+      "description": "Design and implement the database schema required to store data.",
+      "requirement_id": "SRS-21",
+      "reasoning": "The database schema is required to store the data described in SRS-21.",
+      "tags": [
+        "backend",
+        "design",
+        "documents"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-21-002",
+      "name": "Implement Backend APIs",
+      "description": "Develop REST APIs to handle data processing.",
+      "requirement_id": "SRS-21",
+      "reasoning": "Backend APIs are required to process data.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-21-003",
+      "name": "Develop User Interface",
+      "description": "Develop UI components to display data.",
+      "requirement_id": "SRS-21",
+      "reasoning": "A user interface is required to display data.",
+      "tags": [
+        "frontend",
+        "design",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-21-004",
+      "name": "Write Unit Tests",
+      "description": "Write comprehensive unit tests for backend components.",
+      "requirement_id": "SRS-21",
+      "reasoning": "Unit tests are required to validate backend logic.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-21-005",
+      "name": "Write Integration Tests",
+      "description": "Create integration tests to validate the user interface and backend integration.",
+      "requirement_id": "SRS-21",
+      "reasoning": "Integration tests are required to validate UI and backend integration.",
+      "tags": [
+        "frontend",
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-21-006",
+      "name": "Set up CI/CD Pipeline",
+      "description": "Set up a CI/CD pipeline to automate builds, tests, and deployment.",
+      "requirement_id": "SRS-21",
+      "reasoning": "A CI/CD pipeline is required for automated deployment.",
+      "tags": [
+        "devops"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-22-001",
+      "name": "Create API Endpoint",
+      "description": "Develop a new API endpoint to handle requests related to SRS-22.",
+      "requirement_id": "SRS-22",
+      "reasoning": "The API endpoint is needed to expose the functionality described in SRS-22 to the frontend.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-22-002",
+      "name": "Implement Data Validation",
+      "description": "Implement data validation for the new API endpoint to ensure data integrity as per SRS-22.",
+      "requirement_id": "SRS-22",
+      "reasoning": "Data validation is crucial for maintaining data quality and preventing errors.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-22-003",
+      "name": "Frontend Integration",
+      "description": "Integrate the new API endpoint with the frontend to allow users to access the functionality of SRS-22.",
+      "requirement_id": "SRS-22",
+      "reasoning": "The frontend integration is necessary to provide a user interface for interacting with the API endpoint.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-22-004",
+      "name": "Design Database Schema",
+      "description": "Design the database schema to store data related to SRS-22.",
+      "requirement_id": "SRS-22",
+      "reasoning": "A well-designed database schema is essential for efficient data storage and retrieval.",
+      "tags": [
+        "backend",
+        "design"
+      ],
+      "priority": "P2",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-22-005",
+      "name": "Implement Unit Tests",
+      "description": "Implement unit tests for the backend code to ensure its correctness and reliability according to SRS-22.",
+      "requirement_id": "SRS-22",
+      "reasoning": "Unit tests are crucial for verifying the functionality of individual code components.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-22-006",
+      "name": "Create Documentation",
+      "description": "Create documentation for the new API endpoint and its usage according to SRS-22.",
+      "requirement_id": "SRS-22",
+      "reasoning": "Documentation is important for guiding developers and users on how to use the API endpoint.",
+      "tags": [
+        "documents",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-22-007",
+      "name": "Configure CI/CD Pipeline",
+      "description": "Configure the CI/CD pipeline to automatically deploy changes related to SRS-22 to the staging and production environments.",
+      "requirement_id": "SRS-22",
+      "reasoning": "CI/CD automation is essential for streamlining the deployment process and reducing manual effort.",
+      "tags": [
+        "devops",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-22-008",
+      "name": "Regression Testing",
+      "description": "Perform regression testing to ensure that existing functionality is not broken by the changes introduced in SRS-22.",
+      "requirement_id": "SRS-22",
+      "reasoning": "Regression testing is crucial for maintaining the stability and reliability of the overall system.",
+      "tags": [
+        "testing"
+      ],
+      "priority": "P3",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-51-001",
+      "name": "Implement 'Create Document' Functionality",
+      "description": "Implement the functionality for users to create a new empty document within the application.",
+      "requirement_id": "SRS-51",
+      "reasoning": "The requirement SRS-51 states that the application must allow users to create a new empty document. This task implements that functionality.",
+      "tags": [
+        "backend",
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-51-002",
+      "name": "Design UI for 'Create Document' Action",
+      "description": "Design the user interface elements (e.g., button, menu item) that will trigger the creation of a new document.",
+      "requirement_id": "SRS-51",
+      "reasoning": "Users need a clear and intuitive way to initiate the document creation process, in accordance with requirement SRS-51.",
+      "tags": [
+        "frontend",
+        "design"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-51-003",
+      "name": "Write Unit Tests for Document Creation",
+      "description": "Write unit tests to verify the 'Create Document' functionality, ensuring that new documents are created correctly and without errors.",
+      "requirement_id": "SRS-51",
+      "reasoning": "Testing is crucial to ensure the reliability of the new document creation feature, satisfying the requirements of SRS-51.",
+      "tags": [
+        "testing",
+        "backend"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-54-001",
+      "name": "Design Document Structure",
+      "description": "Define the structure and format for storing document content and metadata in the database. This includes designing database tables, relationships, and data types for efficient storage and retrieval of document content.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To ensure the content and metadata are stored efficiently and can be easily retrieved and managed.",
+      "tags": [
+        "backend",
+        "design",
+        "documents"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-54-002",
+      "name": "Implement API Endpoint",
+      "description": "Develop a REST API endpoint to receive the document content and metadata. This endpoint should handle data validation, authorization, and error handling.",
+      "requirement_id": "SRS-54",
+      "reasoning": "This is required for the frontend to send documents to the backend.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-54-003",
+      "name": "Develop Document Storage Logic",
+      "description": "Implement the logic to store the document content and metadata into the designed database structure. This includes writing SQL queries and data mapping routines.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To persistently store the document information.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-54-004",
+      "name": "Unit Tests for Document API",
+      "description": "Write unit tests to validate the correctness of the document API endpoint, including data validation, authorization, and storage logic.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To verify the implementation and prevent regressions.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-54-005",
+      "name": "Frontend Integration",
+      "description": "Integrate the frontend with the backend API to allow users to upload documents. Implement the necessary UI components and event handlers.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To enable document upload functionality.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-54-006",
+      "name": "Frontend Testing",
+      "description": "Create integration and end-to-end tests for the document upload feature on the frontend. Verify that documents are uploaded correctly and the UI behaves as expected.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To verify user interactions.",
+      "tags": [
+        "frontend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-54-007",
+      "name": "Deployment Pipeline Update",
+      "description": "Update the CI/CD pipeline to include the new API endpoint and any necessary configurations. Ensure that the deployment process is smooth and automated.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To automate the deployment process.",
+      "tags": [
+        "devops"
+      ],
+      "priority": "P2",
+      "estimate": "2h"
+    },
+    {
+      "task_id": "TASK-SRS-54-008",
+      "name": "End-to-End Testing",
+      "description": "Develop end-to-end tests to verify the complete workflow, from document upload to storage and retrieval.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To ensure the whole system works.",
+      "tags": [
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-59-001",
+      "name": "Implement 'Save Local File' Functionality",
+      "description": "Implement the functionality to allow users to save project data in JSON format to a local file. This includes creating a user interface element (button or menu item) to trigger the save action, handling file system interactions, and converting the project data into JSON format for saving.",
+      "requirement_id": "SRS-59",
+      "reasoning": "This task is needed to fulfill the requirement that the application should allow users to save their work locally, ensuring data persistence and portability as stated in IESIS-5.",
+      "tags": [
+        "frontend",
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-59-002",
+      "name": "Design 'Save Local File' User Interface",
+      "description": "Design the user interface elements for the 'Save Local File' functionality. This includes the placement of the save button/menu item, the visual feedback to the user during the saving process (e.g., a progress bar or a confirmation message), and the design of any dialog boxes for specifying the file name and location.",
+      "requirement_id": "SRS-59",
+      "reasoning": "A well-designed user interface is crucial for a smooth user experience. It makes the save functionality easily accessible and provides clear feedback to the user.",
+      "tags": [
+        "design",
+        "frontend"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-59-003",
+      "name": "Add tests for the save function",
+      "description": "Develop unit and integration tests to ensure the 'Save Local File' functionality is working correctly. The tests should check file name, validity of the json, if the data has been written correctly.",
+      "requirement_id": "SRS-59",
+      "reasoning": "Testing to ensure that the save functionality works correctly and to prevent regression bugs in the future.",
+      "tags": [
+        "testing",
+        "backend"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-59-004",
+      "name": "Setup Version Control for Project Files",
+      "description": "Implement a version control system (e.g., Git) for the project files (JSON format). This includes setting up a repository, defining branching strategies, and configuring commit hooks to enforce code quality and standards.",
+      "requirement_id": "SRS-59",
+      "reasoning": "Version control is essential for managing changes to the project files, facilitating collaboration among team members, and ensuring data integrity.",
+      "tags": [
+        "devops",
+        "backend"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-59-005",
+      "name": "Create Documentation for 'Save Local File'",
+      "description": "Create documentation for the 'Save Local File' functionality. This includes a user guide explaining how to use the feature, a developer guide describing the implementation details, and API documentation for any relevant interfaces.",
+      "requirement_id": "SRS-59",
+      "reasoning": "Documentation is crucial for users to understand how to use the 'Save Local File' functionality and for developers to maintain and extend the code.",
+      "tags": [
+        "documents",
+        "frontend",
+        "backend"
+      ],
+      "priority": "P3",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-53-001",
+      "name": "Design Document Creation",
+      "description": "Design the database schema and backend API endpoint for creating a new empty document. Consider document metadata storage.",
+      "requirement_id": "SRS-53",
+      "reasoning": "To define the technical implementation details for the new document creation feature.",
+      "tags": [
+        "design",
+        "backend",
+        "documents"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-53-002",
+      "name": "Implement Backend API for Document Creation",
+      "description": "Develop a Python-based API endpoint to handle the creation of new, empty documents.  The endpoint should interact with the database to store document metadata. Ensure proper error handling and security.",
+      "requirement_id": "SRS-53",
+      "reasoning": "To provide the core functionality for creating new documents as required by the user.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-53-003",
+      "name": "Implement Frontend UI for Document Creation",
+      "description": "Create a React-based UI element (e.g., a button or menu item) that allows users to initiate the creation of a new, empty document.  This UI should call the backend API.",
+      "requirement_id": "SRS-53",
+      "reasoning": "To provide the user interface for initiating the document creation process.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-53-004",
+      "name": "Testing of Document Creation",
+      "description": "Write unit and integration tests for the backend API and frontend UI components related to document creation. Verify correct document metadata storage and error handling.",
+      "requirement_id": "SRS-53",
+      "reasoning": "To ensure the document creation feature functions correctly and reliably.",
+      "tags": [
+        "testing",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-53-005",
+      "name": "Document Creation Documentation",
+      "description": "Create API documentation and user documentation for the document creation feature.",
+      "requirement_id": "SRS-53",
+      "reasoning": "To provide clear instructions for developers and users on how to use the document creation feature.",
+      "tags": [
+        "documents",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-54-009",
+      "name": "Implement unsaved changes check before closing document",
+      "description": "Implement a mechanism to detect if the current document contains unsaved changes. If unsaved changes are detected, prompt the user to save the document before closing.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To prevent data loss and ensure users are aware of unsaved changes before closing a document.",
+      "tags": [
+        "frontend",
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-54-010",
+      "name": "Design unsaved changes warning modal",
+      "description": "Design a modal window that appears when a user attempts to close a document with unsaved changes, prompting them to save or discard the changes.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To provide a clear and intuitive user interface for handling unsaved changes.",
+      "tags": [
+        "design",
+        "frontend"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-54-011",
+      "name": "Add testing for unsaved changes functionality",
+      "description": "Write unit and integration tests to ensure the unsaved changes detection and warning modal function correctly.",
+      "requirement_id": "SRS-54",
+      "reasoning": "To ensure the reliability and correctness of the unsaved changes feature.",
+      "tags": [
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-56-001",
+      "name": "Implement File Selection UI",
+      "description": "Develop the user interface component that allows users to select a document from their local file system.",
+      "requirement_id": "SRS-56",
+      "reasoning": "Users need a way to choose the document they want to open within the application.",
+      "tags": [
+        "frontend",
+        "design"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-56-002",
+      "name": "Implement File Reading Functionality",
+      "description": "Implement the backend functionality to read the selected file from the user's local file system.",
+      "requirement_id": "SRS-56",
+      "reasoning": "The application needs to be able to read the contents of the selected file.",
+      "tags": [
+        "backend"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-56-003",
+      "name": "Integrate File Reading with UI",
+      "description": "Connect the file selection UI component to the backend file reading functionality to enable users to open documents.",
+      "requirement_id": "SRS-56",
+      "reasoning": "The frontend and backend components need to work together to provide the open file functionality.",
+      "tags": [
+        "frontend",
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-56-004",
+      "name": "Add Unit Tests for File Reading",
+      "description": "Add unit tests for the file reading functionality.",
+      "requirement_id": "SRS-56",
+      "reasoning": "To ensure the file reading functionality works as expected.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-56-005",
+      "name": "Test File Opening Functionality",
+      "description": "Perform end-to-end testing of the file opening functionality.",
+      "requirement_id": "SRS-56",
+      "reasoning": "To ensure the file opening functionality works as expected from the user's perspective.",
+      "tags": [
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-59-006",
+      "name": "Implement Document Saving Functionality",
+      "description": "Implement the functionality to allow users to save the currently opened document into a file. This includes creating the necessary UI elements (e.g., a 'Save' button or menu item) and the backend logic to handle file saving.",
+      "requirement_id": "SRS-59",
+      "reasoning": "Users need to be able to save their work to persistent storage. Without this, any progress will be lost when the application is closed.",
+      "tags": [
+        "frontend",
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-59-007",
+      "name": "Design Document Saving Workflow",
+      "description": "Design the workflow for saving documents, including the user interface elements, file format options, and error handling.  Consider where the 'Save' and 'Save As' options will be located in the UI.",
+      "requirement_id": "SRS-59",
+      "reasoning": "A well-designed workflow will improve the user experience and ensure that users can easily save their documents without confusion.",
+      "tags": [
+        "design",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-59-008",
+      "name": "Testing of Document Saving Functionality",
+      "description": "Create and execute test cases to ensure the document saving functionality works as expected. This includes testing different file formats, error conditions (e.g., file not found, insufficient permissions), and boundary cases (e.g., very large files).",
+      "requirement_id": "SRS-59",
+      "reasoning": "Thorough testing is essential to ensure the reliability of the document saving feature and prevent data loss.",
+      "tags": [
+        "testing"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-61-001",
+      "name": "Implement Document Template Creation",
+      "description": "Implement functionality to allow users to create a document template file from the currently opened document.",
+      "requirement_id": "SRS-61",
+      "reasoning": "Users need to be able to save opened documents as templates for future use, streamlining document creation processes.",
+      "tags": [
+        "backend",
+        "frontend",
+        "feature",
+        "design"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-61-002",
+      "name": "Design Document Template Storage",
+      "description": "Design the storage mechanism and format for document templates.",
+      "requirement_id": "SRS-61",
+      "reasoning": "A well-defined storage mechanism is needed for efficient template retrieval and management.",
+      "tags": [
+        "backend",
+        "design",
+        "documents"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-61-003",
+      "name": "Develop Frontend UI for Template Creation",
+      "description": "Develop the user interface elements and interactions for creating a template from an open document.",
+      "requirement_id": "SRS-61",
+      "reasoning": "A user-friendly interface is essential for easily creating document templates.",
+      "tags": [
+        "frontend",
+        "design",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-61-004",
+      "name": "Testing of Document Template Functionality",
+      "description": "Write unit and integration tests to verify the document template creation feature.",
+      "requirement_id": "SRS-61",
+      "reasoning": "Thorough testing ensures the template creation feature works correctly and reliably.",
+      "tags": [
+        "testing",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-62-001",
+      "name": "Design Document Template Structure",
+      "description": "Design the database schema and data models to store the structure of document sections, including the hierarchy and relationships between sections.",
+      "requirement_id": "SRS-62",
+      "reasoning": "To provide a structured way to manage document templates and ensure consistency across different documents.",
+      "tags": [
+        "design",
+        "backend",
+        "documents"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-62-002",
+      "name": "Implement Document Template Storage",
+      "description": "Implement the backend logic to store and retrieve document template structures from the database, including the definition and values of requirement attributes.",
+      "requirement_id": "SRS-62",
+      "reasoning": "To persist document template structures and make them accessible for document generation and management.",
+      "tags": [
+        "backend",
+        "documents"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-62-003",
+      "name": "Define API for Document Templates",
+      "description": "Define API endpoints to create, read, update, and delete document templates, including the ability to manage requirement attributes.",
+      "requirement_id": "SRS-62",
+      "reasoning": "To provide a programmatic interface for interacting with document templates and integrating with other systems.",
+      "tags": [
+        "backend",
+        "design"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-62-004",
+      "name": "Create Document Template UI Components",
+      "description": "Develop React components to allow users to create, edit, and view document templates, including the ability to define requirement attributes.",
+      "requirement_id": "SRS-62",
+      "reasoning": "To provide a user-friendly interface for managing document templates.",
+      "tags": [
+        "frontend",
+        "design",
+        "documents"
+      ],
+      "priority": "P2",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-62-005",
+      "name": "Implement Document Template Validation",
+      "description": "Implement validation rules for document templates to ensure data integrity and consistency.",
+      "requirement_id": "SRS-62",
+      "reasoning": "To prevent invalid or inconsistent document template definitions.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-62-006",
+      "name": "Test Document Template Functionality",
+      "description": "Write unit and integration tests to verify the functionality of document template storage, API, and UI components.",
+      "requirement_id": "SRS-62",
+      "reasoning": "To ensure the reliability and correctness of document template functionality.",
+      "tags": [
+        "testing",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-63-001",
+      "name": "Implement Document Template Import Feature",
+      "description": "Implement the functionality to allow users to create a new document from a chosen document template file, preserving document sections and requirement attributes.",
+      "requirement_id": "SRS-63",
+      "reasoning": "This feature enables users to quickly create new documents based on predefined templates, improving efficiency and consistency.",
+      "tags": [
+        "backend",
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-63-002",
+      "name": "Design Document Template Structure Parsing",
+      "description": "Design the data structure and parsing logic to extract section information and requirement attribute definitions from document template files.",
+      "requirement_id": "SRS-63",
+      "reasoning": "A well-defined data structure is essential for efficiently processing and managing document templates.",
+      "tags": [
+        "design",
+        "backend"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-63-003",
+      "name": "Develop Backend API for Document Import",
+      "description": "Develop the backend API endpoint to handle document template uploads and create new documents based on the parsed template data.",
+      "requirement_id": "SRS-63",
+      "reasoning": "The backend API will serve as the core component for processing document templates and creating new documents.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-63-004",
+      "name": "Implement Frontend UI for Template Selection and Document Creation",
+      "description": "Implement the frontend user interface for selecting a document template and initiating the document creation process.",
+      "requirement_id": "SRS-63",
+      "reasoning": "The frontend UI will provide users with a convenient way to choose a template and start the document creation process.",
+      "tags": [
+        "frontend",
+        "feature",
+        "design"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-63-005",
+      "name": "Implement Attribute Definition and Value Persisting",
+      "description": "Develop the logic to save the values of requirement attributes in the new created document.",
+      "requirement_id": "SRS-63",
+      "reasoning": "It will ensure data integrity during the document template import process.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-63-006",
+      "name": "Create Tests for Document Import",
+      "description": "Write integration and unit tests to ensure the document import feature works correctly.",
+      "requirement_id": "SRS-63",
+      "reasoning": "Automated tests ensure stability of the document import functionality.",
+      "tags": [
+        "testing",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-72-001",
+      "name": "Backend: Implement Word Document Parsing",
+      "description": "Develop the backend logic to parse MS Word documents, extract text, formatting, and images, and preserve the structure of sections and paragraphs. This includes handling rich text descriptions of requirements.",
+      "requirement_id": "SRS-72",
+      "reasoning": "The application needs to support importing MS Word documents, preserving their structure, text, and images.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "3d"
+    },
+    {
+      "task_id": "TASK-SRS-72-002",
+      "name": "Backend: Design Data Model for Imported Documents",
+      "description": "Design the database schema to store the extracted content from MS Word documents, including sections, paragraphs, text formatting, and images.  Consider efficient storage and retrieval.",
+      "requirement_id": "SRS-72",
+      "reasoning": "A well-defined data model is essential for storing and managing the imported document content effectively.",
+      "tags": [
+        "backend",
+        "design"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-72-003",
+      "name": "Frontend: Develop Document Import Interface",
+      "description": "Create the frontend component that allows users to upload MS Word documents. Provide feedback to the user during the upload and processing phases.",
+      "requirement_id": "SRS-72",
+      "reasoning": "Users need a way to upload their MS Word documents to the application.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-72-004",
+      "name": "Frontend: Render Imported Document Content",
+      "description": "Develop the frontend component to display the parsed content from the backend, preserving the original formatting and structure of the Word document.",
+      "requirement_id": "SRS-72",
+      "reasoning": "Users need to be able to view the content of the imported Word documents.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "3d"
+    },
+    {
+      "task_id": "TASK-SRS-72-005",
+      "name": "Testing: Integration Tests for Document Import",
+      "description": "Write integration tests to verify the correct parsing, storage, and rendering of imported MS Word documents. Cover various document structures and formatting options.",
+      "requirement_id": "SRS-72",
+      "reasoning": "Ensure the document import functionality works reliably with different Word document formats.",
+      "tags": [
+        "testing",
+        "feature"
+      ],
+      "priority": "P2",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-72-006",
+      "name": "Backend: Implement Image Storage",
+      "description": "Implement the backend functionality to store images extracted from the Word document.",
+      "requirement_id": "SRS-72",
+      "reasoning": "Images need to be extracted from the Word document and then stored.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-73-001",
+      "name": "Design Excel Import Feature",
+      "description": "Design the architecture for importing MS Excel tables, focusing on preserving section headings, levels, unformatted text, and custom attributes. Consider different Excel versions and file sizes.",
+      "requirement_id": "SRS-73",
+      "reasoning": "To ensure the application can correctly ingest and process requirement data from Excel files, maintaining data integrity and structure.",
+      "tags": [
+        "design",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-73-002",
+      "name": "Implement Backend Excel Parsing",
+      "description": "Develop the backend logic to parse Excel files, extract requirement data, and map it to the application's internal data structures. Focus on handling various data types and potential errors.",
+      "requirement_id": "SRS-73",
+      "reasoning": "To enable the application to read and interpret data from Excel files.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-73-003",
+      "name": "Implement Frontend Excel Upload and Preview",
+      "description": "Create a frontend component for users to upload Excel files and preview the extracted requirement data before importing. Include error handling for invalid file formats or large file sizes.",
+      "requirement_id": "SRS-73",
+      "reasoning": "To provide users with a user-friendly interface for importing Excel data and verifying its accuracy.",
+      "tags": [
+        "frontend",
+        "feature",
+        "design"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-73-004",
+      "name": "Develop Data Mapping Configuration",
+      "description": "Implement a configuration mechanism to map Excel columns to requirement attributes in the application. This should allow users to customize the import process and handle different Excel formats.",
+      "requirement_id": "SRS-73",
+      "reasoning": "To allow flexibility in mapping data and ensure compatibility with various Excel file formats.",
+      "tags": [
+        "backend",
+        "frontend",
+        "feature",
+        "design"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-73-005",
+      "name": "Implement Data Validation and Error Handling",
+      "description": "Develop validation rules to ensure the imported requirement data meets the application's requirements. Implement error handling to provide informative messages to the user when data is invalid or missing.",
+      "requirement_id": "SRS-73",
+      "reasoning": "To maintain data quality and prevent errors caused by invalid or incomplete data.",
+      "tags": [
+        "backend",
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-73-006",
+      "name": "Write Unit and Integration Tests",
+      "description": "Write unit and integration tests to verify the functionality of the Excel import feature, including data parsing, mapping, and validation.",
+      "requirement_id": "SRS-73",
+      "reasoning": "To ensure the quality and reliability of the Excel import feature.",
+      "tags": [
+        "testing",
+        "backend",
+        "frontend"
+      ],
+      "priority": "P2",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-73-007",
+      "name": "Create Documentation for Excel Import",
+      "description": "Create user documentation explaining how to import Excel files, configure data mapping, and troubleshoot potential issues.",
+      "requirement_id": "SRS-73",
+      "reasoning": "To help users understand and use the Excel import feature effectively.",
+      "tags": [
+        "documents"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-76-001",
+      "name": "Implement HTML Export Functionality",
+      "description": "Implement the functionality to export the displayed document view to HTML format. This includes creating the necessary backend logic to convert the document data into HTML and providing a download option for the user.",
+      "requirement_id": "SRS-76",
+      "reasoning": "Users need to be able to export the displayed document view to HTML for offline access, sharing, or further editing in other applications.",
+      "tags": [
+        "backend",
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-76-002",
+      "name": "Design HTML Export Template",
+      "description": "Design the HTML template to be used for exporting the document view. This includes defining the layout, styling, and formatting of the exported HTML document.",
+      "requirement_id": "SRS-76",
+      "reasoning": "A well-designed HTML template ensures that the exported document is visually appealing and easy to read.",
+      "tags": [
+        "design",
+        "frontend"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-76-003",
+      "name": "Add Export Button to UI",
+      "description": "Add an 'Export to HTML' button to the user interface, allowing users to initiate the export process.",
+      "requirement_id": "SRS-76",
+      "reasoning": "Users need a clear and accessible way to trigger the document export functionality.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-76-004",
+      "name": "Test HTML Export Functionality",
+      "description": "Create and execute test cases to verify the HTML export functionality. Ensure that the exported HTML document is correctly formatted, and that all document content is included.",
+      "requirement_id": "SRS-76",
+      "reasoning": "Testing is essential to ensure the quality and reliability of the HTML export functionality.",
+      "tags": [
+        "testing"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-77-001",
+      "name": "Implement CSV Export Functionality",
+      "description": "Implement the backend logic to export requirements data into CSV format.",
+      "requirement_id": "SRS-77",
+      "reasoning": "Users need to be able to export requirements for offline analysis and sharing.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-77-002",
+      "name": "Create Frontend Export Button",
+      "description": "Add a button to the frontend that triggers the CSV export functionality.",
+      "requirement_id": "SRS-77",
+      "reasoning": "Users need a clear and accessible way to initiate the export process.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-77-003",
+      "name": "Test CSV Export",
+      "description": "Write automated tests to verify the correctness of the exported CSV data.",
+      "requirement_id": "SRS-77",
+      "reasoning": "Ensure the exported data is accurate and complete.",
+      "tags": [
+        "testing",
+        "backend"
+      ],
+      "priority": "P2",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-77-004",
+      "name": "Integrate Export Feature",
+      "description": "Integrate the backend CSV export functionality with the frontend export button.",
+      "requirement_id": "SRS-77",
+      "reasoning": "Ensure the user interface works as expected.",
+      "tags": [
+        "frontend",
+        "backend",
+        "testing"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-80-001",
+      "name": "Implement Table of Contents Structure",
+      "description": "Develop the data structure and API endpoint to serve the table of contents data, reflecting the document tree hierarchy.",
+      "requirement_id": "SRS-80",
+      "reasoning": "To provide a structured navigation for users to easily locate and access different sections within the document.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "2d"
+    },
+    {
+      "task_id": "TASK-SRS-80-002",
+      "name": "Design TOC Component",
+      "description": "Design the React component to display the table of contents, ensuring it accurately represents the document tree hierarchy.",
+      "requirement_id": "SRS-80",
+      "reasoning": "To create a user-friendly interface for navigating the document content.",
+      "tags": [
+        "design",
+        "frontend"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-80-003",
+      "name": "Implement TOC Component",
+      "description": "Implement the React component to render the table of contents, utilizing the API data to display the section headings according to their hierarchical structure.",
+      "requirement_id": "SRS-80",
+      "reasoning": "To provide a dynamic and interactive table of contents for document navigation.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-80-004",
+      "name": "Test TOC Functionality",
+      "description": "Write unit and integration tests for the table of contents component to ensure accurate rendering and navigation.",
+      "requirement_id": "SRS-80",
+      "reasoning": "To guarantee the table of contents functions as expected and provides reliable document navigation.",
+      "tags": [
+        "testing",
+        "frontend",
+        "backend"
+      ],
+      "priority": "P2",
+      "estimate": "6h"
+    },
+    {
+      "task_id": "TASK-SRS-84-001",
+      "name": "Implement Unique ID Display for Requirements Table",
+      "description": "Modify the requirements table's ID column to ensure it displays unique requirement identifiers, preventing duplicates and ensuring data integrity.",
+      "requirement_id": "SRS-84",
+      "reasoning": "The current implementation of the ID column in the requirements table does not guarantee unique identifiers. This can lead to confusion, data inconsistencies, and difficulties in tracking and managing requirements effectively.",
+      "tags": [
+        "frontend",
+        "backend",
+        "testing"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-84-002",
+      "name": "Write Unit Tests for Unique ID Validation",
+      "description": "Develop unit tests to validate the uniqueness of the IDs in the requirements table, ensuring that the system rejects any attempts to insert duplicate IDs.",
+      "requirement_id": "SRS-84",
+      "reasoning": "To ensure the reliability and correctness of the unique ID implementation, comprehensive unit tests are required to cover various scenarios, including edge cases and potential error conditions.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-84-003",
+      "name": "Write Integration Tests for Unique ID Display",
+      "description": "Create integration tests to verify that the unique IDs are correctly displayed in the frontend, ensuring seamless integration between the backend data and the user interface.",
+      "requirement_id": "SRS-84",
+      "reasoning": "Integration tests are essential to validate the end-to-end functionality of the unique ID implementation, confirming that the data flows correctly from the backend to the frontend and that the user interface displays the correct information.",
+      "tags": [
+        "frontend",
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-85-001",
+      "name": "Implement Description Column Content",
+      "description": "Implement the Description column in the requirements table to display section numbers, headings, requirement text descriptions, and attachments as specified in SRS-85.",
+      "requirement_id": "SRS-85",
+      "reasoning": "The Description column needs to be updated to include all specified elements to accurately represent requirement details.",
+      "tags": [
+        "frontend",
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-85-002",
+      "name": "Design Description Column Layout",
+      "description": "Design the layout and styling for the Description column to ensure readability and proper display of section numbers, headings, requirement text descriptions, and attachments.",
+      "requirement_id": "SRS-85",
+      "reasoning": "A well-designed layout will improve user experience and ensure information is presented clearly.",
+      "tags": [
+        "frontend",
+        "design"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-85-003",
+      "name": "Test Description Column Display",
+      "description": "Create and execute test cases to verify that the Description column correctly displays section numbers, headings, requirement text descriptions, and attachments as intended.",
+      "requirement_id": "SRS-85",
+      "reasoning": "Testing is crucial to ensure that the implemented feature meets the specified requirements and functions correctly.",
+      "tags": [
+        "testing",
+        "frontend",
+        "backend"
+      ],
+      "priority": "P2",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-86-001",
+      "name": "Backend: Fetch and Order Comments for Discussion Column",
+      "description": "Implement backend logic to fetch requirement comments from the database, order them by date and time, and prepare the data for the frontend.",
+      "requirement_id": "SRS-86",
+      "reasoning": "The Discussion column needs to display comments in chronological order to maintain context and facilitate understanding of requirement evolution.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-86-002",
+      "name": "Frontend: Display Comments in Discussion Column",
+      "description": "Implement frontend component to display comments in the Discussion column, including author, date, and text, ordered by date and time, as provided by the backend.",
+      "requirement_id": "SRS-86",
+      "reasoning": "The Discussion column needs to display comments in chronological order to maintain context and facilitate understanding of requirement evolution.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-86-003",
+      "name": "Testing: Verify Comment Display and Ordering",
+      "description": "Write automated tests to verify that comments are displayed correctly in the Discussion column, with correct author, date, and text, and are ordered by date and time.",
+      "requirement_id": "SRS-86",
+      "reasoning": "Ensure that comments are displayed correctly and in the correct order to meet the requirement and prevent confusion.",
+      "tags": [
+        "testing",
+        "feature"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-87-001",
+      "name": "Design Requirement Traceability Links Display",
+      "description": "Design the UI/UX for displaying requirement traceability links in the Links column of the requirements table, grouped by link types.",
+      "requirement_id": "SRS-87",
+      "reasoning": "To provide a clear and organized view of requirement traceability, enhancing usability and understanding.",
+      "tags": [
+        "design",
+        "frontend"
+      ],
+      "priority": "P1",
+      "estimate": "8h"
+    },
+    {
+      "task_id": "TASK-SRS-87-002",
+      "name": "Implement Frontend for Traceability Links",
+      "description": "Implement the frontend component in React to display requirement traceability links, grouped by link types, as designed.",
+      "requirement_id": "SRS-87",
+      "reasoning": "To enable users to view the traceability links directly in the requirements table.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-87-003",
+      "name": "Backend API Enhancement for Traceability Data",
+      "description": "Enhance the backend API to provide requirement traceability data, including link types, for the Links column.",
+      "requirement_id": "SRS-87",
+      "reasoning": "To supply the frontend with the necessary data for displaying traceability links.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-87-004",
+      "name": "Testing of Traceability Links Display",
+      "description": "Write unit and integration tests to ensure the correct display and functionality of requirement traceability links.",
+      "requirement_id": "SRS-87",
+      "reasoning": "To ensure the reliability and accuracy of the traceability links display.",
+      "tags": [
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-112-001",
+      "name": "Implement permanent deletion of requirements",
+      "description": "Implement the functionality to permanently delete selected requirements from the document as requested in SRS-112.",
+      "requirement_id": "SRS-112",
+      "reasoning": "This is required to fully implement the 'permanently remove' feature, ensuring data is completely removed from the system.",
+      "tags": [
+        "backend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "1d"
+    },
+    {
+      "task_id": "TASK-SRS-112-002",
+      "name": "Update Frontend to trigger permanent delete",
+      "description": "Update the frontend to include a button or action that triggers the permanent deletion of requirements. This includes confirming with the user.",
+      "requirement_id": "SRS-112",
+      "reasoning": "The frontend needs to provide the user interface for triggering the permanent delete functionality.",
+      "tags": [
+        "frontend",
+        "feature"
+      ],
+      "priority": "P1",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-112-003",
+      "name": "Add unit tests for permanent delete",
+      "description": "Write unit tests for the permanent delete functionality to ensure it works as expected and handles edge cases correctly.",
+      "requirement_id": "SRS-112",
+      "reasoning": "Unit tests are needed to verify the correctness and reliability of the implemented feature.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    },
+    {
+      "task_id": "TASK-SRS-112-004",
+      "name": "Add integration tests for permanent delete",
+      "description": "Write integration tests to ensure that the permanent delete functionality integrates correctly with other parts of the system, such as the database.",
+      "requirement_id": "SRS-112",
+      "reasoning": "Integration tests are needed to verify the correct integration of the newly implemented feature with other system components.",
+      "tags": [
+        "backend",
+        "testing"
+      ],
+      "priority": "P2",
+      "estimate": "4h"
+    }
+  ],
+  "dependencies": [
+    {
+      "from_task_id": "TASK-GENERAL-002",
+      "to_task_id": "TASK-SRS-21-006",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.863309383392334,
+      "reasoning": "Semantic similarity: 86.33%"
+    },
+    {
+      "from_task_id": "TASK-GENERAL-004",
+      "to_task_id": "TASK-SRS-54-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-GENERAL-004",
+      "to_task_id": "TASK-SRS-53-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-GENERAL-004",
+      "to_task_id": "TASK-SRS-62-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-21-001",
+      "to_task_id": "TASK-SRS-22-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-21-001",
+      "to_task_id": "TASK-SRS-54-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-21-001",
+      "to_task_id": "TASK-SRS-54-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-21-001",
+      "to_task_id": "TASK-SRS-62-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-21-001",
+      "to_task_id": "TASK-SRS-72-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-21-001",
+      "to_task_id": "TASK-SRS-86-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-21-004",
+      "to_task_id": "TASK-SRS-21-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6823336482048035,
+      "reasoning": "Semantic similarity: 68.23%"
+    },
+    {
+      "from_task_id": "TASK-SRS-21-004",
+      "to_task_id": "TASK-SRS-22-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7103303074836731,
+      "reasoning": "Semantic similarity: 71.03%"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-001",
+      "to_task_id": "TASK-SRS-22-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-001",
+      "to_task_id": "TASK-SRS-22-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-001",
+      "to_task_id": "TASK-SRS-22-006",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-001",
+      "to_task_id": "TASK-SRS-54-007",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-001",
+      "to_task_id": "TASK-SRS-53-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-001",
+      "to_task_id": "TASK-SRS-63-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-002",
+      "to_task_id": "TASK-SRS-22-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-002",
+      "to_task_id": "TASK-SRS-22-006",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-002",
+      "to_task_id": "TASK-SRS-54-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.8999999999999999,
+      "reasoning": "Entity overlap: 75.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-002",
+      "to_task_id": "TASK-SRS-54-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.8999999999999999,
+      "reasoning": "Entity overlap: 75.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-002",
+      "to_task_id": "TASK-SRS-54-007",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-002",
+      "to_task_id": "TASK-SRS-63-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-002",
+      "to_task_id": "TASK-SRS-80-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.8999999999999999,
+      "reasoning": "Entity overlap: 75.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-003",
+      "to_task_id": "TASK-SRS-22-006",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-003",
+      "to_task_id": "TASK-SRS-54-007",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-003",
+      "to_task_id": "TASK-SRS-53-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-003",
+      "to_task_id": "TASK-SRS-63-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-004",
+      "to_task_id": "TASK-SRS-54-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-004",
+      "to_task_id": "TASK-SRS-54-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-004",
+      "to_task_id": "TASK-SRS-62-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-004",
+      "to_task_id": "TASK-SRS-72-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-004",
+      "to_task_id": "TASK-SRS-86-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-005",
+      "to_task_id": "TASK-SRS-22-008",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6845263838768005,
+      "reasoning": "Semantic similarity: 68.45%"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-006",
+      "to_task_id": "TASK-SRS-54-007",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-006",
+      "to_task_id": "TASK-SRS-53-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-22-006",
+      "to_task_id": "TASK-SRS-63-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-001",
+      "to_task_id": "TASK-SRS-53-001",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7483388185501099,
+      "reasoning": "Semantic similarity: 74.83%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-001",
+      "to_task_id": "TASK-SRS-53-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6781283020973206,
+      "reasoning": "Semantic similarity: 67.81%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-001",
+      "to_task_id": "TASK-SRS-61-001",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6513393521308899,
+      "reasoning": "Semantic similarity: 65.13%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-002",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.68827885389328,
+      "reasoning": "Semantic similarity: 68.83%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-002",
+      "to_task_id": "TASK-SRS-63-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.707184374332428,
+      "reasoning": "Semantic similarity: 70.72%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-002",
+      "to_task_id": "TASK-SRS-112-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-003",
+      "to_task_id": "TASK-SRS-54-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.691451370716095,
+      "reasoning": "Semantic similarity: 69.15%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-003",
+      "to_task_id": "TASK-SRS-54-006",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-003",
+      "to_task_id": "TASK-SRS-54-008",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-003",
+      "to_task_id": "TASK-SRS-53-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7286482453346252,
+      "reasoning": "Semantic similarity: 72.86%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-003",
+      "to_task_id": "TASK-SRS-59-008",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6832984089851379,
+      "reasoning": "Semantic similarity: 68.33%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-003",
+      "to_task_id": "TASK-SRS-61-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-003",
+      "to_task_id": "TASK-SRS-62-006",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6616420745849609,
+      "reasoning": "Semantic similarity: 66.16%"
+    },
+    {
+      "from_task_id": "TASK-SRS-51-003",
+      "to_task_id": "TASK-SRS-72-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-001",
+      "to_task_id": "TASK-SRS-54-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-001",
+      "to_task_id": "TASK-SRS-61-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.671039879322052,
+      "reasoning": "Semantic similarity: 67.10%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-001",
+      "to_task_id": "TASK-SRS-62-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-001",
+      "to_task_id": "TASK-SRS-72-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7083338499069214,
+      "reasoning": "Semantic similarity: 70.83%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-001",
+      "to_task_id": "TASK-SRS-86-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-002",
+      "to_task_id": "TASK-SRS-54-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.693401038646698,
+      "reasoning": "Semantic similarity: 69.34%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-002",
+      "to_task_id": "TASK-SRS-63-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.8999999999999999,
+      "reasoning": "Entity overlap: 75.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-003",
+      "to_task_id": "TASK-SRS-62-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-003",
+      "to_task_id": "TASK-SRS-62-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6726968288421631,
+      "reasoning": "Semantic similarity: 67.27%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-003",
+      "to_task_id": "TASK-SRS-72-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6948249340057373,
+      "reasoning": "Semantic similarity: 69.48%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-003",
+      "to_task_id": "TASK-SRS-86-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-004",
+      "to_task_id": "TASK-SRS-53-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7328060865402222,
+      "reasoning": "Semantic similarity: 73.28%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-004",
+      "to_task_id": "TASK-SRS-62-006",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7060664892196655,
+      "reasoning": "Semantic similarity: 70.61%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-004",
+      "to_task_id": "TASK-SRS-63-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.8999999999999999,
+      "reasoning": "Entity overlap: 75.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-005",
+      "to_task_id": "TASK-SRS-54-006",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7101063132286072,
+      "reasoning": "Semantic similarity: 71.01%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-005",
+      "to_task_id": "TASK-SRS-53-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-005",
+      "to_task_id": "TASK-SRS-62-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-005",
+      "to_task_id": "TASK-SRS-72-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7989656329154968,
+      "reasoning": "Semantic similarity: 79.90%"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-006",
+      "to_task_id": "TASK-SRS-54-008",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-006",
+      "to_task_id": "TASK-SRS-61-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-006",
+      "to_task_id": "TASK-SRS-72-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-007",
+      "to_task_id": "TASK-SRS-53-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-007",
+      "to_task_id": "TASK-SRS-63-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-008",
+      "to_task_id": "TASK-SRS-61-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-008",
+      "to_task_id": "TASK-SRS-72-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-001",
+      "to_task_id": "TASK-SRS-59-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6768739819526672,
+      "reasoning": "Semantic similarity: 67.69%"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-001",
+      "to_task_id": "TASK-SRS-59-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6606496572494507,
+      "reasoning": "Semantic similarity: 66.06%"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-002",
+      "to_task_id": "TASK-SRS-59-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7970340847969055,
+      "reasoning": "Semantic similarity: 79.70%"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-002",
+      "to_task_id": "TASK-SRS-59-006",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-002",
+      "to_task_id": "TASK-SRS-59-007",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6807917356491089,
+      "reasoning": "Semantic similarity: 68.08%"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-003",
+      "to_task_id": "TASK-SRS-59-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6621881723403931,
+      "reasoning": "Semantic similarity: 66.22%"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-005",
+      "to_task_id": "TASK-SRS-59-007",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6510434746742249,
+      "reasoning": "Semantic similarity: 65.10%"
+    },
+    {
+      "from_task_id": "TASK-SRS-53-001",
+      "to_task_id": "TASK-SRS-53-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.8999999999999999,
+      "reasoning": "Entity overlap: 75.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-53-004",
+      "to_task_id": "TASK-SRS-53-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.66408371925354,
+      "reasoning": "Semantic similarity: 66.41%"
+    },
+    {
+      "from_task_id": "TASK-SRS-53-004",
+      "to_task_id": "TASK-SRS-62-006",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-53-005",
+      "to_task_id": "TASK-SRS-62-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-54-009",
+      "to_task_id": "TASK-SRS-54-010",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7328957319259644,
+      "reasoning": "Semantic similarity: 73.29%"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-001",
+      "to_task_id": "TASK-SRS-56-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.735175609588623,
+      "reasoning": "Semantic similarity: 73.52%"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-001",
+      "to_task_id": "TASK-SRS-56-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-001",
+      "to_task_id": "TASK-SRS-73-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-002",
+      "to_task_id": "TASK-SRS-56-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7475930452346802,
+      "reasoning": "Semantic similarity: 74.76%"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-002",
+      "to_task_id": "TASK-SRS-56-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-002",
+      "to_task_id": "TASK-SRS-56-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-002",
+      "to_task_id": "TASK-SRS-59-007",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-002",
+      "to_task_id": "TASK-SRS-59-008",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-002",
+      "to_task_id": "TASK-SRS-61-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-002",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-002",
+      "to_task_id": "TASK-SRS-73-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-003",
+      "to_task_id": "TASK-SRS-73-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-004",
+      "to_task_id": "TASK-SRS-56-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-004",
+      "to_task_id": "TASK-SRS-59-007",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-004",
+      "to_task_id": "TASK-SRS-59-008",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-004",
+      "to_task_id": "TASK-SRS-61-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-004",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-004",
+      "to_task_id": "TASK-SRS-73-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-005",
+      "to_task_id": "TASK-SRS-59-007",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-005",
+      "to_task_id": "TASK-SRS-59-008",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-005",
+      "to_task_id": "TASK-SRS-61-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-005",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-56-005",
+      "to_task_id": "TASK-SRS-73-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-006",
+      "to_task_id": "TASK-SRS-59-007",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7162363529205322,
+      "reasoning": "Semantic similarity: 71.62%"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-006",
+      "to_task_id": "TASK-SRS-61-001",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7205120921134949,
+      "reasoning": "Semantic similarity: 72.05%"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-007",
+      "to_task_id": "TASK-SRS-59-008",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-007",
+      "to_task_id": "TASK-SRS-61-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-007",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-007",
+      "to_task_id": "TASK-SRS-73-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-008",
+      "to_task_id": "TASK-SRS-61-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-008",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-59-008",
+      "to_task_id": "TASK-SRS-73-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-001",
+      "to_task_id": "TASK-SRS-61-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7021769285202026,
+      "reasoning": "Semantic similarity: 70.22%"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-001",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-001",
+      "to_task_id": "TASK-SRS-63-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6929996013641357,
+      "reasoning": "Semantic similarity: 69.30%"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-001",
+      "to_task_id": "TASK-SRS-73-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-002",
+      "to_task_id": "TASK-SRS-62-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6525474786758423,
+      "reasoning": "Semantic similarity: 65.25%"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-003",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6756937503814697,
+      "reasoning": "Semantic similarity: 67.57%"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-003",
+      "to_task_id": "TASK-SRS-63-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7405452132225037,
+      "reasoning": "Semantic similarity: 74.05%"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-004",
+      "to_task_id": "TASK-SRS-62-006",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7874404788017273,
+      "reasoning": "Semantic similarity: 78.74%"
+    },
+    {
+      "from_task_id": "TASK-SRS-61-004",
+      "to_task_id": "TASK-SRS-72-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-001",
+      "to_task_id": "TASK-SRS-62-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6628462076187134,
+      "reasoning": "Semantic similarity: 66.28%"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-001",
+      "to_task_id": "TASK-SRS-72-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-001",
+      "to_task_id": "TASK-SRS-80-001",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7030338048934937,
+      "reasoning": "Semantic similarity: 70.30%"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-001",
+      "to_task_id": "TASK-SRS-86-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-002",
+      "to_task_id": "TASK-SRS-62-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7317110896110535,
+      "reasoning": "Semantic similarity: 73.17%"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-002",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6542357206344604,
+      "reasoning": "Semantic similarity: 65.42%"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-002",
+      "to_task_id": "TASK-SRS-63-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7639281153678894,
+      "reasoning": "Semantic similarity: 76.39%"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-002",
+      "to_task_id": "TASK-SRS-63-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6691365242004395,
+      "reasoning": "Semantic similarity: 66.91%"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-002",
+      "to_task_id": "TASK-SRS-112-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-003",
+      "to_task_id": "TASK-SRS-63-001",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6531015038490295,
+      "reasoning": "Semantic similarity: 65.31%"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-003",
+      "to_task_id": "TASK-SRS-63-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.705142617225647,
+      "reasoning": "Semantic similarity: 70.51%"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-005",
+      "to_task_id": "TASK-SRS-63-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-005",
+      "to_task_id": "TASK-SRS-73-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-005",
+      "to_task_id": "TASK-SRS-73-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-62-006",
+      "to_task_id": "TASK-SRS-72-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6615044474601746,
+      "reasoning": "Semantic similarity: 66.15%"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-001",
+      "to_task_id": "TASK-SRS-63-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7186709642410278,
+      "reasoning": "Semantic similarity: 71.87%"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-001",
+      "to_task_id": "TASK-SRS-63-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7209471464157104,
+      "reasoning": "Semantic similarity: 72.09%"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-001",
+      "to_task_id": "TASK-SRS-73-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-002",
+      "to_task_id": "TASK-SRS-73-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-002",
+      "to_task_id": "TASK-SRS-73-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-003",
+      "to_task_id": "TASK-SRS-63-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7040513157844543,
+      "reasoning": "Semantic similarity: 70.41%"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-003",
+      "to_task_id": "TASK-SRS-80-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.8999999999999999,
+      "reasoning": "Entity overlap: 75.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-006",
+      "to_task_id": "TASK-SRS-72-005",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6533800959587097,
+      "reasoning": "Semantic similarity: 65.34%"
+    },
+    {
+      "from_task_id": "TASK-SRS-63-006",
+      "to_task_id": "TASK-SRS-73-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-72-001",
+      "to_task_id": "TASK-SRS-72-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6785498857498169,
+      "reasoning": "Semantic similarity: 67.85%"
+    },
+    {
+      "from_task_id": "TASK-SRS-72-001",
+      "to_task_id": "TASK-SRS-72-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7173460125923157,
+      "reasoning": "Semantic similarity: 71.73%"
+    },
+    {
+      "from_task_id": "TASK-SRS-72-002",
+      "to_task_id": "TASK-SRS-72-006",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6859543919563293,
+      "reasoning": "Semantic similarity: 68.60%"
+    },
+    {
+      "from_task_id": "TASK-SRS-72-004",
+      "to_task_id": "TASK-SRS-80-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-72-004",
+      "to_task_id": "TASK-SRS-86-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-72-004",
+      "to_task_id": "TASK-SRS-87-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-001",
+      "to_task_id": "TASK-SRS-73-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6553017497062683,
+      "reasoning": "Semantic similarity: 65.53%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-001",
+      "to_task_id": "TASK-SRS-73-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7389763593673706,
+      "reasoning": "Semantic similarity: 73.90%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-002",
+      "to_task_id": "TASK-SRS-73-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7018584609031677,
+      "reasoning": "Semantic similarity: 70.19%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-002",
+      "to_task_id": "TASK-SRS-73-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7130340933799744,
+      "reasoning": "Semantic similarity: 71.30%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-002",
+      "to_task_id": "TASK-SRS-73-005",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (1 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-002",
+      "to_task_id": "TASK-SRS-73-006",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7057154774665833,
+      "reasoning": "Semantic similarity: 70.57%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-002",
+      "to_task_id": "TASK-SRS-73-007",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6830771565437317,
+      "reasoning": "Semantic similarity: 68.31%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-003",
+      "to_task_id": "TASK-SRS-73-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7350106239318848,
+      "reasoning": "Semantic similarity: 73.50%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-003",
+      "to_task_id": "TASK-SRS-73-007",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6554043889045715,
+      "reasoning": "Semantic similarity: 65.54%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-004",
+      "to_task_id": "TASK-SRS-73-006",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7266055941581726,
+      "reasoning": "Semantic similarity: 72.66%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-004",
+      "to_task_id": "TASK-SRS-73-007",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6850208640098572,
+      "reasoning": "Semantic similarity: 68.50%"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-006",
+      "to_task_id": "TASK-SRS-73-007",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-73-006",
+      "to_task_id": "TASK-SRS-84-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-76-001",
+      "to_task_id": "TASK-SRS-76-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7795312404632568,
+      "reasoning": "Semantic similarity: 77.95%"
+    },
+    {
+      "from_task_id": "TASK-SRS-76-001",
+      "to_task_id": "TASK-SRS-77-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-76-003",
+      "to_task_id": "TASK-SRS-77-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-76-003",
+      "to_task_id": "TASK-SRS-77-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-77-002",
+      "to_task_id": "TASK-SRS-77-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (3 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-77-003",
+      "to_task_id": "TASK-SRS-84-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-80-002",
+      "to_task_id": "TASK-SRS-80-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.8390190005302429,
+      "reasoning": "Semantic similarity: 83.90%"
+    },
+    {
+      "from_task_id": "TASK-SRS-80-002",
+      "to_task_id": "TASK-SRS-80-004",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-80-002",
+      "to_task_id": "TASK-SRS-87-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-84-001",
+      "to_task_id": "TASK-SRS-84-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7599879503250122,
+      "reasoning": "Semantic similarity: 76.00%"
+    },
+    {
+      "from_task_id": "TASK-SRS-84-001",
+      "to_task_id": "TASK-SRS-87-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-85-001",
+      "to_task_id": "TASK-SRS-85-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-85-001",
+      "to_task_id": "TASK-SRS-87-001",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-85-002",
+      "to_task_id": "TASK-SRS-86-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-85-003",
+      "to_task_id": "TASK-SRS-86-003",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.9,
+      "reasoning": "Entity overlap: 100.00% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-86-002",
+      "to_task_id": "TASK-SRS-86-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7167077660560608,
+      "reasoning": "Semantic similarity: 71.67%"
+    },
+    {
+      "from_task_id": "TASK-SRS-86-002",
+      "to_task_id": "TASK-SRS-87-002",
+      "dependency_type": "data",
+      "strength": "soft",
+      "confidence": 0.7999999999999999,
+      "reasoning": "Entity overlap: 66.67% (2 shared)"
+    },
+    {
+      "from_task_id": "TASK-SRS-87-001",
+      "to_task_id": "TASK-SRS-87-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7522327899932861,
+      "reasoning": "Semantic similarity: 75.22%"
+    },
+    {
+      "from_task_id": "TASK-SRS-87-001",
+      "to_task_id": "TASK-SRS-87-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.8211894035339355,
+      "reasoning": "Semantic similarity: 82.12%"
+    },
+    {
+      "from_task_id": "TASK-SRS-87-001",
+      "to_task_id": "TASK-SRS-87-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7459218502044678,
+      "reasoning": "Semantic similarity: 74.59%"
+    },
+    {
+      "from_task_id": "TASK-SRS-87-002",
+      "to_task_id": "TASK-SRS-87-003",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.7026790380477905,
+      "reasoning": "Semantic similarity: 70.27%"
+    },
+    {
+      "from_task_id": "TASK-SRS-87-003",
+      "to_task_id": "TASK-SRS-87-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6764482855796814,
+      "reasoning": "Semantic similarity: 67.64%"
+    },
+    {
+      "from_task_id": "TASK-SRS-112-001",
+      "to_task_id": "TASK-SRS-112-002",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.6956573128700256,
+      "reasoning": "Semantic similarity: 69.57%"
+    },
+    {
+      "from_task_id": "TASK-SRS-112-003",
+      "to_task_id": "TASK-SRS-112-004",
+      "dependency_type": "functional",
+      "strength": "soft",
+      "confidence": 0.8132789731025696,
+      "reasoning": "Semantic similarity: 81.33%"
+    }
+  ],
+  "sprint_allocations": {}
+}

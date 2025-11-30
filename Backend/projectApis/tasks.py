@@ -1,83 +1,376 @@
 from celery import shared_task
-from .models import Task, Sprint
+from .models import Task, Sprint, Project, Document, Activity
+from users.models import User
 from django.utils import timezone
 import logging
+import time
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 logger = logging.getLogger(__name__)
 
-# from .rag_pipeline import TaskExtractor
-# from .models import Task, FileUpload
-# from agileBotApis.celery import app
-# import re
-# import json
-# from channels.layers import get_channel_layer
-# from asgiref.sync import async_to_sync
+
+def _build_team_description(project):
+    """Build team description from project team members"""
+    if not project.team:
+        return """
+        - 2 Senior Backend Engineers (Python, SQL, System Design)
+        - 1 Senior Frontend Engineer (React, TypeScript, CSS)
+        - 1 DevOps Engineer (Docker, Kubernetes, CI/CD)
+        - 1 QA Engineer (Automation, Testing)
+        """
+    
+    team_members = project.team.members.all()
+    if not team_members:
+        return "- Development team with full-stack capabilities"
+    
+    # Build description from team members
+    description = f"Team: {project.team.name}\n"
+    for member in team_members:
+        description += f"- {member.email}\n"
+    
+    return description
 
 
-# def send_message_to_frontend(message, user_id):
-#     channel_layer = get_channel_layer()
-#     group_name = "chat_room"  # Must match the group name in the consumer
+def send_progress_update(project_uuid, message, progress, status="processing", data=None):
+    """Send progress update via WebSocket"""
+    channel_layer = get_channel_layer()
+    group_name = f"task_generation_{project_uuid}"
+    
+    payload = {
+        "type": "task_generation_progress",
+        "message": message,
+        "progress": progress,
+        "status": status,
+        "data": data or {}
+    }
+    
+    try:
+        async_to_sync(channel_layer.group_send)(group_name, payload)
+        logger.info(f"Sent progress update to {group_name}: {message} ({progress}%)")
+    except Exception as e:
+        logger.error(f"Failed to send progress update: {str(e)}")
 
-#     # Message payload
-#     payload = {
-#         "type": "chat_message",  # Must match the consumer's handler type
-#         "message": message,
-#         "user_id": user_id,  # Include the user ID
-#     }
 
-#     # Send the message to the group
-#     async_to_sync(channel_layer.group_send)(group_name, payload)
+def create_and_broadcast_activity(activity_type, user, project, description, target_name, task=None, metadata=None):
+    """Create activity record and broadcast via WebSocket"""
+    try:
+        # Create activity
+        activity = Activity.objects.create(
+            activity_type=activity_type,
+            user=user,
+            project=project,
+            task=task,
+            description=description,
+            target_name=target_name,
+            metadata=metadata
+        )
+        
+        # Broadcast to WebSocket
+        from .serializers import ActivitySerializer
+        channel_layer = get_channel_layer()
+        serializer = ActivitySerializer(activity)
+        activity_data = serializer.data
+        
+        # Broadcast to general activity channel
+        async_to_sync(channel_layer.group_send)(
+            "activities",
+            {
+                "type": "activity_message",
+                "activity": activity_data,
+            }
+        )
+        
+        # Broadcast to project-specific channel
+        if project:
+            async_to_sync(channel_layer.group_send)(
+                f"project_{project.id}",
+                {
+                    "type": "activity_message",
+                    "activity": activity_data,
+                }
+            )
+        
+        logger.info(f"Activity created and broadcasted: {activity_type} by {user}")
+        return activity
+        
+    except Exception as e:
+        logger.error(f"Failed to create/broadcast activity: {str(e)}")
+        return None
 
 
-# @app.task
-# def generate_task(file_id, user_id):
-#     print("Generating task")
-#     send_message_to_frontend("Generating task", user_id)
-#     try:
-#         file = FileUpload.objects.get(id=file_id)
-
-#         Task.objects.filter(Project=file.project, created_by="ai").delete()
-
-#         if not file:
-#             print("No file found.")
-#             return False
-
-#         task_extractor = TaskExtractor(file.file)
-#         tasks = task_extractor.extract_tasks_from_requirements()
-
-#         json_match = re.search(r"```json\n(.*?)```", tasks, re.DOTALL)
-#         send_message_to_frontend("Generated task", user_id)
-
-#         if json_match:
-#             json_content = json_match.group(1)
-#             try:
-#                 json_data = json.loads(json_content)
-#                 for task in json_data["tasks"]:
-#                     task_title = task["task_title"]
-#                     task_desc = task["task_desc"]
-#                     task_id = task["task_id"]
-#                     task_ref = task["task_ref"]
-#                     Task.objects.create(
-#                         Project=file.project,  # Use the passed project ID
-#                         name=task_title,
-#                         description=task_desc.strip(),
-#                         details=task_ref,  # Placeholder for additional details
-#                         status="created",  # Default status
-#                         priority="normal",  # Default priority
-#                         size="m",  # Default size
-#                         created_by="ai",
-#                     )
-#                 print("Tasks saved to database.")
-#                 send_message_to_frontend("Tasks saved to database.", user_id)
-
-#             except json.JSONDecodeError as e:
-#                 print(f"Error decoding JSON: {e}")
-#         else:
-#             print("No JSON content found.")
-
-#     except Exception as e:
-#         print(f"Error occurred: {e}")
-#         return False
+@shared_task(bind=True)
+def generate_tasks_async(self, project_id, document_id, user_id):
+    """
+    Async task generation with progress updates via WebSocket.
+    Uses enhanced LLM system for intelligent task generation.
+    """
+    try:
+        # Get project, document, and user
+        project = Project.objects.get(id=project_id)
+        document = Document.objects.get(id=document_id)
+        user = User.objects.get(id=user_id)
+        
+        # Use project UUID for WebSocket group name
+        project_uuid = str(project.uuid)
+        
+        logger.info(f"Starting LLM task generation for project {project.name}")
+        
+        # Create activity for task generation start
+        create_and_broadcast_activity(
+            activity_type='task_created',
+            user=user,
+            project=project,
+            description=f"started AI task generation for {project.name}",
+            target_name=f"AI Task Generation",
+            metadata={"document_id": document_id, "status": "started"}
+        )
+        
+        # Send initial progress
+        send_progress_update(project_uuid, "Starting task generation...", 0, "processing")
+        time.sleep(0.5)
+        
+        # Step 1: Initialize LLM system
+        send_progress_update(project_uuid, "Initializing AI system...", 10, "processing")
+        
+        try:
+            from .llm_integration import generate_tasks_with_llm
+            
+            # Get document file path
+            document_path = document.file.path
+            
+            # Build team description from project team
+            team_description = _build_team_description(project)
+            
+            # Step 2: Analyzing document
+            send_progress_update(project_uuid, "Analyzing requirements document with AI...", 20, "processing")
+            
+            # Step 3: Generate tasks using LLM
+            send_progress_update(project_uuid, "Extracting tasks from requirements...", 40, "processing")
+            
+            # Call LLM system with sprint allocation
+            result = generate_tasks_with_llm(
+                project_id=project.id,
+                document_path=document_path,
+                team_description=team_description,
+                detect_dependencies=True,
+                allocate_sprints=True,  # Enable sprint allocation
+                num_sprints=5
+            )
+            
+            if not result['success']:
+                raise Exception(result.get('error', 'LLM generation failed'))
+            
+            llm_tasks = result['tasks']
+            dependencies = result.get('dependencies', [])
+            sprint_allocations = result.get('sprints', [])
+            
+            send_progress_update(
+                project_uuid, 
+                f"Generated {len(llm_tasks)} tasks with AI and {len(sprint_allocations)} sprints", 
+                60, 
+                "processing"
+            )
+            
+        except ImportError as e:
+            logger.warning(f"LLM system not available: {str(e)}. Falling back to dummy tasks.")
+            send_progress_update(project_uuid, "AI system unavailable, using fallback...", 40, "processing")
+            
+            # Fallback to dummy tasks
+            llm_tasks = [
+                {
+                    "name": "Setup Project Infrastructure",
+                    "description": "Initialize project repository and setup development environment",
+                    "details": "Create Git repository, setup CI/CD pipeline, configure development tools",
+                    "priority": "high",
+                    "size": "l",
+                    "tags": ["setup", "infrastructure"]
+                },
+                {
+                    "name": "Design Database Schema",
+                    "description": "Create database schema based on requirements",
+                    "details": "Define tables, relationships, and indexes for the application",
+                    "priority": "high",
+                    "size": "m",
+                    "tags": ["database", "design"]
+                },
+                {
+                    "name": "Implement User Authentication",
+                    "description": "Build user authentication and authorization system",
+                    "details": "Implement login, registration, password reset, and session management",
+                    "priority": "high",
+                    "size": "l",
+                    "tags": ["backend", "security"]
+                },
+                {
+                    "name": "Create API Endpoints",
+                    "description": "Develop RESTful API endpoints for core functionality",
+                    "details": "Build CRUD operations for main entities with proper validation",
+                    "priority": "normal",
+                    "size": "xl",
+                    "tags": ["backend", "api"]
+                },
+            ]
+            dependencies = []
+        
+        time.sleep(0.5)
+        
+        # Step 4: Save tasks to database
+        send_progress_update(project_uuid, "Saving tasks to database...", 80, "processing")
+        
+        created_tasks = []
+        task_id_mapping = {}  # Map LLM task IDs to Django task IDs
+        
+        for task_data in llm_tasks:
+            task = Task.objects.create(
+                Project=project,
+                name=task_data["name"],
+                description=task_data["description"],
+                details=task_data.get("details", task_data["description"]),
+                priority=task_data.get("priority", "normal"),
+                size=task_data.get("size", "m"),
+                status="created",
+                created_by="ai",
+                tags=task_data.get("tags", [])
+            )
+            
+            # Store mapping for dependency creation
+            if "metadata" in task_data and "llm_task_id" in task_data["metadata"]:
+                task_id_mapping[task_data["metadata"]["llm_task_id"]] = task.taskid
+            
+            created_tasks.append({
+                "taskid": str(task.taskid),
+                "name": task.name,
+                "task_number": task.task_number,
+                "requirement_id": task_data.get("metadata", {}).get("requirement_id", "")
+            })
+        
+        # Step 5: Create task dependencies (if any)
+        dependency_count = 0
+        if dependencies and task_id_mapping:
+            send_progress_update(project_uuid, "Creating task dependencies...", 85, "processing")
+            
+            for dep in dependencies:
+                from_llm_id = dep['from_task_id']
+                to_llm_id = dep['to_task_id']
+                
+                # Get Django task IDs
+                from_task_id = task_id_mapping.get(from_llm_id)
+                to_task_id = task_id_mapping.get(to_llm_id)
+                
+                if from_task_id and to_task_id:
+                    try:
+                        from_task = Task.objects.get(taskid=from_task_id)
+                        to_task = Task.objects.get(taskid=to_task_id)
+                        from_task.related_work.add(to_task)
+                        dependency_count += 1
+                        logger.info(f"Created dependency: {from_task.name} -> {to_task.name}")
+                    except Task.DoesNotExist:
+                        logger.warning(f"Could not create dependency: task not found")
+        
+        # Step 6: Create sprints (if any)
+        created_sprints = []
+        if sprint_allocations and task_id_mapping:
+            send_progress_update(project_uuid, "Creating sprint allocations...", 92, "processing")
+            
+            from .llm.django_integration import DjangoSprintCreator
+            
+            sprint_creator = DjangoSprintCreator(project)
+            created_sprints = sprint_creator.create_sprints_with_auto_dates(
+                sprint_allocations,
+                task_id_mapping,
+                created_by=user
+            )
+            
+            logger.info(f"Created {len(created_sprints)} sprints")
+        
+        time.sleep(0.5)
+        
+        # Step 7: Complete
+        completion_message = f"Successfully generated {len(created_tasks)} tasks"
+        if dependency_count > 0:
+            completion_message += f" with {dependency_count} dependencies"
+        if created_sprints:
+            completion_message += f" across {len(created_sprints)} sprints"
+        completion_message += "!"
+        
+        send_progress_update(
+            project_uuid, 
+            completion_message, 
+            100, 
+            "completed",
+            {
+                "tasks": created_tasks, 
+                "count": len(created_tasks),
+                "dependencies": dependency_count,
+                "sprints": len(created_sprints)
+            }
+        )
+        
+        # Create activity for task generation completion
+        activity_description = f"completed AI task generation - created {len(created_tasks)} tasks"
+        if dependency_count > 0:
+            activity_description += f" with {dependency_count} dependencies"
+        if created_sprints:
+            activity_description += f" across {len(created_sprints)} sprints"
+        
+        create_and_broadcast_activity(
+            activity_type='task_created',
+            user=user,
+            project=project,
+            description=activity_description,
+            target_name=f"AI Task Generation",
+            metadata={
+                "document_id": document_id, 
+                "status": "completed",
+                "tasks_created": len(created_tasks),
+                "task_ids": [t["taskid"] for t in created_tasks],
+                "dependencies_created": dependency_count,
+                "sprints_created": len(created_sprints)
+            }
+        )
+        
+        logger.info(f"Task generation completed for project {project.name}. Created {len(created_tasks)} tasks.")
+        
+        return {
+            "success": True,
+            "project_id": project_id,
+            "tasks_created": len(created_tasks),
+            "tasks": created_tasks
+        }
+        
+    except Project.DoesNotExist:
+        error_msg = f"Project with ID {project_id} not found"
+        logger.error(error_msg)
+        # Try to get project UUID for error message
+        try:
+            project = Project.objects.get(id=project_id)
+            send_progress_update(str(project.uuid), error_msg, 0, "error")
+        except:
+            pass
+        return {"success": False, "error": error_msg}
+        
+    except Document.DoesNotExist:
+        error_msg = f"Document with ID {document_id} not found"
+        logger.error(error_msg)
+        # Try to get project UUID for error message
+        try:
+            project = Project.objects.get(id=project_id)
+            send_progress_update(str(project.uuid), error_msg, 0, "error")
+        except:
+            pass
+        return {"success": False, "error": error_msg}
+        
+    except Exception as e:
+        error_msg = f"Error generating tasks: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        # Try to get project UUID for error message
+        try:
+            project = Project.objects.get(id=project_id)
+            send_progress_update(str(project.uuid), error_msg, 0, "error")
+        except:
+            pass
+        return {"success": False, "error": error_msg}
 
 
 @shared_task
@@ -112,17 +405,38 @@ def move_unfinished_tasks_to_backlog():
             )
             
             tasks_moved = 0
+            task_ids = []
             for task in unfinished_tasks:
                 # Move task to backlog
                 task.status = 'backlog'
                 task.sprint = None  # Remove from sprint
                 task.save()
                 tasks_moved += 1
+                task_ids.append(str(task.taskid))
                 logger.info(f"Moved task '{task.name}' (ID: {task.taskid}) to backlog")
             
             # Mark sprint as completed
             sprint.status = 'completed'
             sprint.save()
+            
+            # Create activity for sprint completion (use project owner or system user)
+            if sprint.project and tasks_moved > 0:
+                # Try to get project owner or first team member
+                system_user = sprint.project.owner if sprint.project.owner else None
+                if system_user:
+                    create_and_broadcast_activity(
+                        activity_type='task_updated',
+                        user=system_user,
+                        project=sprint.project,
+                        description=f"Sprint '{sprint.name}' ended - moved {tasks_moved} unfinished tasks to backlog",
+                        target_name=sprint.name,
+                        metadata={
+                            "sprint_id": sprint.id,
+                            "tasks_moved": tasks_moved,
+                            "task_ids": task_ids,
+                            "automated": True
+                        }
+                    )
             
             total_tasks_moved += tasks_moved
             total_sprints_completed += 1
@@ -153,7 +467,7 @@ def move_unfinished_tasks_to_backlog():
 
 
 @shared_task
-def check_and_complete_sprint(sprint_id):
+def check_and_complete_sprint(sprint_id, user_id=None):
     """
     Manually trigger sprint completion for a specific sprint.
     Useful for testing or manual sprint closure.
@@ -169,15 +483,45 @@ def check_and_complete_sprint(sprint_id):
         )
         
         tasks_moved = 0
+        task_ids = []
         for task in unfinished_tasks:
             task.status = 'backlog'
             task.sprint = None
             task.save()
             tasks_moved += 1
+            task_ids.append(str(task.taskid))
         
         # Mark sprint as completed
         sprint.status = 'completed'
         sprint.save()
+        
+        # Create activity for manual sprint completion
+        if sprint.project and tasks_moved > 0:
+            # Get user who triggered this, or use project owner
+            user = None
+            if user_id:
+                try:
+                    user = User.objects.get(id=user_id)
+                except User.DoesNotExist:
+                    pass
+            
+            if not user:
+                user = sprint.project.owner
+            
+            if user:
+                create_and_broadcast_activity(
+                    activity_type='task_updated',
+                    user=user,
+                    project=sprint.project,
+                    description=f"manually completed sprint '{sprint.name}' - moved {tasks_moved} tasks to backlog",
+                    target_name=sprint.name,
+                    metadata={
+                        "sprint_id": sprint.id,
+                        "tasks_moved": tasks_moved,
+                        "task_ids": task_ids,
+                        "manual": True
+                    }
+                )
         
         logger.info(
             f"Manually completed sprint '{sprint.name}'. "

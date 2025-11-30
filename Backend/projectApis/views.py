@@ -621,7 +621,6 @@ class TriggerTaskGeneration(APIView):
             user_id = request.user.id
             file_id = request.data.get("file_id")
             file = FileUpload.objects.get(id=file_id)
-            # generate_task.delay(file_id, user_id)
 
             return Response(
                 {"message": "Task generation started."}, status=status.HTTP_200_OK
@@ -632,6 +631,88 @@ class TriggerTaskGeneration(APIView):
             )
 
         return Response({"message": "not webscoket."}, status=status.HTTP_200_OK)
+
+
+class GenerateTasksView(APIView):
+    """Generate tasks for a project with document validation and progress tracking"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, project_uuid):
+        """Start task generation process"""
+        try:
+            # Get project
+            project = Project.objects.get(uuid=project_uuid)
+            
+            # Check permissions
+            if not (project.created_by == request.user or 
+                    (project.team and request.user in project.team.members.all())):
+                return Response(
+                    {"error": "You don't have permission to generate tasks for this project."},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+            
+            # Check if project has documents with requirements
+            documents = Document.objects.filter(project=project)
+            
+            if not documents.exists():
+                return Response(
+                    {
+                        "error": "No documents found",
+                        "message": "Please upload a requirements document before generating tasks.",
+                        "requires_upload": True
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Check for requirements document (optional category check)
+            requirements_doc = documents.filter(
+                Q(category__icontains='requirement') | 
+                Q(name__icontains='requirement')
+            ).first()
+            
+            if not requirements_doc:
+                # If no specific requirements doc, use the first document
+                requirements_doc = documents.first()
+            
+            # Import and trigger the Celery task
+            from .tasks import generate_tasks_async
+            
+            # Start async task generation
+            task = generate_tasks_async.delay(
+                project_id=project.id,
+                document_id=requirements_doc.id,
+                user_id=request.user.id
+            )
+            
+            return Response(
+                {
+                    "message": "Task generation started",
+                    "task_id": task.id,
+                    "project_id": project.id,
+                    "document": {
+                        "id": requirements_doc.id,
+                        "name": requirements_doc.name,
+                        "category": requirements_doc.category
+                    }
+                },
+                status=status.HTTP_202_ACCEPTED
+            )
+            
+        except Project.DoesNotExist:
+            return Response(
+                {"error": "Project not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            import traceback
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Task generation error: {str(e)}")
+            logger.error(traceback.format_exc())
+            return Response(
+                {"error": f"Failed to start task generation: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class ActivityPagination(PageNumberPagination):
