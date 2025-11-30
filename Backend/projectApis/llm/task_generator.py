@@ -46,7 +46,8 @@ class TaskGenerator:
         self, 
         chunk_text: str, 
         req_id: str, 
-        team_description: str
+        team_description: str,
+        project_context: str = ""
     ) -> List[SprintTaskLLM]:
         """
         Generate tasks from a requirement chunk
@@ -55,30 +56,46 @@ class TaskGenerator:
             chunk_text: Text of the requirement
             req_id: Requirement ID
             team_description: Description of the team
+            project_context: Project context information
             
         Returns:
             List of generated tasks
         """
         self._enforce_rate_limit()
         
+        # Build enhanced system prompt with project context
         system_prompt = f"""
         # Role
-        You are a Technical Business Analyst.
+        You are a Technical Business Analyst specializing in Agile project management.
         
-        # Task
-        Break down the following software requirement into actionable engineering sprint tasks.
-
-        # Instructions
-        Each task must explicitly cite the Requirement ID.
-        Provide a concise name for each task.
-        Assign strictly one or more tags to each task from this list: ['design', 'documents', 'frontend', 'backend', 'devops', 'testing', 'bug', 'feature', 'enhancement'].
-        Do not use any other tags.
-        Using the team information, assign priority and an estimate of time to complete the task in days or hours based on the complexity of the task. Format the estimate as a number followed by the unit of time (e.g. "1d", "2h", "30m").
-        Priority should be one of the following: [P1, P2, P3]. P1 is the highest priority and P3 is the lowest priority.
-
+        # Project Context
+        {project_context if project_context else "General software development project"}
+        
         # Team Information
         Your Engineering Team consists of:
         {team_description}
+        
+        # Task
+        Break down the following software requirement into actionable engineering sprint tasks that are suitable for this specific project and team.
+
+        # Instructions
+        1. Each task must explicitly cite the Requirement ID
+        2. Provide a concise, actionable name for each task
+        3. Consider the project's technology stack and domain when creating tasks
+        4. Consider the team's composition and assign appropriate priorities
+        5. If a project deadline is mentioned, prioritize tasks accordingly
+        6. Assign strictly one or more tags to each task from this list: ['design', 'documents', 'frontend', 'backend', 'devops', 'testing', 'bug', 'feature', 'enhancement']
+        7. Do not use any other tags
+        8. Assign priority based on:
+           - Project deadline urgency
+           - Task dependencies
+           - Business value
+           - Priority should be: P1 (Critical/Urgent), P2 (Important/Normal), P3 (Nice-to-have/Low)
+        9. Estimate time based on:
+           - Team's skill level and composition
+           - Task complexity
+           - Technology stack familiarity
+           - Format: number + unit (e.g., "1d", "4h", "30m")
         """
         
         try:

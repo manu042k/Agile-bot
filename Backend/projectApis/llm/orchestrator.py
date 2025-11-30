@@ -41,7 +41,8 @@ class LLMOrchestrator:
     def generate_tasks_from_document(
         self,
         document_path: str,
-        team_description: str = None
+        team_description: str = None,
+        project_context: str = None
     ) -> List[Dict]:
         """
         Generate tasks from a requirements document
@@ -49,12 +50,16 @@ class LLMOrchestrator:
         Args:
             document_path: Path to the document file
             team_description: Description of the team (optional)
+            project_context: Project context information (optional)
             
         Returns:
             List of task dictionaries ready for Django Task model
         """
         if not team_description:
             team_description = DEFAULT_TEAM_DESCRIPTION
+        
+        if not project_context:
+            project_context = ""
         
         logger.info(f"Processing document: {document_path}")
         
@@ -80,7 +85,8 @@ class LLMOrchestrator:
             llm_tasks = self.task_generator.generate_tasks(
                 chunk['text'],
                 req_id,
-                team_description
+                team_description,
+                project_context
             )
             
             # Process each generated task

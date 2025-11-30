@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def _build_team_description(project):
-    """Build team description from project team members"""
+    """Build team description from project team members with roles"""
     if not project.team:
         return """
         - 2 Senior Backend Engineers (Python, SQL, System Design)
@@ -24,12 +24,36 @@ def _build_team_description(project):
     if not team_members:
         return "- Development team with full-stack capabilities"
     
-    # Build description from team members
+    # Build description from team members with roles
     description = f"Team: {project.team.name}\n"
     for member in team_members:
-        description += f"- {member.email}\n"
+        role = member.role if member.role else "Developer"
+        name = member.get_full_name()
+        description += f"- {name} ({role})\n"
     
     return description
+
+
+def _build_project_context(project):
+    """Build project context for LLM"""
+    context = f"Project: {project.name}\n"
+    
+    if project.description:
+        context += f"Description: {project.description}\n"
+    
+    if project.domain:
+        context += f"Domain: {project.domain}\n"
+    
+    if project.tech_stack and len(project.tech_stack) > 0:
+        tech_list = ', '.join(project.tech_stack)
+        context += f"Technology Stack: {tech_list}\n"
+    
+    if project.deadline:
+        from datetime import date
+        days_remaining = (project.deadline - date.today()).days
+        context += f"Deadline: {project.deadline} ({days_remaining} days remaining)\n"
+    
+    return context
 
 
 def send_progress_update(project_uuid, message, progress, status="processing", data=None):
@@ -157,8 +181,9 @@ def generate_tasks_async(self, project_id, document_id, user_id):
             # Get document file path
             document_path = document.file.path
             
-            # Build team description from project team
+            # Build team description and project context
             team_description = _build_team_description(project)
+            project_context = _build_project_context(project)
             
             # Step 3: Analyzing document
             send_progress_update(project_uuid, "Analyzing requirements document with AI...", 20, "processing")
@@ -171,6 +196,7 @@ def generate_tasks_async(self, project_id, document_id, user_id):
                 project_id=project.id,
                 document_path=document_path,
                 team_description=team_description,
+                project_context=project_context,
                 detect_dependencies=True,
                 allocate_sprints=True,  # Enable sprint allocation
                 num_sprints=5

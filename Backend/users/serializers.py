@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
             "phone_number",
             "avatar_url",
             "google_id",
+            "role",
             "is_active",
             "date_joined",
         ]

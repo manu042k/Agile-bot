@@ -20,6 +20,9 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
             "visibility",
             "team",
             "created_by",
+            "domain",
+            "tech_stack",
+            "deadline",
             "created_at",
             "updated_at",
         ]

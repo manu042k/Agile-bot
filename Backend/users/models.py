@@ -57,6 +57,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     # Optional fields (user can add manually if needed)
     phone_number = models.CharField(max_length=15, blank=True, null=True, help_text="Optional phone number")
     
+    # Professional information for AI task generation
+    role = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text="User's role (e.g., Backend Engineer, Frontend Developer, DevOps Engineer)"
+    )
+    
     # System fields
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

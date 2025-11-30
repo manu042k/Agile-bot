@@ -18,7 +18,7 @@ class LLMTaskGenerator:
     No duplicate database - uses Django models
     """
     
-    def __init__(self, project_id: int, document_path: str, team_description: str = None):
+    def __init__(self, project_id: int, document_path: str, team_description: str = None, project_context: str = None):
         """
         Initialize the LLM task generator
         
@@ -26,10 +26,12 @@ class LLMTaskGenerator:
             project_id: Django project ID
             document_path: Path to the requirements document
             team_description: Description of the team (optional)
+            project_context: Project context information (optional)
         """
         self.project_id = project_id
         self.document_path = document_path
         self.team_description = team_description or DEFAULT_TEAM_DESCRIPTION
+        self.project_context = project_context or ""
         self.orchestrator = LLMOrchestrator(project_id)
         self.generated_tasks = []
     
@@ -46,7 +48,8 @@ class LLMTaskGenerator:
             # Generate tasks using orchestrator
             self.generated_tasks = self.orchestrator.generate_tasks_from_document(
                 self.document_path,
-                self.team_description
+                self.team_description,
+                self.project_context
             )
             
             logger.info(f"Generated {len(self.generated_tasks)} tasks")
@@ -120,6 +123,7 @@ def generate_tasks_with_llm(
     project_id: int,
     document_path: str,
     team_description: str = None,
+    project_context: str = None,
     detect_dependencies: bool = True,
     allocate_sprints: bool = False,
     num_sprints: int = 5
@@ -131,14 +135,15 @@ def generate_tasks_with_llm(
         project_id: Django project ID
         document_path: Path to requirements document
         team_description: Team description (optional)
+        project_context: Project context information (optional)
         detect_dependencies: Whether to detect dependencies
-        allocate_sprints: Whether to allocate to sprints (not implemented yet)
+        allocate_sprints: Whether to allocate to sprints
         num_sprints: Number of sprints (if allocating)
         
     Returns:
         Dictionary with tasks and dependencies
     """
-    generator = LLMTaskGenerator(project_id, document_path, team_description)
+    generator = LLMTaskGenerator(project_id, document_path, team_description, project_context)
     
     try:
         # Generate tasks

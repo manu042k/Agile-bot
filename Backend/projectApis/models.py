@@ -23,6 +23,25 @@ class Project(models.Model):
         "users.Team", on_delete=models.CASCADE, blank=True, null=True
     )
     created_by = models.ForeignKey("users.User", on_delete=models.CASCADE)
+    
+    # Project context for AI task generation
+    domain = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text="Project domain (e.g., E-commerce, Healthcare, Finance)"
+    )
+    tech_stack = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="Technology stack (e.g., ['React', 'Django', 'PostgreSQL'])"
+    )
+    deadline = models.DateField(
+        blank=True,
+        null=True,
+        help_text="Project deadline for AI task prioritization"
+    )
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
