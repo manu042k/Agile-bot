@@ -651,6 +651,22 @@ class GenerateTasksView(APIView):
                     status=status.HTTP_403_FORBIDDEN
                 )
             
+            # Check if AI tasks already exist
+            existing_ai_tasks = Task.objects.filter(
+                Project=project,
+                created_by='ai'
+            ).exists()
+            
+            if existing_ai_tasks:
+                return Response(
+                    {
+                        "error": "AI tasks already generated",
+                        "message": "This project already has AI-generated tasks. Delete existing AI tasks to regenerate.",
+                        "already_generated": True
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
             # Check if project has documents with requirements
             documents = Document.objects.filter(project=project)
             

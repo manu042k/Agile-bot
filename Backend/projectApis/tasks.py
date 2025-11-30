@@ -130,7 +130,25 @@ def generate_tasks_async(self, project_id, document_id, user_id):
         send_progress_update(project_uuid, "Starting task generation...", 0, "processing")
         time.sleep(0.5)
         
-        # Step 1: Initialize LLM system
+        # Step 1: Check if AI tasks already exist
+        send_progress_update(project_uuid, "Checking existing tasks...", 5, "processing")
+        
+        existing_ai_tasks = Task.objects.filter(
+            Project=project,
+            created_by='ai'
+        ).exists()
+        
+        if existing_ai_tasks:
+            error_msg = "AI tasks already generated for this project. Delete existing AI tasks to regenerate."
+            logger.warning(error_msg)
+            send_progress_update(project_uuid, error_msg, 0, "error")
+            return {
+                "success": False,
+                "error": error_msg,
+                "tasks_created": 0
+            }
+        
+        # Step 2: Initialize LLM system
         send_progress_update(project_uuid, "Initializing AI system...", 10, "processing")
         
         try:
@@ -142,10 +160,10 @@ def generate_tasks_async(self, project_id, document_id, user_id):
             # Build team description from project team
             team_description = _build_team_description(project)
             
-            # Step 2: Analyzing document
+            # Step 3: Analyzing document
             send_progress_update(project_uuid, "Analyzing requirements document with AI...", 20, "processing")
             
-            # Step 3: Generate tasks using LLM
+            # Step 4: Generate tasks using LLM
             send_progress_update(project_uuid, "Extracting tasks from requirements...", 40, "processing")
             
             # Call LLM system with sprint allocation
@@ -215,11 +233,11 @@ def generate_tasks_async(self, project_id, document_id, user_id):
         
         time.sleep(0.5)
         
-        # Step 4: Save tasks to database
+        # Step 5: Save tasks to database
         send_progress_update(project_uuid, "Saving tasks to database...", 80, "processing")
         
         created_tasks = []
-        task_id_mapping = {}  # Map LLM task IDs to Django task IDs
+        task_id_mapping = {}  # Map LLM task IDs to Django task UUIDs
         
         for task_data in llm_tasks:
             task = Task.objects.create(
@@ -231,54 +249,50 @@ def generate_tasks_async(self, project_id, document_id, user_id):
                 size=task_data.get("size", "m"),
                 status="created",
                 created_by="ai",
-                tags=task_data.get("tags", [])
+                tags=task_data.get("tags", []),
+                llm_task_id=task_data.get("llm_task_id")  # Store LLM task ID
             )
             
             # Store mapping for dependency creation
-            if "metadata" in task_data and "llm_task_id" in task_data["metadata"]:
-                task_id_mapping[task_data["metadata"]["llm_task_id"]] = task.taskid
+            if task_data.get("llm_task_id"):
+                task_id_mapping[task_data["llm_task_id"]] = str(task.taskid)
             
             created_tasks.append({
                 "taskid": str(task.taskid),
                 "name": task.name,
                 "task_number": task.task_number,
-                "requirement_id": task_data.get("metadata", {}).get("requirement_id", "")
+                "requirement_id": task_data.get("requirement_id", "")
             })
         
-        # Step 5: Create task dependencies (if any)
+        # Step 6: Create task dependencies (if any)
         dependency_count = 0
-        if dependencies and task_id_mapping:
+        if dependencies:
             send_progress_update(project_uuid, "Creating task dependencies...", 85, "processing")
             
             for dep in dependencies:
                 from_llm_id = dep['from_task_id']
                 to_llm_id = dep['to_task_id']
                 
-                # Get Django task IDs
-                from_task_id = task_id_mapping.get(from_llm_id)
-                to_task_id = task_id_mapping.get(to_llm_id)
-                
-                if from_task_id and to_task_id:
-                    try:
-                        from_task = Task.objects.get(taskid=from_task_id)
-                        to_task = Task.objects.get(taskid=to_task_id)
-                        from_task.related_work.add(to_task)
-                        dependency_count += 1
-                        logger.info(f"Created dependency: {from_task.name} -> {to_task.name}")
-                    except Task.DoesNotExist:
-                        logger.warning(f"Could not create dependency: task not found")
+                try:
+                    # Use llm_task_id field for lookup
+                    from_task = Task.objects.get(llm_task_id=from_llm_id)
+                    to_task = Task.objects.get(llm_task_id=to_llm_id)
+                    from_task.related_work.add(to_task)
+                    dependency_count += 1
+                    logger.info(f"Created dependency: {from_task.name} -> {to_task.name}")
+                except Task.DoesNotExist:
+                    logger.warning(f"Could not create dependency: task not found ({from_llm_id} -> {to_llm_id})")
         
-        # Step 6: Create sprints (if any)
+        # Step 7: Create sprints (if any)
         created_sprints = []
-        if sprint_allocations and task_id_mapping:
+        if sprint_allocations:
             send_progress_update(project_uuid, "Creating sprint allocations...", 92, "processing")
             
-            from .llm.django_integration import DjangoSprintCreator
+            from .llm.django_integration import create_sprints_from_llm_ids
             
-            sprint_creator = DjangoSprintCreator(project)
-            created_sprints = sprint_creator.create_sprints_with_auto_dates(
-                sprint_allocations,
-                task_id_mapping,
+            created_sprints = create_sprints_from_llm_ids(
+                project=project,
+                sprint_allocations=sprint_allocations,
                 created_by=user
             )
             
@@ -286,7 +300,7 @@ def generate_tasks_async(self, project_id, document_id, user_id):
         
         time.sleep(0.5)
         
-        # Step 7: Complete
+        # Step 8: Complete
         completion_message = f"Successfully generated {len(created_tasks)} tasks"
         if dependency_count > 0:
             completion_message += f" with {dependency_count} dependencies"

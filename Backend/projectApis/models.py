@@ -235,6 +235,14 @@ class Task(models.Model):
         "Sprint", on_delete=models.SET_NULL, blank=True, null=True, related_name="tasks"
     )
     tags = models.JSONField(default=list, blank=True, help_text="Task tags like design, frontend, backend, etc.")
+    llm_task_id = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        unique=True,
+        db_index=True,
+        help_text="LLM-generated task identifier for tracking and preventing duplicates"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

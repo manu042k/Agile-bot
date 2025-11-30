@@ -36,7 +36,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # --- CONFIGURATION ---
-GEMINI_API_KEY = "AIzaSyBLMo0OUql8RhXccp744eSp9cVu42Tihp0"
+GEMINI_API_KEY = ""
 QDRANT_PATH = "./qdrant_db"
 SQLITE_DB_PATH = "task_tracker.db"
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"

@@ -8,6 +8,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 from .models import TaskDependency
+from .config import DEFAULT_SPRINT_CAPACITY
 
 logger = logging.getLogger(__name__)
 
@@ -51,14 +52,15 @@ class SprintAllocator:
         'low': 2
     }
     
-    def __init__(self, default_sprint_capacity: int = 50):
+    def __init__(self, default_sprint_capacity: int = None):
         """
         Initialize sprint allocator
         
         Args:
             default_sprint_capacity: Default capacity per sprint in story points
+                                    (uses config value if not provided)
         """
-        self.default_sprint_capacity = default_sprint_capacity
+        self.default_sprint_capacity = default_sprint_capacity or DEFAULT_SPRINT_CAPACITY
     
     def allocate_tasks(
         self,

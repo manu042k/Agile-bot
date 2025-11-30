@@ -8,7 +8,7 @@ from typing import List
 from google import genai
 
 from .models import SprintTaskLLM, SprintTaskList, GeneratedTask
-from .config import GEMINI_API_KEY
+from .config import GEMINI_API_KEY, GEMINI_RATE_LIMIT_PER_MINUTE
 
 logger = logging.getLogger(__name__)
 
@@ -17,15 +17,21 @@ class TaskGenerator:
     """Generate tasks from requirements using Gemini LLM"""
     
     def __init__(self):
+        if not GEMINI_API_KEY:
+            raise ValueError(
+                "GEMINI_API_KEY not configured. "
+                "Please add GEMINI_API_KEY to Backend/.env file."
+            )
         self.client = genai.Client(api_key=GEMINI_API_KEY)
         self.call_timestamps = []
+        self.rate_limit = GEMINI_RATE_LIMIT_PER_MINUTE
     
     def _enforce_rate_limit(self):
-        """Enforce rate limiting (10 calls per minute)"""
+        """Enforce rate limiting based on config"""
         now = time.time()
         self.call_timestamps = [t for t in self.call_timestamps if now - t < 60]
         
-        if len(self.call_timestamps) >= 10:
+        if len(self.call_timestamps) >= self.rate_limit:
             wait_time = 60 - (now - self.call_timestamps[0])
             if wait_time > 0:
                 logger.info(f"Rate limit reached. Sleeping for {wait_time:.2f} seconds...")

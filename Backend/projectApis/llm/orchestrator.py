@@ -127,9 +127,9 @@ class LLMOrchestrator:
         # Prepare tasks for dependency detection
         detection_tasks = [
             {
-                'task_id': task.get('metadata', {}).get('llm_task_id', task.get('name')),
+                'task_id': task.get('llm_task_id', task.get('name')),
                 'description': task['description'],
-                'requirement_id': task.get('metadata', {}).get('requirement_id', 'UNKNOWN')
+                'requirement_id': task.get('requirement_id', 'UNKNOWN')
             }
             for task in tasks
         ]
@@ -239,14 +239,8 @@ class LLMOrchestrator:
             'status': 'created',
             'created_by': 'ai',
             'tags': llm_task.tags,
-            'metadata': {
-                'requirement_id': llm_task.requirement_id,
-                'llm_task_id': task_id,
-                'estimate': llm_task.estimate,
-                'original_priority': llm_task.priority,
-                'task_hash': task_hash,
-                'chunk_id': chunk_id
-            }
+            'llm_task_id': task_id,  # Store LLM task ID directly
+            'requirement_id': llm_task.requirement_id  # For reference
         }
     
     def _estimate_size(self, estimate: str) -> str:

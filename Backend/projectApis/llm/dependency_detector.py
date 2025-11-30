@@ -1,21 +1,17 @@
 """
 Optimized dependency detection engine
+Uses only Tier 1 & 2 (no vector embeddings/Qdrant)
 """
 import re
 import time
 import logging
-import numpy as np
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Optional
 import concurrent.futures
-from sentence_transformers import SentenceTransformer
 
 from .models import TaskDependency
 from .config import (
-    EMBEDDING_MODEL,
-    DEPENDENCY_SIMILARITY_THRESHOLD,
     ENTITY_EXTRACTION_THRESHOLD,
-    NUM_WORKERS,
-    BATCH_SIZE
+    NUM_WORKERS
 )
 
 logger = logging.getLogger(__name__)
@@ -23,10 +19,10 @@ logger = logging.getLogger(__name__)
 
 class DependencyDetector:
     """
-    Optimized dependency detection using multi-tier approach:
+    Optimized dependency detection using 2-tier approach:
     - Tier 1: Fast checks (hierarchy, layers)
     - Tier 2: Entity-based checks
-    - Tier 3: Semantic similarity (expensive, filtered)
+    No vector embeddings or external databases needed
     """
     
     LAYER_HIERARCHY = {
@@ -47,18 +43,15 @@ class DependencyDetector:
         'file': r'\b(file|export|import|csv|json)\b',
     }
     
-    def __init__(self, num_workers: int = NUM_WORKERS, batch_size: int = BATCH_SIZE):
+    def __init__(self, num_workers: int = NUM_WORKERS):
         self.num_workers = num_workers
-        self.batch_size = batch_size
-        self.encoder = SentenceTransformer(EMBEDDING_MODEL)
         
         # Caches
         self.entity_cache = {}
         self.layer_cache = {}
-        self.embedding_cache = {}
         self.req_hierarchy_cache = {}
         
-        logger.info(f"DependencyDetector initialized with {num_workers} workers")
+        logger.info(f"DependencyDetector initialized (Tier 1 & 2 only, no embeddings)")
     
     def detect_dependencies(self, tasks: List[Dict]) -> List[TaskDependency]:
         """
@@ -104,28 +97,16 @@ class DependencyDetector:
             unique_reqs = set(t['requirement_id'] for t in tasks)
             for req_id in unique_reqs:
                 self.req_hierarchy_cache[req_id] = self._parse_requirement_hierarchy(req_id)
-            
-            # Batch embeddings (vectorized)
-            descriptions = [t['description'] for t in tasks]
-            embeddings = self.encoder.encode(
-                descriptions,
-                batch_size=self.batch_size,
-                show_progress_bar=False
-            )
         
         # Collect entity futures
         for task_id, future in entity_futures.items():
             self.entity_cache[task_id] = future.result()
         
-        # Store embeddings
-        for task, emb in zip(tasks, embeddings):
-            self.embedding_cache[task['task_id']] = emb
-        
         elapsed = time.time() - start
         logger.info(f"Precomputation completed in {elapsed:.2f}s")
     
     def _detect_with_filtering(self, tasks: List[Dict]) -> List[TaskDependency]:
-        """Detect dependencies with intelligent filtering"""
+        """Detect dependencies using Tier 1 & 2 only"""
         dependencies = []
         detected_pairs = set()
         
@@ -154,13 +135,6 @@ class DependencyDetector:
                     dependencies.append(dep)
                     detected_pairs.add(pair_key)
                     continue
-                
-                # Tier 3: Semantic (only if needed)
-                if self._should_check_semantic(task1, task2):
-                    dep = self._check_semantic_dependency(task1, task2)
-                    if dep:
-                        dependencies.append(dep)
-                        detected_pairs.add(pair_key)
         
         return dependencies
     
@@ -265,46 +239,4 @@ class DependencyDetector:
         
         return None
     
-    def _check_semantic_dependency(self, task1: Dict, task2: Dict) -> Optional[TaskDependency]:
-        """Check semantic similarity between tasks"""
-        emb1 = self.embedding_cache.get(task1['task_id'])
-        emb2 = self.embedding_cache.get(task2['task_id'])
-        
-        if emb1 is None or emb2 is None:
-            return None
-        
-        similarity = np.dot(emb1, emb2) / (
-            np.linalg.norm(emb1) * np.linalg.norm(emb2) + 1e-8
-        )
-        
-        if similarity > DEPENDENCY_SIMILARITY_THRESHOLD:
-            return TaskDependency(
-                from_task_id=task1['task_id'],
-                to_task_id=task2['task_id'],
-                dependency_type='functional',
-                strength='soft',
-                confidence=float(similarity),
-                reasoning=f"Semantic similarity: {similarity:.2%}"
-            )
-        
-        return None
-    
-    def _should_check_semantic(self, task1: Dict, task2: Dict) -> bool:
-        """Determine if semantic check is needed"""
-        req_base1 = task1['requirement_id'].split('-')[0]
-        req_base2 = task2['requirement_id'].split('-')[0]
-        
-        if req_base1 == req_base2:
-            return True
-        
-        words1 = set(task1['description'].lower().split())
-        words2 = set(task2['description'].lower().split())
-        
-        common = words1 & words2
-        stop_words = {
-            'the', 'a', 'an', 'and', 'or', 'to', 'of', 'in', 'for', 'on',
-            'at', 'is', 'be', 'by', 'with', 'from', 'that', 'this', 'shall', 'system'
-        }
-        meaningful_common = common - stop_words
-        
-        return len(meaningful_common) > 3
+

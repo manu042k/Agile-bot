@@ -8,6 +8,8 @@ from datetime import datetime, timedelta
 from django.db import transaction
 from django.utils import timezone
 
+from .config import DEFAULT_SPRINT_DURATION_DAYS
+
 logger = logging.getLogger(__name__)
 
 
@@ -28,18 +30,17 @@ class DjangoSprintCreator:
     def create_sprints_from_allocations(
         self,
         sprint_allocations: List[Dict],
-        task_id_mapping: Dict[str, str],
-        sprint_duration_days: int = 14,
+        sprint_duration_days: int = None,
         start_date: datetime = None,
         created_by = None
     ) -> List:
         """
         Create Django Sprint objects from allocations
+        Uses llm_task_id field for task lookup
         
         Args:
             sprint_allocations: List of sprint allocation dicts
-            task_id_mapping: Mapping from LLM task IDs to Django task UUIDs
-            sprint_duration_days: Duration of each sprint in days
+            sprint_duration_days: Duration of each sprint in days (uses config if not provided)
             start_date: Start date for first sprint (default: today)
             created_by: User who created the sprints
             
@@ -47,6 +48,9 @@ class DjangoSprintCreator:
             List of created Sprint objects
         """
         from projectApis.models import Sprint, Task
+        
+        if not sprint_duration_days:
+            sprint_duration_days = DEFAULT_SPRINT_DURATION_DAYS
         
         if not start_date:
             start_date = timezone.now()
@@ -76,19 +80,17 @@ class DjangoSprintCreator:
                     created_by=created_by
                 )
                 
-                # Assign tasks to sprint
+                # Assign tasks to sprint using llm_task_id
                 assigned_count = 0
                 for llm_task_id in task_ids:
-                    django_task_id = task_id_mapping.get(llm_task_id)
-                    if django_task_id:
-                        try:
-                            task = Task.objects.get(taskid=django_task_id)
-                            task.sprint = sprint
-                            task.status = 'backlog'  # Set to backlog initially
-                            task.save()
-                            assigned_count += 1
-                        except Task.DoesNotExist:
-                            logger.warning(f"Task {django_task_id} not found")
+                    try:
+                        task = Task.objects.get(llm_task_id=llm_task_id)
+                        task.sprint = sprint
+                        task.status = 'backlog'  # Set to backlog initially
+                        task.save()
+                        assigned_count += 1
+                    except Task.DoesNotExist:
+                        logger.warning(f"Task with llm_task_id {llm_task_id} not found")
                 
                 logger.info(
                     f"Created {sprint.name}: "
@@ -103,7 +105,6 @@ class DjangoSprintCreator:
     def create_sprints_with_auto_dates(
         self,
         sprint_allocations: List[Dict],
-        task_id_mapping: Dict[str, str],
         created_by = None
     ) -> List:
         """
@@ -112,7 +113,6 @@ class DjangoSprintCreator:
         
         Args:
             sprint_allocations: List of sprint allocation dicts
-            task_id_mapping: Mapping from LLM task IDs to Django task UUIDs
             created_by: User who created the sprints
             
         Returns:
@@ -123,11 +123,34 @@ class DjangoSprintCreator:
         
         return self.create_sprints_from_allocations(
             sprint_allocations,
-            task_id_mapping,
-            sprint_duration_days=14,
+            sprint_duration_days=None,  # Will use config default
             start_date=start_date,
             created_by=created_by
         )
+
+
+def create_sprints_from_llm_ids(
+    project,
+    sprint_allocations: List[Dict],
+    created_by = None
+) -> List:
+    """
+    Simple helper to create sprints from LLM allocations
+    Uses llm_task_id field for task lookup
+    
+    Args:
+        project: Django Project instance
+        sprint_allocations: List of sprint allocation dictionaries
+        created_by: User who created the sprints
+        
+    Returns:
+        List of created Sprint objects
+    """
+    sprint_creator = DjangoSprintCreator(project)
+    return sprint_creator.create_sprints_with_auto_dates(
+        sprint_allocations,
+        created_by
+    )
 
 
 def create_tasks_and_sprints(
