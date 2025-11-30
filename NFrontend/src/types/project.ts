@@ -18,6 +18,10 @@ export interface Project {
   visibility: ProjectVisibility;
   team: Team;
   created_by?: User;
+  // New fields for AI task generation context
+  domain?: string;  // Project domain (e.g., E-commerce, Healthcare)
+  tech_stack?: string[];  // Technology stack
+  deadline?: string;  // Project deadline (ISO date string)
   created_at: string;
   updated_at: string;
 }
@@ -44,6 +48,9 @@ export interface ProjectDTO {
   description: string;
   visibility: ProjectVisibility;
   team: string;
+  domain?: string;
+  tech_stack?: string[];
+  deadline?: string;
 }
 
 export interface UpadtedProjectDTO {
