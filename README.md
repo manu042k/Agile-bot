@@ -2,6 +2,8 @@
 
 Agile-bot is an intelligent SaaS platform designed for Agile project management through advanced automation and AI-driven insights. The platform automatically converts software requirement documents into actionable user stories, validates tasks, and optimizes sprint planning using state-of-the-art AI technologies.
 
+## Demo: 
+- https://agilebot-frontend.azurewebsites.net/
 ## Overview
 
 This project consists of three main components:
@@ -183,12 +185,8 @@ Interactive API documentation is available at:
 | ------------------ | ----------------------------------------------------- |
 | Landing Page       | ![Landing Page](ScreenShots/Landing_Page.png)         |
 | Projects List      | ![Projects List](ScreenShots/projects_list.png)       |
-| Project Overview   | ![Project Overview](ScreenShots/project_overview.png) |
-| On Document Upload | ![On Document Upload](ScreenShots/on_doc_upload.png)  |
-| Tasks Generated    | ![Tasks Generated](ScreenShots/tasks_generated.png)   |
-| Sample Task        | ![Sample Task](ScreenShots/sample_task.png)           |
-| Team Info          | ![Team Info](ScreenShots/team_info.png)               |
-| Team Page          | ![Team Page](ScreenShots/team_page.png)               |
+
+          |
 
 
 

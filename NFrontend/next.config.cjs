@@ -3,7 +3,8 @@ const nextConfig = {
   reactCompiler: true,
 
   // Output configuration for Azure Static Web Apps
-  output: process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined,
+  // Note: standalone mode is not used as it's not compatible with current Next.js setup
+  // output: process.env.BUILD_STANDALONE === 'true' ? 'standalone' : undefined,
 
   // Image optimization
   images: {

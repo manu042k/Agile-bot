@@ -67,18 +67,20 @@ services:
   frontend:
     build:
       context: ./NFrontend
-      dockerfile: Dockerfile
+      dockerfile: dockerfile
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
+        - NEXT_PUBLIC_WS_URL=ws://localhost:8000
+        - NEXTAUTH_URL=http://localhost:3000
+        - NEXTAUTH_SECRET=sG3ZrXxphB7JId+HNEg2m9LHRFiv4HtZZ7/EuDJv/o4=
     container_name: agilebot-frontend
     ports:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000
     depends_on:
       - backend
-    volumes:
-      - ./NFrontend:/app
-      - /app/node_modules
-      - /app/.next
 
 volumes:
   redis_data:
