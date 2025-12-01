@@ -15,11 +15,11 @@ RUN npm ci
 FROM base AS builder
 WORKDIR /app
 
-# Accept build arguments
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_WS_URL
-ARG NEXTAUTH_URL
-ARG NEXTAUTH_SECRET
+# Accept build arguments with default values for CI/CD
+ARG NEXT_PUBLIC_API_URL=http://localhost:8000
+ARG NEXT_PUBLIC_WS_URL=ws://localhost:8000
+ARG NEXTAUTH_URL=http://localhost:3000
+ARG NEXTAUTH_SECRET=change-me-in-production
 
 # Set environment variables for build
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}

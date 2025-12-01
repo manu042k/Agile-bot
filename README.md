@@ -138,6 +138,19 @@ The project includes production-ready configurations:
 - Nginx reverse proxy ready
 
 ### Azure Deployment
+
+#### GitHub Actions (Automated)
+The project includes automated deployment workflows:
+- `.github/workflows/azure-deploy.yml`: Automatic deployment on push to main/newDesgin
+- `.github/workflows/manual-deploy.yml`: Manual deployment trigger
+
+**Required GitHub Secrets:**
+- `AZURE_CREDENTIALS`: Azure service principal credentials
+- `ACR_USERNAME`: Azure Container Registry username
+- `ACR_PASSWORD`: Azure Container Registry password
+- `NEXTAUTH_SECRET`: NextAuth.js secret for session encryption (generate with `openssl rand -base64 32`)
+
+#### Manual Deployment
 1. Configure Azure resources (App Service, Blob Storage, PostgreSQL)
 2. Update production environment variables
 3. Run deployment script:

@@ -94,8 +94,14 @@ jobs:
       working-directory: ./NFrontend
       run: |
         echo "Building frontend image..."
-        docker build -t ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:${{ github.sha }} \
-                     -t ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:latest .
+        docker build \
+          --build-arg NEXT_PUBLIC_API_URL=https://${{ env.AZURE_WEBAPP_BACKEND }}.azurewebsites.net \
+          --build-arg NEXT_PUBLIC_WS_URL=wss://${{ env.AZURE_WEBAPP_BACKEND }}.azurewebsites.net \
+          --build-arg NEXTAUTH_URL=https://${{ env.AZURE_WEBAPP_FRONTEND }}.azurewebsites.net \
+          --build-arg NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} \
+          -f dockerfile \
+          -t ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:${{ github.sha }} \
+          -t ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:latest .
         echo "Pushing frontend image..."
         docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:${{ github.sha }}
         docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:latest
