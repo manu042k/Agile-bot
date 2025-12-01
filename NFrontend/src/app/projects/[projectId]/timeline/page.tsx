@@ -213,8 +213,8 @@ const TimelinePage = () => {
     return uniqueLabels;
   };
 
-  const handleSprintClick = (sprintId: number) => {
-    router.push(`/projects/${projectId}/board?sprint=${sprintId}`);
+  const handleSprintClick = (sprintUuid: string) => {
+    router.push(`/projects/${projectId}/board?sprint=${sprintUuid}`);
   };
 
   // Get sprints for a specific date
@@ -432,7 +432,7 @@ const TimelinePage = () => {
                 return (
                   <div
                     key={sprint.id}
-                    onClick={() => handleSprintClick(sprint.id)}
+                    onClick={() => handleSprintClick(sprint.uuid)}
                     className="p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:shadow-md transition-all cursor-pointer flex flex-col"
                   >
                     <div className="flex items-start justify-between mb-3">

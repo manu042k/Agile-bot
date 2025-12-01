@@ -85,7 +85,7 @@ const SprintBacklogPage = () => {
   };
 
   const filteredTasks = tasks.filter(task =>
-    task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    task.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     task.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -180,29 +180,29 @@ const SprintBacklogPage = () => {
           <div className="space-y-3">
             {filteredTasks.map((task) => (
               <div
-                key={task.id}
+                key={task.taskid}
                 className={`pm-card p-4 cursor-pointer transition-all ${
-                  selectedTasks.has(task.id) ? "ring-2 ring-orange-500 bg-orange-50" : ""
+                  selectedTasks.has(task.taskid) ? "ring-2 ring-orange-500 bg-orange-50" : ""
                 }`}
-                onClick={() => toggleTaskSelection(task.id)}
+                onClick={() => toggleTaskSelection(task.taskid)}
               >
                 <div className="flex items-start gap-4">
                   <div className="mt-1">
                     <div
                       className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                        selectedTasks.has(task.id)
+                        selectedTasks.has(task.taskid)
                           ? "bg-orange-600 border-orange-600"
                           : "border-gray-300"
                       }`}
                     >
-                      {selectedTasks.has(task.id) && (
+                      {selectedTasks.has(task.taskid) && (
                         <Check className="h-3 w-3 text-white" />
                       )}
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900">{task.title}</h3>
+                      <h3 className="font-semibold text-gray-900">{task.name}</h3>
                       <span className={`px-2 py-1 rounded text-xs font-medium border ${getPriorityClass(task.priority)}`}>
                         <Flag className="h-3 w-3 inline mr-1" />
                         {task.priority}
@@ -212,16 +212,10 @@ const SprintBacklogPage = () => {
                       <p className="text-sm text-gray-600 mb-3 line-clamp-2">{task.description}</p>
                     )}
                     <div className="flex items-center gap-4 text-xs text-gray-500">
-                      {task.assigned_to && (
+                      {task.assigned_to && Array.isArray(task.assigned_to) && task.assigned_to.length > 0 && (
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3" />
-                          <span>{task.assigned_to.username || task.assigned_to.email}</span>
-                        </div>
-                      )}
-                      {task.due_date && (
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          <span>{new Date(task.due_date).toLocaleDateString()}</span>
+                          <span>{typeof task.assigned_to[0] === 'object' && 'email' in task.assigned_to[0] ? (task.assigned_to[0].username || task.assigned_to[0].email) : 'Assigned'}</span>
                         </div>
                       )}
                       <span className={`px-2 py-0.5 rounded text-xs ${

@@ -54,7 +54,7 @@ const InviteMemberComponent: React.FC<InviteMemberComponentProps> = ({
       });
       // Use invitation endpoint instead of direct add
       const result = await teamService.inviteMember(
-        parseInt(teamId),
+        typeof teamId === 'string' ? parseInt(teamId) : teamId,
         email,
         role as any
       );

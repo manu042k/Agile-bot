@@ -109,6 +109,7 @@ const SprintGanttChart = ({
             day: "numeric",
           }),
           id: sprint.id,
+          uuid: sprint.uuid,
         };
       });
   }, [sprints, timelineBounds, getEffectiveStatus]);
@@ -171,7 +172,7 @@ const SprintGanttChart = ({
           fill="#374151"
           fontSize={12}
           className="cursor-pointer hover:fill-orange-600"
-          onClick={() => onSprintClick(data.id)}
+          onClick={() => onSprintClick(data.uuid)}
         >
           {payload.value}
         </text>

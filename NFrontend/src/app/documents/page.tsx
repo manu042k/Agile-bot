@@ -210,7 +210,7 @@ const DocumentsPage = () => {
                 .length > 0 ? (
                 <div className="space-y-6">
                   {Array.from(
-                    new Set(filteredDocuments.map((d) => d.project_name).filter(Boolean))
+                    new Set(filteredDocuments.map((d) => d.project_name).filter((name): name is string => Boolean(name)))
                   ).map((projectName) => {
                     const projectDocs = filteredDocuments.filter(
                       (d) => d.project_name === projectName

@@ -55,7 +55,7 @@ const ProjectDocumentsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [documentToDelete, setDocumentToDelete] = useState<{ id: number; name: string } | null>(null);
+  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(null);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [documentToPreview, setDocumentToPreview] = useState<Document | null>(null);
 
@@ -77,8 +77,8 @@ const ProjectDocumentsPage = () => {
     }
   };
 
-  const handleDeleteClick = (documentId: number, documentName: string) => {
-    setDocumentToDelete({ id: documentId, name: documentName });
+  const handleDeleteClick = (document: Document) => {
+    setDocumentToDelete(document);
     setDeleteDialogOpen(true);
   };
 
@@ -260,7 +260,7 @@ const ProjectDocumentsPage = () => {
                     </a>
                   )}
                   <button
-                    onClick={() => handleDeleteClick(doc.id, doc.name)}
+                    onClick={() => handleDeleteClick(doc)}
                     className="p-2 pm-button-secondary text-xs hover:bg-red-50 hover:text-red-600 transition-colors"
                   >
                     <Trash2 className="h-3 w-3" />

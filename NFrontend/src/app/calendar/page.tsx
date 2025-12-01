@@ -11,7 +11,6 @@ const CalendarPage = () => {
   const tab = searchParams.get("tab") || "month";
   const [currentDate, setCurrentDate] = useState(new Date(2024, 1, 1)); // February 2024
   const tasks: any[] = []; // Will be populated from API
-  const tasks: any[] = []; // Will be populated from API
 
   const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();

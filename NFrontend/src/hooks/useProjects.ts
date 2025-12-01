@@ -133,3 +133,36 @@ export const useProjects = () => {
     completedTasks,
   };
 };
+
+export const useProject = (projectId: string) => {
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProject = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const fetchedProject = await projectService.getProject(projectId);
+      setProject(fetchedProject);
+    } catch (err: any) {
+      console.error("Error fetching project:", err);
+      setError(err.message || "Failed to fetch project");
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId]);
+
+  useEffect(() => {
+    fetchProject();
+  }, [fetchProject]);
+
+  return {
+    project,
+    loading,
+    error,
+    refresh: fetchProject,
+    setProject,
+  };
+};
