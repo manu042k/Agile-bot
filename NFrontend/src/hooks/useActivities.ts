@@ -4,14 +4,15 @@ import { getActivityWebSocket } from "@/services/activityWebSocket";
 import api from "@/interceptor/api";
 
 interface UseActivitiesOptions {
-  projectId?: number;
+  projectId?: number;  // Numeric ID for WebSocket filtering
+  projectUuid?: string;  // UUID for API calls
   autoConnect?: boolean;
   limit?: number;
   skipInitialFetch?: boolean;
 }
 
 export const useActivities = (options: UseActivitiesOptions = {}) => {
-  const { projectId, autoConnect = true, limit = 10, skipInitialFetch = false } = options;
+  const { projectId, projectUuid, autoConnect = true, limit = 10, skipInitialFetch = false } = options;
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(!skipInitialFetch);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +25,12 @@ export const useActivities = (options: UseActivitiesOptions = {}) => {
     try {
       let url = "/api/project-management/activities/recent/";
       
-      if (projectId) {
+      // Use projectUuid if provided, otherwise fall back to projectId (for backward compatibility)
+      if (projectUuid) {
+        url = `/api/project-management/projects/${projectUuid}/activities/?page_size=${limit}`;
+      } else if (projectId) {
+        // Legacy: numeric ID - this won't work with current backend
+        console.warn('useActivities: projectId (numeric) is deprecated, use projectUuid instead');
         url = `/api/project-management/projects/${projectId}/activities/?page_size=${limit}`;
       }
 
@@ -42,7 +48,7 @@ export const useActivities = (options: UseActivitiesOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [projectId, limit]);
+  }, [projectId, projectUuid, limit]);
 
   // Add new activity to the list
   const addActivity = useCallback((newActivity: Activity) => {

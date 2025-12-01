@@ -17,7 +17,8 @@ import { Separator } from "@/components/ui/separator";
 import useActivities from "@/hooks/useActivities";
 
 interface ActivityFeedProps {
-  projectId?: number;
+  projectId?: number;  // Numeric ID for WebSocket filtering
+  projectUuid?: string;  // UUID for API calls
   limit?: number;
   showHeader?: boolean;
   className?: string;
@@ -29,6 +30,7 @@ interface ActivityFeedProps {
 
 const ActivityFeed: React.FC<ActivityFeedProps> = ({
   projectId,
+  projectUuid,
   limit = 10,
   showHeader = true,
   className = "",
@@ -39,7 +41,8 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({
 }) => {
   // Only use hook if activities are not provided
   const hookResult = useActivities({ 
-    projectId, 
+    projectId,
+    projectUuid,
     limit, 
     autoConnect: providedActivities === undefined,
     skipInitialFetch: providedActivities !== undefined

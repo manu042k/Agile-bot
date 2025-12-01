@@ -295,7 +295,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto relative">{children}</main>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative w-full max-w-full">{children}</main>
       </div>
     </div>
   );

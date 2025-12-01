@@ -111,13 +111,40 @@ class TaskSerializer(serializers.ModelSerializer):
     assigned_to_ids = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), many=True, required=False, write_only=True, source='assigned_to'
     )
+    related_work_ids = serializers.SerializerMethodField()
+    
+    def to_representation(self, instance):
+        """Override to return project UUID instead of ID"""
+        data = super().to_representation(instance)
+        # Replace Project ID with UUID
+        if instance.Project:
+            data['Project'] = str(instance.Project.uuid)
+        return data
     
     def to_internal_value(self, data):
         # Map 'assigned_to' to 'assigned_to_ids' for writing
         if 'assigned_to' in data and 'assigned_to_ids' not in data:
             data['assigned_to_ids'] = data.pop('assigned_to')
+        
+        # Convert Project UUID to integer ID if UUID is provided
+        if 'Project' in data:
+            project_identifier = data['Project']
+            try:
+                # Try to get project by UUID
+                from .models import Project as ProjectModel
+                project = ProjectModel.objects.get(uuid=project_identifier)
+                data['Project'] = project.id
+            except (ProjectModel.DoesNotExist, ValueError):
+                # If not UUID or not found, try as numeric ID
+                try:
+                    from .models import Project as ProjectModel
+                    project = ProjectModel.objects.get(id=int(project_identifier))
+                    data['Project'] = project.id
+                except (ProjectModel.DoesNotExist, ValueError):
+                    # Let Django handle the validation error
+                    pass
+        
         return super().to_internal_value(data)
-    related_work_ids = serializers.SerializerMethodField()
 
     class Meta:
         model = Task

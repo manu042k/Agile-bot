@@ -248,7 +248,11 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
                   </SelectContent>
                 </Select>
                 <div className="flex justify-end mt-4">
-                  <Button onClick={handleAssignTeam} disabled={isLoading}>
+                  <Button 
+                    onClick={handleAssignTeam} 
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
                     {isLoading ? "Assigning..." : "Assign"}
                   </Button>
                 </div>
@@ -325,7 +329,10 @@ const ProjectDisplayComponent: React.FC<Props> = ({ id }) => {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDeleteProject}>
+              <AlertDialogAction 
+                onClick={handleDeleteProject}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
                 Continue
               </AlertDialogAction>
             </AlertDialogFooter>

@@ -17,8 +17,9 @@ import { User } from "@/types/user";
 
 interface Props {
   task: Task;
+  onDelete?: (taskId: string) => void;
 }
-const TaskCardComponent: React.FC<Props> = ({ task }) => {
+const TaskCardComponent: React.FC<Props> = ({ task, onDelete }) => {
   const avatarData: string[] = task.assigned_to
     ? Array.isArray(task.assigned_to)
       ? typeof task.assigned_to[0] === "object"
@@ -103,6 +104,7 @@ const TaskCardComponent: React.FC<Props> = ({ task }) => {
               onUpdate={() => {
                 /* handle update */
               }}
+              onDelete={onDelete}
             />
           </DialogContent>
         </Dialog>

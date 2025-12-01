@@ -70,11 +70,13 @@ function DroppableColumn({
   tasks,
   projectId,
   onTaskUpdate,
+  onTaskDelete,
 }: {
   column: Column;
   tasks: Task[];
   projectId: string;
   onTaskUpdate: () => void;
+  onTaskDelete: (taskId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -121,6 +123,7 @@ function DroppableColumn({
                   compact={true}
                   draggable={true}
                   onUpdate={onTaskUpdate}
+                  onDelete={onTaskDelete}
                 />
               ))
             ) : (
@@ -177,7 +180,7 @@ const BoardPage = () => {
         
         if (activeSprint) {
           // Redirect to the active sprint
-          router.replace(`/projects/${projectId}/board?sprint=${activeSprint.id}`);
+          router.replace(`/projects/${projectId}/board?sprint=${activeSprint.uuid}`);
           return; // Let the redirect trigger a new fetch
         } else {
           // No active sprint, use the most recent sprint
@@ -185,7 +188,7 @@ const BoardPage = () => {
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
           if (sortedSprints.length > 0) {
-            router.replace(`/projects/${projectId}/board?sprint=${sortedSprints[0].id}`);
+            router.replace(`/projects/${projectId}/board?sprint=${sortedSprints[0].uuid}`);
             return;
           }
         }
@@ -196,9 +199,9 @@ const BoardPage = () => {
         const sprintData = await sprintService.getSprint(projectId, targetSprintId);
         setSprint(sprintData);
 
-        // Fetch tasks for this sprint
+        // Fetch tasks for this sprint - filter by sprint's integer ID
         const allTasks = await taskService.getTasks(projectId);
-        const tasksData = allTasks.filter(task => task.sprint === parseInt(targetSprintId));
+        const tasksData = allTasks.filter(task => task.sprint === sprintData.id);
         setTasks(tasksData);
       } else {
         // No sprints exist - show all tasks
@@ -219,6 +222,11 @@ const BoardPage = () => {
       fetchTasks();
     }
   }, [projectId, sprintId]);
+
+  const handleTaskDeleted = (taskId: string) => {
+    // Remove the task from the local state
+    setTasks((prevTasks) => prevTasks.filter((task) => task.taskid !== taskId));
+  };
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
@@ -309,13 +317,13 @@ const BoardPage = () => {
                 <button
                   className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                   title="Previous Sprint"
-                  disabled={filteredSprints.length === 0 || !sprint || filteredSprints.findIndex(s => s.id === sprint.id) === 0}
+                  disabled={filteredSprints.length === 0 || !sprint || filteredSprints.findIndex(s => s.uuid === sprint.uuid) === 0}
                   onClick={() => {
                     if (!sprint) return;
-                    const idx = filteredSprints.findIndex(s => s.id === sprint.id);
+                    const idx = filteredSprints.findIndex(s => s.uuid === sprint.uuid);
                     if (idx > 0) {
                       const prevSprint = filteredSprints[idx - 1];
-                      router.push(`/projects/${projectId}/board?sprint=${prevSprint.id}`);
+                      router.push(`/projects/${projectId}/board?sprint=${prevSprint.uuid}`);
                     }
                   }}
                 >
@@ -349,13 +357,13 @@ const BoardPage = () => {
                 <button
                   className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
                   title="Next Sprint"
-                  disabled={filteredSprints.length === 0 || !sprint || filteredSprints.findIndex(s => s.id === sprint.id) === filteredSprints.length - 1}
+                  disabled={filteredSprints.length === 0 || !sprint || filteredSprints.findIndex(s => s.uuid === sprint.uuid) === filteredSprints.length - 1}
                   onClick={() => {
                     if (!sprint) return;
-                    const idx = filteredSprints.findIndex(s => s.id === sprint.id);
+                    const idx = filteredSprints.findIndex(s => s.uuid === sprint.uuid);
                     if (idx < filteredSprints.length - 1) {
                       const nextSprint = filteredSprints[idx + 1];
-                      router.push(`/projects/${projectId}/board?sprint=${nextSprint.id}`);
+                      router.push(`/projects/${projectId}/board?sprint=${nextSprint.uuid}`);
                     }
                   }}
                 >
@@ -455,6 +463,7 @@ const BoardPage = () => {
                     tasks={tasks}
                     projectId={projectId}
                     onTaskUpdate={fetchTasks}
+                    onTaskDelete={handleTaskDeleted}
                   />
                   {index < columns.length - 1 && (
                     <Separator

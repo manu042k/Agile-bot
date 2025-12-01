@@ -3,12 +3,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Shield, UserCircle, ExternalLink, Lock, KeyRound } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { BarChart2, LogOut, Mail, Phone, Calendar, Settings, User, Shield, UserCircle, ExternalLink, Lock, KeyRound, Edit2, Briefcase } from "lucide-react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import PageHeader from "@/components/common/PageHeader";
 import { useUser } from "@/hooks/useUser";
+import userInfoService from "@/services/userInfoService";
 import { useMemo, useState, useEffect } from "react";
 
 const ProfilePage = () => {
@@ -17,8 +21,11 @@ const ProfilePage = () => {
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") || "personal";
   const { data: session, status: sessionStatus } = useSession();
-  const { user: backendUser, loading: userLoading } = useUser();
+  const { user: backendUser, loading: userLoading, refetch: refetchUser } = useUser();
   const [deviceInfo, setDeviceInfo] = useState<string>("Loading...");
+  const [isEditRoleOpen, setIsEditRoleOpen] = useState(false);
+  const [editedRole, setEditedRole] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -72,9 +79,32 @@ const ProfilePage = () => {
       joined_date: backendUser?.date_joined 
         ? new Date(backendUser.date_joined).toLocaleDateString()
         : "",
-      role: "User" // Default role, can be enhanced later
+      role: backendUser?.role || ""
     };
   }, [session, sessionStatus, backendUser, userLoading]);
+
+  const handleUpdateRole = async () => {
+    if (!editedRole.trim()) {
+      toast.error("Please enter a role");
+      return;
+    }
+
+    try {
+      setIsUpdating(true);
+      await userInfoService.updateUserInfo({ role: editedRole.trim() });
+      toast.success("Role updated successfully");
+      setIsEditRoleOpen(false);
+      // Refetch user data to update the UI
+      if (refetchUser) {
+        await refetchUser();
+      }
+    } catch (error) {
+      console.error("Error updating role:", error);
+      toast.error("Failed to update role");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -210,12 +240,59 @@ const ProfilePage = () => {
                       <div className="p-4 rounded-lg border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all">
                         <div className="flex items-center gap-3 mb-2">
                           <div className="p-2 rounded-lg bg-orange-50">
-                            <Settings className="h-5 w-5 text-orange-600" />
+                            <Briefcase className="h-5 w-5 text-orange-600" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Role</p>
-                            <p className="text-sm font-semibold text-gray-900">{user.role}</p>
+                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Professional Role</p>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {user.role || <span className="text-gray-400 italic">Not set</span>}
+                            </p>
                           </div>
+                          <Dialog open={isEditRoleOpen} onOpenChange={setIsEditRoleOpen}>
+                            <DialogTrigger asChild>
+                              <button 
+                                className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                                onClick={() => setEditedRole(user.role || "")}
+                              >
+                                <Edit2 className="h-4 w-4 text-gray-500" />
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Update Professional Role</DialogTitle>
+                                <DialogDescription>
+                                  Set your professional role (e.g., Backend Engineer, Frontend Developer, Product Manager)
+                                </DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4 mt-4">
+                                <div>
+                                  <Label htmlFor="role">Professional Role</Label>
+                                  <Input
+                                    id="role"
+                                    placeholder="e.g., Backend Engineer"
+                                    value={editedRole}
+                                    onChange={(e) => setEditedRole(e.target.value)}
+                                    className="mt-2"
+                                  />
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => setIsEditRoleOpen(false)}
+                                    disabled={isUpdating}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    onClick={handleUpdateRole}
+                                    disabled={isUpdating}
+                                  >
+                                    {isUpdating ? "Updating..." : "Update Role"}
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </div>
                     </div>

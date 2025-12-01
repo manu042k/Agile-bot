@@ -71,6 +71,11 @@ const ProjectTasksPage = () => {
     toast.success("Task created successfully");
   };
 
+  const handleTaskDeleted = (taskId: string) => {
+    // Remove the task from the local state
+    setTasks((prevTasks) => prevTasks.filter((task) => task.taskid !== taskId));
+  };
+
   const filteredTasks = tasks.filter((task) => {
     if (!searchQuery && filterStatus === "all") return true;
 
@@ -260,7 +265,12 @@ const ProjectTasksPage = () => {
           filteredTasks.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-8">
               {filteredTasks.map((task) => (
-                <TaskCard key={task.taskid} task={task} projectId={projectId} />
+                <TaskCard 
+                  key={task.taskid} 
+                  task={task} 
+                  projectId={projectId}
+                  onDelete={handleTaskDeleted}
+                />
               ))}
             </div>
           ) : tasks.length === 0 ? (
@@ -323,6 +333,7 @@ const ProjectTasksPage = () => {
                             task={task}
                             projectId={projectId}
                             compact={true}
+                            onDelete={handleTaskDeleted}
                           />
                         ))}
                       </div>

@@ -49,7 +49,7 @@ const SprintsPage = () => {
 
     try {
       setIsDeleting(true);
-      await sprintService.deleteSprint(projectId, sprintToDelete.id.toString());
+      await sprintService.deleteSprint(projectId, sprintToDelete.uuid);
       toast.success("Sprint deleted successfully");
       setDeleteDialogOpen(false);
       setSprintToDelete(null);

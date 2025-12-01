@@ -7,20 +7,24 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import CreateCard from "@/components/common/CreateCard";
 import taskService from "@/services/taskService";
 import { useRouter } from "next/navigation";
 
 interface GenerateTasksButtonProps {
   projectId: string;
   onTasksGenerated?: () => void;
+  hasTeam?: boolean;
 }
 
 const GenerateTasksButton: React.FC<GenerateTasksButtonProps> = ({
   projectId,
   onTasksGenerated,
+  hasTeam = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -86,9 +90,8 @@ const GenerateTasksButton: React.FC<GenerateTasksButtonProps> = ({
     wsRef.current = ws;
   };
 
-  const handleGenerateTasks = async () => {
+  const startGeneration = async () => {
     try {
-      setIsOpen(true);
       setIsGenerating(true);
       setProgress(0);
       setStatus("processing");
@@ -124,44 +127,52 @@ const GenerateTasksButton: React.FC<GenerateTasksButtonProps> = ({
     }
   };
 
-  const handleClose = () => {
-    setIsOpen(false);
-    if (wsRef.current) {
-      wsRef.current.close();
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    
+    // Check if team is assigned before starting generation
+    if (open && status === "idle") {
+      if (!hasTeam) {
+        setStatus("error");
+        setError("Please assign a team to this project before generating tasks.");
+        return;
+      }
+      startGeneration();
     }
     
-    // Reset state after a delay
-    setTimeout(() => {
-      setProgress(0);
-      setStatus("idle");
-      setMessage("");
-      setError(null);
-      setRequiresUpload(false);
-      setTasksCreated([]);
-    }, 300);
+    // Cleanup when dialog closes
+    if (!open) {
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
+      
+      // Reset state after a delay
+      setTimeout(() => {
+        setProgress(0);
+        setStatus("idle");
+        setMessage("");
+        setError(null);
+        setRequiresUpload(false);
+        setTasksCreated([]);
+      }, 300);
+    }
   };
 
   const handleViewTasks = () => {
-    handleClose();
+    setIsOpen(false);
     router.push(`/projects/${projectId}/tasks`);
   };
 
   return (
-    <>
-      <button
-        onClick={handleGenerateTasks}
-        className="pm-card p-6 hover:shadow-md transition-all group cursor-pointer border-2 border-transparent hover:border-orange-200"
-      >
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-lg bg-orange-100 group-hover:bg-orange-200 flex items-center justify-center transition-colors">
-            <Sparkles className="h-5 w-5 text-orange-600" />
-          </div>
-          <h3 className="font-semibold text-gray-900">Generate Tasks</h3>
-        </div>
-        <p className="text-sm text-gray-600">AI-powered</p>
-      </button>
-
-      <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        <CreateCard
+          title="Generate Tasks"
+          description={hasTeam ? "AI-powered" : "Assign team first"}
+          icon={Sparkles}
+          className={!hasTeam ? "opacity-60 cursor-not-allowed" : ""}
+        />
+      </DialogTrigger>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
@@ -246,7 +257,7 @@ const GenerateTasksButton: React.FC<GenerateTasksButtonProps> = ({
           <div className="flex gap-2 justify-end">
             {status === "completed" && (
               <>
-                <Button variant="outline" onClick={handleClose}>
+                <Button variant="outline" onClick={() => setIsOpen(false)}>
                   Close
                 </Button>
                 <Button onClick={handleViewTasks} className="bg-orange-600 hover:bg-orange-700">
@@ -257,11 +268,11 @@ const GenerateTasksButton: React.FC<GenerateTasksButtonProps> = ({
             
             {status === "error" && (
               <>
-                <Button variant="outline" onClick={handleClose}>
+                <Button variant="outline" onClick={() => setIsOpen(false)}>
                   Close
                 </Button>
                 {!requiresUpload && (
-                  <Button onClick={handleGenerateTasks} className="bg-orange-600 hover:bg-orange-700">
+                  <Button onClick={startGeneration} className="bg-orange-600 hover:bg-orange-700">
                     Try Again
                   </Button>
                 )}
@@ -269,14 +280,13 @@ const GenerateTasksButton: React.FC<GenerateTasksButtonProps> = ({
             )}
             
             {status === "processing" && (
-              <Button variant="outline" onClick={handleClose} disabled={isGenerating}>
+              <Button variant="outline" onClick={() => setIsOpen(false)} disabled={isGenerating}>
                 Cancel
               </Button>
             )}
           </div>
         </DialogContent>
-      </Dialog>
-    </>
+    </Dialog>
   );
 };
 

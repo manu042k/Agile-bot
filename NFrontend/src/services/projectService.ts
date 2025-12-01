@@ -30,7 +30,7 @@ const projectService = {
 
   async assginTeam(data: any): Promise<any> {
     const response = await api.post(
-      `${URLS.PROJECTS}${URLS.ASSIGN_TEAM}`,
+      `api/project-management/projects/assign-team/`,
       data
     );
     return response.data;

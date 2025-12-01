@@ -26,8 +26,8 @@ const userInfoService = {
     const response = await api.get<User>(`${URLS.USER_DETAIL}${userId}/`);
     return response.data;
   },
-  async updateUserInfo(data: { phone_number?: string }): Promise<User> {
-    // Update user information (only phone_number is editable)
+  async updateUserInfo(data: { phone_number?: string; role?: string }): Promise<User> {
+    // Update user information (phone_number and role are editable)
     const response = await api.patch<User>(URLS.USER_PROFILE_UPDATE, data);
     return response.data;
   },

@@ -97,11 +97,11 @@ const ProjectDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 w-full overflow-x-hidden">
       <ProjectHeader />
 
       {/* Main Content */}
-      <div className="px-6 py-8">
+      <div className="w-full max-w-full px-6 py-8 overflow-x-hidden">
         {/* Archived Team Warning */}
         {project.team?.is_archived && (
           <div className="mb-6 pm-card p-4 border-orange-200 bg-orange-50">
@@ -122,7 +122,7 @@ const ProjectDetailPage = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 w-full max-w-full">
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
@@ -135,6 +135,7 @@ const ProjectDetailPage = () => {
               <GenerateTasksButton
                 projectId={projectId}
                 onTasksGenerated={fetchTaskStats}
+                hasTeam={!!project?.team}
               />
             </div>
 
@@ -190,7 +191,11 @@ const ProjectDetailPage = () => {
             </div>
 
             {/* Recent Activity */}
-            <ActivityFeed projectId={parseInt(projectId)} limit={5} />
+            <ActivityFeed 
+              projectUuid={projectId} 
+              projectId={project?.id} 
+              limit={5} 
+            />
           </div>
 
           {/* Sidebar */}

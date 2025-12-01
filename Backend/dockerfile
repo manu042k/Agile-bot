@@ -8,10 +8,16 @@ ENV PYTHONUNBUFFERED 1
 # Set the working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including OpenGL for Docling PDF parsing
 RUN apt-get update && apt-get install -y \
     gcc \
     curl \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies

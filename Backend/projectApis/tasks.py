@@ -447,13 +447,15 @@ def move_unfinished_tasks_to_backlog():
             tasks_moved = 0
             task_ids = []
             for task in unfinished_tasks:
-                # Move task to backlog
-                task.status = 'backlog'
+                # Move task out of sprint, set to backlog only if it was active
+                if task.status == 'active':
+                    task.status = 'backlog'
+                # Keep 'created' status for tasks that were never started
                 task.sprint = None  # Remove from sprint
                 task.save()
                 tasks_moved += 1
                 task_ids.append(str(task.taskid))
-                logger.info(f"Moved task '{task.name}' (ID: {task.taskid}) to backlog")
+                logger.info(f"Moved task '{task.name}' (ID: {task.taskid}) out of sprint (status: {task.status})")
             
             # Mark sprint as completed
             sprint.status = 'completed'
@@ -525,7 +527,9 @@ def check_and_complete_sprint(sprint_id, user_id=None):
         tasks_moved = 0
         task_ids = []
         for task in unfinished_tasks:
-            task.status = 'backlog'
+            # Set to backlog only if it was active, keep 'created' status otherwise
+            if task.status == 'active':
+                task.status = 'backlog'
             task.sprint = None
             task.save()
             tasks_moved += 1

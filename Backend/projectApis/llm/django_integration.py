@@ -86,7 +86,7 @@ class DjangoSprintCreator:
                     try:
                         task = Task.objects.get(llm_task_id=llm_task_id)
                         task.sprint = sprint
-                        task.status = 'backlog'  # Set to backlog initially
+                        # Keep status as 'created' - don't change to backlog
                         task.save()
                         assigned_count += 1
                     except Task.DoesNotExist:

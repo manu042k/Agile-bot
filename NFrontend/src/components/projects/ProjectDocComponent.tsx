@@ -92,7 +92,10 @@ const ProjectDocComponent: React.FC<Props> = ({ id }) => {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleGenerateTask}>
+                    <AlertDialogAction 
+                      onClick={handleGenerateTask}
+                      className="bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white"
+                    >
                       Generate
                     </AlertDialogAction>
                   </AlertDialogFooter>

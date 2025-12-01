@@ -11,6 +11,7 @@ import {
   Sparkles,
   Calendar,
   Loader2,
+  Network,
 } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
@@ -61,8 +62,8 @@ export default function ProjectHeader({
     },
     { icon: Sparkles, label: "Board", href: `/projects/${projectId}/board` },
     { icon: CheckSquare, label: "Tasks", href: `/projects/${projectId}/tasks` },
+    { icon: Network, label: "Dependencies", href: `/projects/${projectId}/dependencies` },
     { icon: Users, label: "Team", href: `/projects/${projectId}/team` },
-
     {
       icon: FileText,
       label: "Documents",
@@ -107,42 +108,44 @@ export default function ProjectHeader({
   }
 
   return (
-    <div className="sticky top-0 z-50 glass-navbar">
-      <div className="px-6 py-4">
+    <div className="sticky top-0 z-50 glass-navbar w-full max-w-full overflow-hidden box-border">
+      <div className="w-full max-w-full px-4 sm:px-6 py-4 box-border">
         {/* Project Info - Compact */}
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-4 w-full max-w-full overflow-hidden">
           <div className="w-10 h-10 rounded-lg bg-white/60 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
             <FileText className="h-5 w-5 text-orange-600" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-gray-900 truncate">
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">
               {project.name}
             </h1>
-            <p className="text-sm text-gray-600 truncate">
+            <p className="hidden sm:block text-sm text-gray-600 truncate max-w-md">
               {project.description}
             </p>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide -mx-1">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
-                  item.active
-                    ? "bg-orange-600 text-white shadow-lg"
-                    : "text-gray-700 hover:bg-white/50 hover:text-gray-900"
-                }`}
-              >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+        {/* Navigation Tabs - Scrollable */}
+        <div className="w-full max-w-full overflow-x-auto overflow-y-hidden scrollbar-hide -mx-1 px-1 box-border">
+          <div className="flex items-center gap-1 w-max">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
+                    item.active
+                      ? "bg-orange-600 text-white shadow-lg"
+                      : "text-gray-700 hover:bg-white/50 hover:text-gray-900"
+                  }`}
+                >
+                  <Icon className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-xs sm:text-sm">{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

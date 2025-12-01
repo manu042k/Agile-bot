@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from "../ui/select";
 import { Separator } from "../ui/separator";
-import { Pen, Link as LinkIcon, Loader2, Save, X, Check, ChevronsUpDown } from "lucide-react";
+import { Pen, Link as LinkIcon, Loader2, Save, X, Check, ChevronsUpDown, Trash2 } from "lucide-react";
+import DeleteConfirmationDialog from "../common/DeleteConfirmationDialog";
 import AvatarCircles from "../ui/avatar-circles";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import toast from "react-hot-toast";
@@ -49,13 +50,15 @@ import {
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
+import { useUser } from "@/hooks/useUser";
 
 interface Props {
   task: Task;
   onUpdate: (updatedTask: Task) => void;
+  onDelete?: (taskId: string) => void;
 }
 
-const TaskViewComponent: React.FC<Props> = ({ task: initialTask, onUpdate }) => {
+const TaskViewComponent: React.FC<Props> = ({ task: initialTask, onUpdate, onDelete }) => {
   const [task, setTask] = useState<Task>(initialTask);
   const [projectMembers, setProjectMembers] = useState<TeamMember[]>([]);
   const [project, setProject] = useState<Project | null>(null);
@@ -68,7 +71,43 @@ const TaskViewComponent: React.FC<Props> = ({ task: initialTask, onUpdate }) => 
   const [isSaving, setIsSaving] = useState(false);
   
   const [commentText, setCommentText] = useState("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const { user: currentUser } = useUser();
+
+  // Check if current user can delete task (project creator or team admin/owner)
+  const canDeleteTask = () => {
+    if (!currentUser || !project) {
+      console.log("Delete check: No user or project", { currentUser, project });
+      return false;
+    }
+    
+    console.log("Delete check:", {
+      currentUserId: currentUser.id,
+      projectCreatorId: project.created_by?.id,
+      isCreator: project.created_by?.id === currentUser.id,
+      hasTeam: !!project.team,
+      teamMembers: project.team?.members
+    });
+    
+    // Check if user is project creator
+    if (project.created_by?.id === currentUser.id) return true;
+    
+    // Check if user is team admin or owner
+    if (project.team) {
+      const currentUserMembership = project.team.members.find(
+        (member) => member.user?.id === currentUser.id
+      );
+      console.log("Team membership:", currentUserMembership);
+      return (
+        currentUserMembership?.role === "admin" ||
+        currentUserMembership?.role === "owner"
+      );
+    }
+    
+    return false;
+  };
 
   // Fetch project members, details, and sprints
   useEffect(() => {
@@ -233,6 +272,29 @@ const TaskViewComponent: React.FC<Props> = ({ task: initialTask, onUpdate }) => 
     }
   };
 
+  const handleDeleteTask = async () => {
+    try {
+      setIsDeleting(true);
+      await taskService.deleteTask(task.taskid);
+      toast.success("Task deleted successfully");
+      setDeleteDialogOpen(false);
+      
+      // Call onDelete callback to close modal and remove card
+      if (onDelete) {
+        onDelete(task.taskid);
+      } else {
+        // Fallback: redirect to tasks page if no callback provided
+        router.push(`/projects/${task.Project}/tasks`);
+        router.refresh();
+      }
+    } catch (err: any) {
+      console.error("Failed to delete task:", err);
+      toast.error("Failed to delete task");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatDateTime = (dateString: string) => {
     try {
       const date = new Date(dateString);
@@ -293,6 +355,19 @@ const TaskViewComponent: React.FC<Props> = ({ task: initialTask, onUpdate }) => 
               </h1>
             )}
           </div>
+          
+          {/* Delete Button - Only for admins */}
+          {canDeleteTask() && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setDeleteDialogOpen(true)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              title="Delete Task"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -842,6 +917,19 @@ const TaskViewComponent: React.FC<Props> = ({ task: initialTask, onUpdate }) => 
 
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteTask}
+        isLoading={isDeleting}
+        title="Delete Task"
+        description={`Are you sure you want to delete "${task.name}"? This action cannot be undone.`}
+        itemName={task.name}
+        confirmLabel="Delete Task"
+        cancelLabel="Cancel"
+      />
     </div>
   );
 };

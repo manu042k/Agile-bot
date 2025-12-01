@@ -4,6 +4,17 @@ import { Save, Trash2, Archive, Globe, Lock, Users, AlertTriangle, Loader2 } fro
 import { useState, useEffect } from "react";
 import ProjectHeader from "@/components/projects/ProjectHeader";
 import { Separator } from "@/components/ui/separator";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import projectService from "@/services/projectService";
 import { Project, ProjectVisibility } from "@/types/project";
 import toast from "react-hot-toast";
@@ -15,6 +26,7 @@ const ProjectSettingsPage = () => {
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,20 +74,17 @@ const ProjectSettingsPage = () => {
 
   const handleDelete = async () => {
     if (!project) return;
-    
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this project? This action cannot be undone."
-    );
-    
-    if (!confirmed) return;
 
     try {
+      setIsDeleting(true);
       await projectService.deleteProject(project.uuid);
       toast.success("Project deleted successfully");
       router.push("/projects");
     } catch (err: any) {
       console.error("Error deleting project:", err);
       toast.error(err.response?.data?.error || "Failed to delete project");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -177,8 +186,8 @@ const ProjectSettingsPage = () => {
                 <input
                   type="radio"
                   name="visibility"
-                  value={ProjectVisibility.PUBLIC}
-                  checked={project.visibility === ProjectVisibility.PUBLIC}
+                  value={ProjectVisibility.Public}
+                  checked={project.visibility === ProjectVisibility.Public}
                   onChange={(e) => setProject({ ...project, visibility: e.target.value as ProjectVisibility })}
                   className="w-4 h-4 text-gray-900"
                 />
@@ -194,8 +203,8 @@ const ProjectSettingsPage = () => {
                 <input
                   type="radio"
                   name="visibility"
-                  value={ProjectVisibility.PRIVATE}
-                  checked={project.visibility === ProjectVisibility.PRIVATE}
+                  value={ProjectVisibility.Private}
+                  checked={project.visibility === ProjectVisibility.Private}
                   onChange={(e) => setProject({ ...project, visibility: e.target.value as ProjectVisibility })}
                   className="w-4 h-4 text-gray-900"
                 />
@@ -281,13 +290,35 @@ const ProjectSettingsPage = () => {
                   <p className="font-medium text-gray-900">Delete Project</p>
                   <p className="text-sm text-gray-500 mt-1">Permanently delete this project and all its data. This action cannot be undone.</p>
                 </div>
-                <button 
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                >
-                  <Trash2 className="h-4 w-4 mr-2 inline" />
-                  Delete
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button 
+                      disabled={isDeleting}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2 inline" />
+                      {isDeleting ? "Deleting..." : "Delete"}
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Project?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to delete &quot;{project.name}&quot;? This will permanently delete the project and all its data including tasks, documents, and sprints. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                      >
+                        {isDeleting ? "Deleting..." : "Delete Project"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           </div>

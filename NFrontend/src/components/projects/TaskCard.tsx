@@ -23,6 +23,7 @@ interface TaskCardProps {
   compact?: boolean;
   draggable?: boolean;
   onUpdate?: (updatedTask: Task) => void;
+  onDelete?: (taskId: string) => void;
 }
 
 export default function TaskCard({
@@ -31,6 +32,7 @@ export default function TaskCard({
   compact = false,
   draggable = false,
   onUpdate,
+  onDelete,
 }: TaskCardProps) {
   const router = useRouter();
   const [localTask, setLocalTask] = useState(task);
@@ -71,6 +73,19 @@ export default function TaskCard({
     if (onUpdate) {
       onUpdate(updatedTask);
     }
+    router.refresh();
+  };
+
+  const handleTaskDelete = () => {
+    // Close the dialog
+    setIsDialogOpen(false);
+    
+    // Notify parent to remove the task card
+    if (onDelete) {
+      onDelete(task.taskid);
+    }
+    
+    // Refresh the page
     router.refresh();
   };
 
@@ -225,7 +240,11 @@ export default function TaskCard({
         {cardContent}
       </DialogTrigger>
       <DialogContent className="sm:max-w-4xl h-auto max-h-[90vh] overflow-auto">
-        <TaskViewComponent task={localTask} onUpdate={handleTaskUpdate} />
+        <TaskViewComponent 
+          task={localTask} 
+          onUpdate={handleTaskUpdate}
+          onDelete={handleTaskDelete}
+        />
       </DialogContent>
     </Dialog>
   );

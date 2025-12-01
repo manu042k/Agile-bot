@@ -935,8 +935,8 @@ class SprintListView(APIView):
                 status__in=['created', 'active', 'backlog']
             )
             
-            # Move them to new sprint and set status to backlog
-            incomplete_tasks.update(sprint=new_sprint, status='backlog')
+            # Move them to new sprint, keeping their current status
+            incomplete_tasks.update(sprint=new_sprint)
 
 
 class SprintDetailView(APIView):

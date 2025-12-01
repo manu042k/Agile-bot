@@ -166,7 +166,7 @@ const ProjectTeamPage = () => {
     try {
       setIsAssigning(true);
       await projectService.assginTeam({
-        project_id: parseInt(projectId),
+        project_uuid: projectId,
         team_id: parseInt(selectedTeamId),
       });
       toast.success("Team assigned successfully!");
@@ -312,7 +312,11 @@ const ProjectTeamPage = () => {
                     >
                       Cancel
                     </Button>
-                    <Button onClick={handleAssignTeam} disabled={isAssigning || !selectedTeamId}>
+                    <Button 
+                      onClick={handleAssignTeam} 
+                      disabled={isAssigning || !selectedTeamId}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
                       {isAssigning ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin mr-2" />

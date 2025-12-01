@@ -8,7 +8,7 @@ interface SprintCalendarProps {
   sprints: Sprint[];
   currentMonth: Date;
   onMonthChange: (date: Date) => void;
-  onSprintClick: (sprintId: number) => void;
+  onSprintClick: (sprintUuid: string) => void;
   getStatusColor: (status: SprintStatus) => string;
   getStatusIcon: (status: SprintStatus) => React.ReactNode;
   getEffectiveStatus: (sprint: Sprint) => SprintStatus;
@@ -220,7 +220,7 @@ const SprintCalendar = ({
                               key={sprint.id}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                onSprintClick(sprint.id);
+                                onSprintClick(sprint.uuid);
                               }}
                               className={cn(
                                 "text-[11px] px-1.5 py-1 rounded truncate cursor-pointer hover:opacity-90 transition-all shadow-sm w-full",
@@ -264,7 +264,7 @@ const SprintCalendar = ({
                           left: `${Math.max(0, Math.min(100, position.left))}%`,
                           width: `${Math.max(3, Math.min(100 - Math.max(0, position.left), position.width))}%`,
                         }}
-                        onClick={() => onSprintClick(sprint.id)}
+                        onClick={() => onSprintClick(sprint.uuid)}
                         onMouseEnter={() => setHoveredSprint(sprint)}
                         onMouseLeave={() => setHoveredSprint(null)}
                       >

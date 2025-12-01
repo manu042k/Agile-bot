@@ -132,8 +132,13 @@ class SprintAllocator:
     
     def _get_task_id(self, task: Dict) -> str:
         """Get task ID from task dict"""
+        # Try llm_task_id first (used by orchestrator)
+        if 'llm_task_id' in task:
+            return task['llm_task_id']
+        # Fallback to metadata (legacy)
         if 'metadata' in task and 'llm_task_id' in task['metadata']:
             return task['metadata']['llm_task_id']
+        # Final fallback
         return task.get('task_id', task.get('name', 'unknown'))
     
     def _build_dependency_graph(self, dependencies: List[Dict]) -> Dict[str, List[str]]:

@@ -758,14 +758,19 @@ class UpdateUserProfileView(APIView):
     authentication_classes = [SessionAuthentication]
     
     def patch(self, request):
-        """Update user profile (only phone_number is editable)"""
+        """Update user profile (phone_number and role are editable)"""
         try:
             user = request.user
             phone_number = request.data.get('phone_number')
+            role = request.data.get('role')
             
             if phone_number is not None:
                 user.phone_number = phone_number
-                user.save()
+            
+            if role is not None:
+                user.role = role
+            
+            user.save()
             
             serializer = UserSerializer(user, context={'request': request})
             return Response(serializer.data, status=status.HTTP_200_OK)

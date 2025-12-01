@@ -41,8 +41,8 @@ const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
     try {
       const processedData = {
         name,
-        description,
-        details,
+        description: description || "",
+        details: details || "",
         priority,
         size,
         created_by: CreatedBy.USER,
@@ -50,6 +50,7 @@ const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
         Project: projectId,
       };
 
+      console.log("Creating task with data:", processedData);
       await taskService.createTask(processedData);
       toast.success("Task created successfully!");
       setName("");
@@ -60,8 +61,12 @@ const TaskCreateComponent: React.FC<props> = ({ projectId, onClose }) => {
       onClose();
       router.refresh();
     } catch (err: any) {
-      setError("Failed to create task. Please try again.");
-      toast.error("Failed to create task. Please try again");
+      console.error("Task creation error:", err.response?.data || err);
+      const errorMessage = err.response?.data?.detail || 
+                          JSON.stringify(err.response?.data) || 
+                          "Failed to create task. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 

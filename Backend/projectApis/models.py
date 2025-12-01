@@ -224,8 +224,8 @@ class Task(models.Model):
 
     Project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    description = models.TextField()
-    details = models.TextField()
+    description = models.TextField(blank=True, default="")
+    details = models.TextField(blank=True, default="")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="created")
     priority = models.CharField(
         max_length=10, choices=PRIORITY_CHOICES, default="normal"

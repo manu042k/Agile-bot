@@ -15,7 +15,7 @@ import { Clock, Maximize2 } from "lucide-react";
 
 interface SprintTimelineChartProps {
   sprints: Sprint[];
-  onSprintClick: (sprintId: number) => void;
+  onSprintClick: (sprintUuid: string) => void;
   onEditSprint: (sprint: Sprint) => void;
   getEffectiveStatus: (sprint: Sprint) => SprintStatus;
   getStatusColor: (status: SprintStatus) => string;
@@ -206,7 +206,7 @@ const SprintTimelineChart = ({
           fill={payload.color}
           rx={8}
           className="cursor-pointer hover:opacity-90 transition-opacity"
-          onClick={() => onSprintClick(payload.sprint.id)}
+          onClick={() => onSprintClick(payload.sprint.uuid)}
         />
         {/* Completion indicator */}
         {payload.completionRate > 0 && (
@@ -416,7 +416,7 @@ const SprintTimelineChart = ({
                       top: `${(index % 3) * 30}px`,
                       height: "25px",
                     }}
-                    onClick={() => onSprintClick(sprint.sprint.id)}
+                    onClick={() => onSprintClick(sprint.sprint.uuid)}
                   >
                     {/* Main bar */}
                     <div

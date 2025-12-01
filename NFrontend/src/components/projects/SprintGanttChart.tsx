@@ -17,7 +17,7 @@ import { PlayCircle, CheckCircle2, ListTodo, Clock } from "lucide-react";
 
 interface SprintGanttChartProps {
   sprints: Sprint[];
-  onSprintClick: (sprintId: number) => void;
+  onSprintClick: (sprintUuid: string) => void;
   getEffectiveStatus: (sprint: Sprint) => SprintStatus;
 }
 
@@ -326,8 +326,8 @@ const SprintGanttChart = ({
         {ganttData.map((sprint) => (
           <div
             key={sprint.id}
-            onClick={() => onSprintClick(sprint.id)}
-            className="p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:shadow-md transition-all cursor-pointer"
+            onClick={() => onSprintClick(sprint.uuid)}
+            className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-all cursor-pointer"
             style={{ borderLeftWidth: "4px", borderLeftColor: sprint.color }}
           >
             <div className="flex items-start justify-between mb-2">

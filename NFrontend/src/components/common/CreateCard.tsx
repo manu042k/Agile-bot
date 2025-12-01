@@ -23,7 +23,7 @@ const CreateCard = forwardRef<HTMLButtonElement | HTMLAnchorElement, CreateCardP
       icon: Icon,
       onClick,
       href,
-      iconBgColor = "bg-orange-100 group-hover:bg-orange-200",
+      iconBgColor = "bg-orange-100",
       iconColor = "text-orange-600",
       className = "",
       as: Component,
@@ -32,7 +32,7 @@ const CreateCard = forwardRef<HTMLButtonElement | HTMLAnchorElement, CreateCardP
     ref
   ) {
     const baseClasses = "pm-card p-4 text-left group hover:shadow-md transition-all";
-    const borderClasses = "!border-orange-300 hover:!border-orange-400";
+    const borderClasses = "";
     
     // Auto-detect component type if not specified
     const componentType = Component || (href ? "link" : "button");
@@ -40,7 +40,7 @@ const CreateCard = forwardRef<HTMLButtonElement | HTMLAnchorElement, CreateCardP
     const content = (
       <div className="flex items-center gap-3">
         <div className={`p-2 rounded-lg ${iconBgColor} transition-colors`}>
-          <Icon className={`h-5 w-5 text-orange-600 group-hover:text-orange-700 transition-colors`} />
+          <Icon className={`h-5 w-5 text-orange-600 transition-colors`} />
         </div>
         <div>
           <h3 className="font-semibold text-gray-900 text-sm mb-0.5">{title}</h3>
