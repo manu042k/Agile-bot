@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # Django backend service
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: agilebot-backend-prod
+    restart: unless-stopped
+    volumes:
+      - backend_media:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URI=${REDIS_URI:-redis://redis:6379}
+      - DEBUG=False
+      - USE_POSTGRESQL=${USE_POSTGRESQL:-False}
+      - USE_REDIS_CACHE=${USE_REDIS_CACHE:-False}
+      - USE_AZURE_STORAGE=${USE_AZURE_STORAGE:-False}
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Celery worker service
+  celery-worker:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.celery
+    container_name: agilebot-celery-worker
+    restart: unless-stopped
+    command: /app/celery-startup.sh
+    volumes:
+      - backend_media:/app/media
+    environment:
+      - REDIS_URI=${REDIS_URI:-redis://redis:6379}
+      - DEBUG=False
+      - USE_POSTGRESQL=${USE_POSTGRESQL:-False}
+      - USE_REDIS_CACHE=${USE_REDIS_CACHE:-False}
+      - USE_AZURE_STORAGE=${USE_AZURE_STORAGE:-False}
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      - redis
+      - backend
+
+  # Celery beat scheduler service
+  celery-beat:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile.celery
+    container_name: agilebot-celery-beat
+    restart: unless-stopped
+    command: /app/celery-beat-startup.sh
+    volumes:
+      - backend_media:/app/media
+    environment:
+      - REDIS_URI=${REDIS_URI:-redis://redis:6379}
+      - DEBUG=False
+      - USE_POSTGRESQL=${USE_POSTGRESQL:-False}
+      - USE_REDIS_CACHE=${USE_REDIS_CACHE:-False}
+      - USE_AZURE_STORAGE=${USE_AZURE_STORAGE:-False}
+    env_file:
+      - ./Backend/.env
+    depends_on:
+      - redis
+      - backend
+      - celery-worker
+
+  # Redis service for Celery broker
+  redis:
+    image: redis:7-alpine
+    container_name: agilebot-redis-prod
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./NFrontend
+      dockerfile: Dockerfile
+    container_name: agilebot-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      - NEXT_PUBLIC_WS_URL=${NEXT_PUBLIC_WS_URL:-ws://localhost:8000}
+      - NODE_ENV=production
+    depends_on:
+      - backend
+
+volumes:
+  redis_data:
+  backend_media:

@@ -41,6 +41,15 @@ jobs:
         docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-backend:${{ github.sha }}
         docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-backend:latest
 
+    - name: Build and push Celery Docker image
+      working-directory: ./Backend
+      run: |
+        docker build -f Dockerfile.celery \
+                     -t ${{ env.CONTAINER_REGISTRY }}/agilebot-celery:${{ github.sha }} \
+                     -t ${{ env.CONTAINER_REGISTRY }}/agilebot-celery:latest .
+        docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-celery:${{ github.sha }}
+        docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-celery:latest
+
     - name: Deploy Backend to Azure Web App
       uses: azure/webapps-deploy@v2
       with:

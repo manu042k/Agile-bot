@@ -30,12 +30,10 @@ COPY . /app/
 # Create media directory
 RUN mkdir -p media
 
-# Copy and set permissions for startup script
-COPY startup.sh /app/
-RUN chmod +x /app/startup.sh
+# Copy and set permissions for celery startup scripts
+COPY celery-startup.sh /app/
+COPY celery-beat-startup.sh /app/
+RUN chmod +x /app/celery-startup.sh /app/celery-beat-startup.sh
 
-# Expose the port the app runs on
-EXPOSE 8000
-
-# Use startup script
-CMD ["/app/startup.sh"]
+# Default to celery worker
+CMD ["/app/celery-startup.sh"]
