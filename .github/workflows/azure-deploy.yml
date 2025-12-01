@@ -1,0 +1,108 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+      - newDesgin
+  workflow_dispatch:
+
+env:
+  AZURE_WEBAPP_BACKEND: agilebot-backend
+  AZURE_WEBAPP_FRONTEND: agilebot-frontend
+  CONTAINER_REGISTRY: agilebotacr2681.azurecr.io
+  RESOURCE_GROUP: agilebot-rg
+
+jobs:
+  build-and-deploy-backend:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.CONTAINER_REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build and push Backend Docker image
+      working-directory: ./Backend
+      run: |
+        docker build -t ${{ env.CONTAINER_REGISTRY }}/agilebot-backend:${{ github.sha }} \
+                     -t ${{ env.CONTAINER_REGISTRY }}/agilebot-backend:latest .
+        docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-backend:${{ github.sha }}
+        docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-backend:latest
+
+    - name: Deploy Backend to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_BACKEND }}
+        images: ${{ env.CONTAINER_REGISTRY }}/agilebot-backend:${{ github.sha }}
+
+    - name: Check Backend deployment
+      run: |
+        echo "Waiting for backend to start..."
+        sleep 30
+        curl -f https://${{ env.AZURE_WEBAPP_BACKEND }}.azurewebsites.net/admin/ || echo "Backend not responding yet"
+
+  build-and-deploy-frontend:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy-backend
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Log in to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.CONTAINER_REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: Build and push Frontend Docker image
+      working-directory: ./NFrontend
+      run: |
+        docker build -t ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:${{ github.sha }} \
+                     -t ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:latest .
+        docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:${{ github.sha }}
+        docker push ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:latest
+
+    - name: Deploy Frontend to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_FRONTEND }}
+        images: ${{ env.CONTAINER_REGISTRY }}/agilebot-frontend:${{ github.sha }}
+
+    - name: Check Frontend deployment
+      run: |
+        echo "Waiting for frontend to start..."
+        sleep 30
+        curl -f https://${{ env.AZURE_WEBAPP_FRONTEND }}.azurewebsites.net/ || echo "Frontend not responding yet"
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build-and-deploy-backend, build-and-deploy-frontend]
+    if: always()
+    
+    steps:
+    - name: Deployment Summary
+      run: |
+        echo "🚀 Deployment Summary"
+        echo "===================="
+        echo "Backend: https://${{ env.AZURE_WEBAPP_BACKEND }}.azurewebsites.net"
+        echo "Frontend: https://${{ env.AZURE_WEBAPP_FRONTEND }}.azurewebsites.net"
+        echo "Status: ${{ job.status }}"
